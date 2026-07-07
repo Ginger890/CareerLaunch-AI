@@ -115,9 +115,9 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 
 /* ── Context panel ── */
 .ctx-panel{background:var(--navy);border-radius:6px;padding:13px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px}
-.ctx-icon{color:var(--teal-mid);font-size:13px;flex-shrink:0;margin-top:2px}
-.ctx-text{font-size:12px;color:rgba(29,158,117,.85);line-height:1.6}
-.ctx-text strong{color:var(--teal-mid);font-weight:500}
+.ctx-icon{color:#7EEFD4;font-size:13px;flex-shrink:0;margin-top:2px}
+.ctx-text{font-size:12px;color:rgba(232,248,244,.92);line-height:1.7}
+.ctx-text strong{color:#7EEFD4;font-weight:600}
 
 /* ── Inputs ── */
 .input-section{margin-bottom:18px}
@@ -297,7 +297,39 @@ textarea{min-height:86px}
 .btn-start{background:var(--navy);color:#fff;border:none;padding:14px 40px;font-family:var(--font-b);font-size:13px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;cursor:pointer;transition:all .2s}
 .btn-start:hover{background:var(--navy-mid);transform:translateY(-1px)}
 .btn-start:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ── Auth screens ── */
+.auth-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;text-align:center;background:var(--cream)}
+.auth-screen.active{display:flex}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:40px 36px;width:100%;max-width:420px;text-align:left}
+.auth-logo{font-family:var(--font-d);font-size:22px;font-weight:600;color:var(--teal);text-align:center;margin-bottom:4px}
+.auth-tagline{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-3);text-align:center;margin-bottom:28px}
+.auth-title{font-family:var(--font-d);font-size:26px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--text-3);margin-bottom:24px;line-height:1.6}
+.auth-field{margin-bottom:16px}
+.auth-field label{display:block;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);margin-bottom:5px}
+.auth-field input{width:100%;padding:12px 14px;font-family:var(--font-b);font-size:14px;border:1.5px solid var(--border-str);border-radius:6px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s}
+.auth-field input:focus{border-color:var(--teal-mid);box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+.auth-field input::placeholder{color:var(--text-3)}
+.auth-btn{width:100%;padding:13px;font-family:var(--font-b);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:all .18s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.auth-btn-primary{background:var(--teal);color:#fff}
+.auth-btn-primary:hover:not(:disabled){background:var(--teal-dk)}
+.auth-btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.auth-divider{text-align:center;font-size:12px;color:var(--text-3);margin:18px 0;position:relative}
+.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)}
+.auth-divider span{background:var(--surface);padding:0 12px;position:relative}
+.auth-link{font-size:13px;color:var(--teal);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:var(--font-b)}
+.auth-link:hover{color:var(--teal-dk)}
+.auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--text-3)}
+.auth-error{background:var(--danger-lt);border:1px solid rgba(193,68,14,.25);border-radius:6px;padding:11px 14px;font-size:12.5px;color:var(--danger);margin-bottom:14px;display:none}
+.auth-error.show{display:block}
+.auth-success{background:var(--success-lt);border:1px solid rgba(15,110,86,.2);border-radius:6px;padding:11px 14px;font-size:12.5px;color:var(--success);margin-bottom:14px;display:none}
+.auth-success.show{display:block}
+.auth-name-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.auth-name-row{grid-template-columns:1fr}}
+
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -305,6 +337,114 @@ textarea{min-height:86px}
   <span></span><span></span><span></span>
 </button>
 <div class="nav-overlay" id="navOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ AUTH SCREENS ═══ -->
+<div class="auth-screen active" id="authScreen">
+  <div class="auth-card" id="authCard">
+    <div class="auth-logo">CareerLaunch AI™</div>
+    <div class="auth-tagline">Professional Career Operating System</div>
+
+    <!-- Login view -->
+    <div id="viewLogin">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to continue your search</div>
+      <div class="auth-error" id="loginError"></div>
+      <div class="auth-field">
+        <label>Email address</label>
+        <input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="auth-btn auth-btn-primary" id="loginBtn" onclick="doLogin()">Sign In</button>
+      <div class="auth-switch">
+        <button class="auth-link" onclick="showView('forgot')">Forgot password?</button>
+        &nbsp;·&nbsp;
+        No account? <button class="auth-link" onclick="showView('register')">Create one</button>
+      </div>
+    </div>
+
+    <!-- Register view -->
+    <div id="viewRegister" style="display:none">
+      <div class="auth-title">Create your account</div>
+      <div class="auth-sub">Set up your CareerLaunch AI™ profile</div>
+      <div class="auth-error" id="registerError"></div>
+      <div class="auth-success" id="registerSuccess"></div>
+      <div class="auth-name-row">
+        <div class="auth-field">
+          <label>First name</label>
+          <input type="text" id="regFirst" placeholder="First" autocomplete="given-name">
+        </div>
+        <div class="auth-field">
+          <label>Last name</label>
+          <input type="text" id="regLast" placeholder="Last" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="auth-field">
+        <label>Email address</label>
+        <input type="email" id="regEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Password <span style="font-size:10px;color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0">(minimum 8 characters)</span></label>
+        <input type="password" id="regPassword" placeholder="Create a password" autocomplete="new-password">
+      </div>
+      <div class="auth-field">
+        <label>Confirm password</label>
+        <input type="password" id="regConfirm" placeholder="Repeat password" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <button class="auth-btn auth-btn-primary" id="registerBtn" onclick="doRegister()">Create Account</button>
+      <div class="auth-switch">Already have an account? <button class="auth-link" onclick="showView('login')">Sign in</button></div>
+    </div>
+
+    <!-- Forgot password view -->
+    <div id="viewForgot" style="display:none">
+      <div class="auth-title">Reset your password</div>
+      <div class="auth-sub">Enter your email and we will send you a reset link</div>
+      <div class="auth-error" id="forgotError"></div>
+      <div class="auth-success" id="forgotSuccess"></div>
+      <div class="auth-field">
+        <label>Email address</label>
+        <input type="email" id="forgotEmail" placeholder="you@email.com" autocomplete="email"
+          onkeydown="if(event.key==='Enter')doForgot()">
+      </div>
+      <button class="auth-btn auth-btn-primary" id="forgotBtn" onclick="doForgot()">Send Reset Link</button>
+      <div class="auth-switch"><button class="auth-link" onclick="showView('login')">← Back to sign in</button></div>
+    </div>
+
+    <!-- Reset password view (shown after clicking email link) -->
+    <div id="viewReset" style="display:none">
+      <div class="auth-title">Choose a new password</div>
+      <div class="auth-sub">Enter your new password below</div>
+      <div class="auth-error" id="resetError"></div>
+      <div class="auth-success" id="resetSuccess"></div>
+      <div class="auth-field">
+        <label>New password</label>
+        <input type="password" id="resetPassword" placeholder="New password (min 8 characters)">
+      </div>
+      <div class="auth-field">
+        <label>Confirm new password</label>
+        <input type="password" id="resetConfirm" placeholder="Repeat new password"
+          onkeydown="if(event.key==='Enter')doReset()">
+      </div>
+      <button class="auth-btn auth-btn-primary" id="resetBtn" onclick="doReset()">Update Password</button>
+    </div>
+
+    <!-- Email confirmation pending -->
+    <div id="viewConfirm" style="display:none">
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:48px;margin-bottom:16px">✉</div>
+        <div class="auth-title" style="text-align:center">Check your email</div>
+        <div class="auth-sub" style="text-align:center">We sent a confirmation link to <strong id="confirmEmail"></strong>. Click the link to activate your account, then return here to sign in.</div>
+        <button class="auth-link" style="margin-top:20px;display:block;width:100%;text-align:center" onclick="showView('login')">Return to sign in</button>
+        <div style="margin-top:16px;font-size:12px;color:var(--text-3)">Didn't receive it? Check your spam folder, or <button class="auth-link" style="font-size:12px" onclick="showView('register')">try again</button>.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <div class="shell">
   <!-- ═══ SIDEBAR ═══ -->
@@ -323,7 +463,10 @@ textarea{min-height:86px}
     <div class="nav" id="navList"></div>
     <div class="sidebar-footer">
       <div class="client-name">Client: <span id="clientNameDisplay">—</span></div>
-      <button class="btn-action" style="font-size:10px" onclick="saveToCloud().then(()=>{}).catch(()=>{})">☁ Save to cloud</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-action" style="font-size:10px" onclick="saveToCloud().then(()=>{}).catch(()=>{})">☁ Save</button>
+        <button class="btn-action" style="font-size:10px;color:rgba(193,68,14,.8);border-color:rgba(193,68,14,.3)" onclick="doSignOut()">Sign out</button>
+      </div>
     </div>
   </nav>
 
@@ -399,18 +542,53 @@ const MODEL  = 'claude-sonnet-4-6';
 const SB_URL   = 'https://vkrhjirkqziuwboovbgf.supabase.co';
 const SB_KEY   = 'sb_publishable__3ZhbHvsOu6seV0fKFjaVA_s0gGAW6I';
 const SB_TABLE = 'careerlaunch_data';
+const APP_URL  = 'https://ginger890.github.io/CareerLaunch-AI';
 
-function sbHeaders(){
+// ── Supabase client (with auth) ──────────────────────────────────────────
+// Initialised after DOM ready so supabase global is available
+let SB = null;
+function initSupabase(){
+  if (SB) return;
+  SB = supabase.createClient(SB_URL, SB_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+  // Listen for auth state changes (handles email confirmation redirect)
+  SB.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      await onSignedIn(session);
+    } else if (event === 'PASSWORD_RECOVERY') {
+      showAuthScreen('reset');
+    } else if (event === 'SIGNED_OUT') {
+      showAuthScreen('login');
+    }
+  });
+}
+
+// ── Auth-aware Supabase data functions ──────────────────────────────────
+
+async function getAuthToken(){
+  if (!SB) return SB_KEY;
+  const { data } = await SB.auth.getSession();
+  return data?.session?.access_token || SB_KEY;
+}
+
+async function sbHeaders(){
+  const token = await getAuthToken();
   return {
-    'Content-Type':      'application/json',
-    'apikey':            SB_KEY,
-    'Authorization':     'Bearer ' + SB_KEY,
-    'Prefer':            'resolution=merge-duplicates',
-    'X-Client-Info':     'careerlaunch-ai/1.0',
+    'Content-Type':  'application/json',
+    'apikey':        SB_KEY,
+    'Authorization': 'Bearer ' + token,
+    'Prefer':        'resolution=merge-duplicates',
   };
 }
 
-function getClientKey(){
+async function getClientKey(){
+  // Use auth user ID when logged in — guarantees cross-device access
+  if (SB) {
+    const { data } = await SB.auth.getUser();
+    if (data?.user?.id) return data.user.id;
+  }
+  // Fallback: random key (pre-auth state)
   let key = localStorage.getItem('cl_client_key');
   if (!key){
     const slug = (STATE.clientName||'client').toLowerCase().replace(/[^a-z0-9]+/g,'_');
@@ -428,15 +606,15 @@ function buildCloudPayload(clientKey){
       if (val !== '') rows.push({ client_key: clientKey, data_key: k, data_value: val, updated_at: new Date().toISOString() });
     }
   };
-  push('client_name',       STATE.clientName);
-  push('plan',              STATE.plan);
-  push('current_agent',     STATE.currentAgent);
-  push('completed_agents',  [...STATE.completedAgents]);
-  push('saved_inputs',      STATE.savedInputs);
-  push('saved_outputs',     STATE.savedOutputs);
-  push('assessment_scores', STATE.assessmentScores);
+  push('client_name',         STATE.clientName);
+  push('plan',                STATE.plan);
+  push('current_agent',       STATE.currentAgent);
+  push('completed_agents',    [...STATE.completedAgents]);
+  push('saved_inputs',        STATE.savedInputs);
+  push('saved_outputs',       STATE.savedOutputs);
+  push('assessment_scores',   STATE.assessmentScores);
   push('assessment_complete', STATE.assessmentComplete);
-  push('checklist_state',   STATE.checklistState);
+  push('checklist_state',     STATE.checklistState);
   push('asmt_SCI',  ASMT_ANSWERS.SCI);
   push('asmt_TSP',  ASMT_ANSWERS.TSP);
   push('asmt_VWSI', ASMT_ANSWERS.VWSI);
@@ -448,49 +626,49 @@ function buildCloudPayload(clientKey){
 async function saveToCloud(){
   if (!STATE.clientName) return;
   try {
-    const clientKey = getClientKey();
+    const clientKey = await getClientKey();
     const payload   = buildCloudPayload(clientKey);
+    const headers   = await sbHeaders();
     const resp = await fetch(`${SB_URL}/rest/v1/${SB_TABLE}`, {
-      method:  'POST',
-      headers: sbHeaders(),
-      body:    JSON.stringify(payload),
+      method: 'POST', headers, body: JSON.stringify(payload),
     });
     if (!resp.ok){
       const err = await resp.json().catch(()=>({}));
       throw new Error(err.message || 'HTTP ' + resp.status);
     }
-    showToast('\u2713 Progress saved to cloud');
+    showToast('\u2713 Progress saved');
   } catch(e){
-    showToast('Cloud save failed: ' + e.message, 3000);
+    showToast('Save failed: ' + e.message, 3000);
     console.error('Cloud save error:', e);
   }
 }
 
 async function loadCloudData(clientKey){
   try {
+    const token = await getAuthToken();
     const resp = await fetch(
       `${SB_URL}/rest/v1/${SB_TABLE}?client_key=eq.${encodeURIComponent(clientKey)}&select=data_key,data_value`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!resp.ok) return false;
     const rows = await resp.json();
     if (!rows || rows.length === 0) return false;
     const map = {};
     rows.forEach(r => { map[r.data_key] = r.data_value; });
-    const parse = (k, fb) => { try { return map[k] ? JSON.parse(map[k]) : fb; } catch(e){ return map[k] || fb; } };
-    if (map['client_name'])       STATE.clientName        = map['client_name'];
-    if (map['plan'])              STATE.plan              = map['plan'];
-    if (map['current_agent'])     STATE.currentAgent      = map['current_agent'];
-    if (map['completed_agents'])  STATE.completedAgents   = new Set(parse('completed_agents',[]));
-    if (map['saved_inputs'])      STATE.savedInputs       = parse('saved_inputs',{});
-    if (map['saved_outputs'])     STATE.savedOutputs      = parse('saved_outputs',{});
-    if (map['assessment_scores']) STATE.assessmentScores  = parse('assessment_scores',{});
+    const parse = (k, fb) => { try { return map[k] ? JSON.parse(map[k]) : fb; } catch(e){ return map[k]||fb; }};
+    if (map['client_name'])         STATE.clientName       = map['client_name'];
+    if (map['plan'])                STATE.plan             = map['plan'];
+    if (map['current_agent'])       STATE.currentAgent     = map['current_agent'];
+    if (map['completed_agents'])    STATE.completedAgents  = new Set(parse('completed_agents',[]));
+    if (map['saved_inputs'])        STATE.savedInputs      = parse('saved_inputs',{});
+    if (map['saved_outputs'])       STATE.savedOutputs     = parse('saved_outputs',{});
+    if (map['assessment_scores'])   STATE.assessmentScores = parse('assessment_scores',{});
     if (map['assessment_complete']) STATE.assessmentComplete = parse('assessment_complete',{});
-    if (map['checklist_state'])   STATE.checklistState    = parse('checklist_state',{});
-    if (map['search_dashboard'])  STATE.searchDashboard   = parse('search_dashboard',null);
+    if (map['checklist_state'])     STATE.checklistState   = parse('checklist_state',{});
+    if (map['search_dashboard'])    STATE.searchDashboard  = parse('search_dashboard',null);
     ['SCI','TSP','VWSI','PPI'].forEach(k => {
       const val = parse('asmt_'+k, null);
-      if (val) ASMT_ANSWERS[k] = val;
+      if (val) Object.assign(ASMT_ANSWERS[k], val);
     });
     return true;
   } catch(e){ console.error('Cloud load error:', e); return false; }
@@ -1561,7 +1739,7 @@ async function runGenericAgent(agentId, outputKey, inputs){
 // ═══════════════════════════════════════════════════════════════════════════
 function renderStepA(body){
   renderGenericAgent(body,'stepA',
-    '<strong>Step A — Career Capital Options Analysis.</strong> This step answers the question every search depends on: where are you going? Evaluate 2–3 realistic career paths against your profile before a single document is built.',
+    '<strong>Step A — Career Capital Options Analysis.</strong> This is the most important decision in your search — and most professionals skip it entirely. They update their résumé before deciding what they are targeting, and end up with a document that does not clearly position them for any specific opportunity. This step uses your Career Capital Profile to evaluate two or three realistic career paths, score each against your background, surface trade-offs honestly, and produce a clear recommended direction with the positioning language you will use throughout the search.<br><br><strong>Why it matters:</strong> Every document you build — your résumé, LinkedIn profile, outreach messages, interview answers — depends on the clarity of your target. A professional who makes an explicit path decision before building documents produces stronger, more specific materials than one who tries to keep all options open. This step takes 20 minutes. The decision it produces shapes every subsequent hour of your search.<br><br><strong>What you need to do:</strong> Paste your work history and describe the paths you are considering. If you are not sure what your options are, describe what you are drawn toward and let the agent suggest paths based on your profile. Read the full output — especially the trade-offs section — before committing to a direction. Once you choose a path, commit to it for the duration of your search.',
     [
       {id:'currentbg',label:'Current work history / résumé',required:true,hint:'Paste your résumé or a brief work history summary.',rows:5,placeholder:'e.g. 8 years in operations and inventory management...'},
       {id:'paths',label:'Career paths to evaluate',required:true,hint:'List 2–3 paths you are considering. If unsure, describe what you are drawn toward.',rows:3,placeholder:'Path 1: Stay in current function, go deeper (e.g. Operations Coordinator → Operations Manager)\nPath 2: Lateral pivot to adjacent function\nPath 3: Industry change within same function'},
@@ -1610,7 +1788,7 @@ IMMEDIATE NEXT STEPS: Three concrete actions to take this week, specific to my r
 function renderStepB(body){
   const optionsOut = getOutput('stepA_options');
   renderGenericAgent(body,'stepB',
-    '<strong>Step B — Résumé Build.</strong> Your master base résumé — built once from your Career Capital Profile and chosen path, then customized per posting by the Job Application Engine in Phase 2.',
+    '<strong>Step B — Résumé Build.</strong> Your master base résumé is the foundation document for your entire search. It is built once — carefully and completely — then customized for each specific job posting by the Job Application Engine in Phase 2. Most professionals have résumés that describe responsibilities rather than results, are not optimized for ATS keyword scanning, and do not position them clearly for their target role. This agent fixes all three.<br><br><strong>Why it matters:</strong> A recruiter spends 7 to 10 seconds on a first pass. An ATS scores your résumé against the job description before any human sees it. Your master base résumé must pass both filters and hold up to close reading by a hiring manager. The quality of every customization you build later depends entirely on the strength of this document.<br><br><strong>What you need to do:</strong> Paste your existing résumé in full. Add your target role, target industries, and the primary ATS keywords from your SCI and TSP results. Review the output carefully — verify every date, title, and company name before saving. This is your master document. You will never submit it unmodified; it exists to be customized by Agent 5 for each specific application.',
     [
       {id:'existingresume',label:'Your current résumé',required:true,hint:'Paste your existing résumé in full.',rows:8,placeholder:'Paste your current résumé here...'},
       {id:'targetrole',label:'Target role and industries',required:true,hint:'Specific title and industries from your Options Analysis.',placeholder:'e.g. Operations Supervisor — manufacturing and distribution, Austin TX'},
@@ -1652,7 +1830,7 @@ Produce the complete résumé — fully written, every section filled in. This i
 // ═══════════════════════════════════════════════════════════════════════════
 function renderStepC(body){
   renderGenericAgent(body,'stepC',
-    '<strong>Step C — LinkedIn Profile Build.</strong> All nine LinkedIn sections — fully written, ready to copy and paste. Build this before any outreach begins.',
+    '<strong>Step C — LinkedIn Profile Build.</strong> LinkedIn is your most visible professional asset during a search. Recruiters use it to find you before you apply. Hiring managers validate you against it after you apply. Your network uses it to refer you. LinkedIn also determines whether you surface in recruiter searches at all — based on your headline, keyword density, activity, and profile completeness. Most professionals have a LinkedIn profile that contradicts their résumé, uses an outdated headline, or goes silent in the About section. This agent rebuilds all nine sections from scratch.<br><br><strong>Why it matters:</strong> A profile built correctly — keyword-rich headline, strong About section hook visible before &ldquo;see more,&rdquo; achievement-oriented experience entries, 50 skills in priority order — produces inbound recruiter contact even when you are not actively applying. That inbound pipeline costs nothing to build once your profile is optimized. Recruiters will check your LinkedIn within hours of receiving any message from you.<br><br><strong>What you need to do:</strong> Complete Step B first — the résumé feeds this agent. After generating, copy and paste each section directly into LinkedIn. Configure the Open to Work and visibility settings exactly as the output specifies. Do not begin Phase 1 outreach until your profile is live and at 100% completeness (All-Star status).',
     [
       {id:'targetrole',label:'Target role and industries',required:true,placeholder:'e.g. Operations Supervisor — manufacturing and distribution'},
       {id:'geography',label:'Target geography and work preference',required:true,placeholder:'e.g. Austin TX metro, open to hybrid or remote'},
@@ -1710,7 +1888,7 @@ function renderStepD(body){
 6. Review your LinkedIn activity feed — posts, likes, comments in the past 90 days
 7. Check any public social media accounts`;
   renderGenericAgent(body,'stepD',
-    '<strong>Step D — Digital Reputation Audit.</strong> Know exactly what the market sees before the market starts looking. Complete your manual self-audit first, then run this agent.',
+    '<strong>Step D — Digital Reputation Audit.</strong> Before a recruiter calls or a hiring manager interviews you, they will search your name. What they find in the first two pages of Google results, on LinkedIn, and in news archives forms an impression your résumé must then confirm or overcome. Most professionals have never audited their own digital footprint. Some have outdated social media posts, contradictory information across platforms, or news mentions they have forgotten about. A single concerning result can end a candidacy before it begins.<br><br><strong>Why it matters:</strong> You cannot fix what you do not know about. Running this audit before outreach begins means you control the narrative from the first contact. At the professional level, digital due diligence on candidates is standard practice — not reserved for senior executives.<br><br><strong>What you need to do:</strong> Complete the manual self-audit steps listed below before running the prompt. Open a private browser window, search your full name in quotes, and review the first two pages of results for each search variation. Review your LinkedIn as a non-connection would see it. Check your social media activity from the past year. Describe what you find honestly — the more specific your input, the more actionable the output.',
     [
       {id:'googleresults',label:'What appeared in your Google search results',required:true,hint:'Describe what appeared on the first two pages for each search you ran.',rows:4,placeholder:'e.g. LinkedIn profile (correct), company bio from previous employer, one mention in local newspaper from 2021, personal Facebook page visible...'},
       {id:'linkedinview',label:'How your LinkedIn looks as a non-connection',required:true,hint:'What is visible? Headline, photo, About preview, recent activity?',rows:3,placeholder:'e.g. Headline shows old title, About section not visible, profile photo is 5 years old...'},
@@ -1767,7 +1945,7 @@ Produce:
 // ═══════════════════════════════════════════════════════════════════════════
 function renderAgent1(body){
   renderGenericAgent(body,'p1a1',
-    '<strong>Agent 1 — Market & Opportunity.</strong> Identifies opportunity signals before positions are posted, maps recruiters in your space, and builds your target company list. Uses live intelligence — run it, do not just read it.',
+    '<strong>Agent 1 — Market &amp; Opportunity.</strong> Most job seekers apply to posted roles and wait. The professionals who find jobs fastest identify where demand is forming before it becomes a posting — and are already in conversation with the right people when roles open. This agent builds your market intelligence foundation: a tiered target company list based on real opportunity signals, a map of the recruiters who place professionals at your level and in your industry, and an analysis of where your background is most likely to find receptive employers right now.<br><br><strong>Why it matters:</strong> Research consistently shows that the majority of professional roles are filled through a recruiter placement, a referral, or a direct employer outreach — often before or alongside a public posting. Candidates who are already in front of the right people get first access to the best opportunities and avoid competing in the high-volume applicant pool for every role.<br><br><strong>What you need to do:</strong> Fill in your target role, industries, geography, and any companies already on your radar. Be specific about company size and type. After generating, work the output actively — contact the recruiters listed, research your Tier 1 companies before reaching out, and use the opportunity signals to personalize your outreach messages in Agent 3.',
     [
       {id:'targetrole',label:'Target role and level',required:true,placeholder:'e.g. Senior Accountant, Operations Supervisor, HR Generalist'},
       {id:'industries',label:'Target industries',required:true,placeholder:'e.g. Healthcare, financial services, manufacturing'},
@@ -1804,7 +1982,7 @@ For each company: name, industry, size estimate, why they belong on the list, li
 
 function renderAgent2(body){
   renderGenericAgent(body,'p1a2',
-    '<strong>Agent 2 — Positioning & Brand.</strong> Produces your Professional Value Proposition, outreach summary statement, and professional bio. Run Prompt 1 once now. Prompt 2 (résumé customization) is handled by Agent 5 — Job Application Engine.',
+    '<strong>Agent 2 — Positioning &amp; Brand.</strong> Before you send a single message or submit a single application, you need to answer one question clearly: why you, for this role, at this company, right now? Most professionals cannot answer that question with specificity. They describe what they have done rather than the value they create, use generic language, and have no consistent positioning framework. This agent builds that framework — the specific, consistent language you will use across every channel of your search.<br><br><strong>Why it matters:</strong> Positioning is the difference between a recruiter who forwards your materials and one who archives them. A clear, specific Professional Value Proposition — built from your Career Capital Profile and targeted at your chosen market — gives every subsequent interaction a foundation. Your outreach emails, LinkedIn headline, interview answers, and networking conversations all become more effective when they are anchored to the same consistent themes.<br><br><strong>What you need to do:</strong> Fill in your target role and describe the primary problems you are most often hired to solve. Internalize the output — especially the outreach summary statement, which you will use verbally in every recruiter call and networking conversation. Save all four documents. Do not begin Agent 3 outreach until this positioning is solid.',
     [
       {id:'targetrole',label:'Target role and industries',required:true,placeholder:'e.g. Operations Supervisor — manufacturing and distribution'},
       {id:'themes',label:'My primary contribution themes',required:false,hint:'What do you do that creates the most value for employers?',rows:2,placeholder:'e.g. I reduce operational costs through process improvement and build high-performing teams...'},
@@ -2175,7 +2353,7 @@ async function runOnDemand(type){
 
 function renderAgent5(body){
   renderGenericAgent(body,'p2a5',
-    '<strong>Agent 5 — Job Application Engine.</strong> Run this before every application. Never submit your master résumé unmodified. Each customization takes approximately 10 minutes and measurably improves ATS pass-through rates.',
+    '<strong>Agent 5 — Job Application Engine.</strong> ATS systems score your résumé against the specific language in each job posting before a human ever sees it. A master résumé optimized for your background will not score as well as one customized for the exact terminology, skills, and priorities in a specific posting. Most professionals submit the same document to every role and wonder why they do not hear back. This agent closes that gap — it analyzes each posting, identifies keyword mismatches, reorders bullets for relevance, and produces a fully customized, ATS-ready résumé for that specific opportunity.<br><br><strong>Why it matters:</strong> Customized applications receive response rates two to three times higher than generic ones. At the professional level, where you may submit 20 to 50 applications over the course of a search, this difference compounds significantly. The 10 minutes invested in each customization will produce more interviews than 10 additional applications submitted with an unmodified résumé. Do not skip this step to save time — it costs you far more time in the long run.<br><br><strong>What you need to do:</strong> Run this agent before every Tier 1 and Tier 2 application. Paste the complete job posting — not just the title, the full text including requirements, responsibilities, and any company description. Review the change log so you understand what changed and why. Save the customized version with the company name in the filename. Never submit the master base résumé directly.',
     [
       {id:'jobposting',label:'Complete job posting',required:true,hint:'Paste the full job description — title, requirements, responsibilities, and any company description included.',rows:8,placeholder:'Paste the complete job posting here...'},
       {id:'company',label:'Company name and what you know about them',required:true,placeholder:'e.g. Meridian Health Systems — regional healthcare network, recently expanded...'},
@@ -2214,7 +2392,7 @@ CHANGE LOG: What changed, what keywords were added, and why each change was made
 
 function renderAgent6(body){
   renderGenericAgent(body,'p2a6',
-    '<strong>Agent 6 — References & Reference Management.</strong> References who are actively prepped and aligned with your positioning are significantly more effective than references who are simply willing.',
+    '<strong>Agent 6 — References &amp; Reference Management.</strong> References are checked late in the hiring process but must be prepared early. The most common reference failure is not a bad reference — it is a reference who tells a different story than the candidate, emphasizes the wrong strengths, or is simply caught unprepared. By the time a reference is called, you are typically in the finalist round — meaning a weak reference can cost you an offer that was essentially yours.<br><br><strong>Why it matters:</strong> References are the one element of your candidacy you can actively manage on someone else\'s behalf. A reference who has been briefed on the role, reminded of your specific work together, and told which strengths to emphasize will give a significantly stronger reference than one who is simply willing. The prep brief this agent produces does exactly that work — efficiently and professionally.<br><br><strong>What you need to do:</strong> Identify four to six potential references — more than you need, because some will be unavailable or less well-positioned than expected. For each, note your relationship, how long you worked together, and what they directly observed you doing. Send each reference their prep brief at least two weeks before any check is likely. Confirm each one has received it and is prepared before giving their contact information to any employer.',
     [
       {id:'references',label:'Your potential references',required:true,hint:'For each: name, title, company, relationship, how long you worked together, what they managed or observed.',rows:6,placeholder:'Reference 1: [Name, Title, Company, relationship, context]\nReference 2: ...\nReference 3: ...'},
       {id:'targetrole',label:'Target role you are applying for',required:false,placeholder:'e.g. Operations Supervisor at Meridian Health Systems'},
@@ -2245,7 +2423,7 @@ Produce:
 
 function renderAgent7(body){
   renderGenericAgent(body,'p2a7',
-    '<strong>Agent 7 — Compensation Benchmarking.</strong> Run this before your first interview — not when you receive an offer. Candidates who know their market value before interviewing negotiate from knowledge rather than hope.',
+    '<strong>Agent 7 — Compensation Benchmarking.</strong> Most professionals enter salary conversations without knowing their actual market value. They anchor to their current compensation — which may be above or below market — or negotiate weakly because they are not confident in what to ask for. At the professional level, the difference between a poorly negotiated offer and a well-negotiated one is typically $5,000 to $15,000 in first-year compensation — and that gap compounds over every subsequent raise and job change throughout your career.<br><br><strong>Why it matters:</strong> Running this agent before your first interview gives you three things: a defensible market range you can cite with confidence, a clear walk-away floor so you know what to decline without second-guessing yourself, and the exact language to use at each stage of the process — recruiter screen, hiring manager interview, and offer stage. This agent feeds Agent 10 directly; the Offer and Negotiation agent uses your benchmark as its foundation.<br><br><strong>What you need to do:</strong> Fill in your target role, level, industries, and geography as specifically as possible — compensation varies significantly across all four variables. Include your current total compensation in full: base, bonus, and the estimated value of benefits. Save the output. When the salary question comes up — and it will — use the scripted language exactly as written rather than improvising in the moment.',
     [
       {id:'targetrole',label:'Target role and level',required:true,placeholder:'e.g. Operations Supervisor, manager-level'},
       {id:'industries',label:'Target industries',required:true,placeholder:'e.g. Healthcare, manufacturing, logistics'},
@@ -2284,7 +2462,7 @@ Produce:
 
 function renderAgent8(body){
   renderGenericAgent(body,'p2a8',
-    '<strong>Agent 8 — Job Search Intelligence.</strong> Board selection by sector, Boolean search strings, job alert configuration, application volume strategy, and live job search. The 24-hour rule: applications submitted within 24 hours of a posting going live receive significantly higher response rates.',
+    '<strong>Agent 8 — Job Search Intelligence.</strong> Not all job boards are equal, and using the wrong channels for your sector wastes significant time. LinkedIn Jobs dominates for most professional roles, but the boards that produce the best results in healthcare, technology, supply chain, nonprofit, or legal are completely different. Beyond board selection, the way you search — your Boolean strings, your alert configuration, and the timing of your applications — determines whether you are in the first wave of applicants or the third. At the professional level, where most roles are filled from posted positions, your search infrastructure matters as much as your résumé quality.<br><br><strong>Why it matters:</strong> Applications submitted within the first 24 hours of a posting going live receive response rates two to three times higher than those submitted after 72 hours. Many ATS systems surface applications chronologically during initial screening, and many hiring managers review the first wave before the role becomes widely distributed. Getting in early with the right keywords is a structural advantage that costs nothing except a well-configured alert system and a consistent daily routine.<br><br><strong>What you need to do:</strong> Fill in your target role, sector, and geography. Commit to the recommended board stack — three primary platforms is enough. Set up job alerts at daily frequency exactly as specified. Paste the Boolean search strings directly into each platform without modification. Follow the weekly search workflow as a non-negotiable operating routine for the duration of your search.',
     [
       {id:'targetrole',label:'Target role and level',required:true,placeholder:'e.g. Operations Supervisor, Senior Accountant'},
       {id:'industries',label:'Target industries and sector',required:true,placeholder:'e.g. Healthcare, manufacturing, administrative/operations'},
@@ -2480,7 +2658,7 @@ async function runFollowup(type){
 
 function renderAgent10(body){
   renderGenericAgent(body,'p3a10',
-    '<strong>Agent 10 — Offer & Negotiation.</strong> Uses your compensation benchmark from Agent 7 as its foundation. Do not accept or decline any offer without running this agent first. 15 minutes here can be worth thousands of dollars.',
+    '<strong>Agent 10 — Offer &amp; Negotiation.</strong> Receiving an offer is not the end of the process — it is the beginning of the most financially consequential conversation in your search. Most professionals accept or decline without fully understanding the total value of what they are being offered, without identifying which components are negotiable, and without scripted language for the conversation. The result is either leaving money on the table by not asking, or damaging a relationship by asking poorly. This agent uses your benchmark from Agent 7 and produces a complete negotiation strategy specific to this offer and this employer.<br><br><strong>Why it matters:</strong> At the professional level, negotiation is almost always possible and almost always expected. Employers typically make an opening offer below what they are willing to pay, specifically because they expect a counter. Candidates who do not counter leave real money behind. A well-executed negotiation with the right language almost never costs an offer. A poorly executed one occasionally does — which is exactly why having scripted language prepared in advance matters.<br><br><strong>What you need to do:</strong> Do not respond to an offer — verbally or in writing — before running this agent. Tell the employer you will review the offer and respond within 24 to 48 hours. Paste the complete offer details including every component. Describe any competing conversations honestly, even if they are informal or early-stage. Read the negotiation scripts out loud before the conversation so the language feels natural.',
     [
       {id:'offerdeets',label:'The offer details',required:true,hint:'Base salary, bonus, signing bonus, benefits, flexibility, start date, title.',rows:4,placeholder:'Base salary: $[amount]\nTarget bonus: [% or none]\nSigning bonus: $[amount or none]\nBenefits: [brief description]\nFlexibility: [remote schedule, title, start date]\nSeverance: [terms or not discussed]'},
       {id:'company',label:'Company profile',required:true,placeholder:'e.g. Meridian Health Systems — regional healthcare, privately held, ~800 employees'},
@@ -2524,7 +2702,7 @@ Produce:
 // ═══════════════════════════════════════════════════════════════════════════
 function renderAgent11(body){
   renderGenericAgent(body,'p4a11',
-    '<strong>Agent 11 — Execution & Coaching (Weekly Intelligence Core).</strong> Run every Friday or Monday for the full duration of your search. Pipeline health diagnosis, stall identification, and your priority list for the week ahead.',
+    '<strong>Agent 11 — Execution &amp; Coaching (Weekly Intelligence Core).</strong> A job search is a project, and like any project it stalls when there is no operating rhythm. Most professionals work hard in the first two weeks, slow down when early outreach does not produce immediate results, and lose momentum before their search gains real traction. The Weekly Intelligence Core prevents that pattern by creating a non-negotiable weekly review that diagnoses the health of your search, identifies exactly what is stalling and why, and produces a specific priority list for the coming week — concrete next actions ranked by likely impact, not general encouragement.<br><br><strong>Why it matters:</strong> Most search stalls are diagnosable and fixable once you know what pattern you are in. No new conversations means outreach volume is too low or messaging is wrong. Conversations but no interviews means positioning is unclear or résumé is weak. Interviews but no offers means interview preparation is insufficient. This agent tells you which pattern you are in and what to do about it, every week, for the full duration of your search.<br><br><strong>What you need to do:</strong> Run this agent every Friday or every Monday — pick one day and treat it as a standing appointment that does not move. Be completely honest about what happened this week. Do not filter, minimize, or round up your activity numbers. The value of this agent is directly proportional to the accuracy of what you put in. Commit to the top three priority actions before closing the app each week.',
     [
       {id:'pipeline',label:'Current pipeline status',required:true,hint:'List each active opportunity with its current status.',rows:4,placeholder:'Company A (Meridian Health): Applied 2 weeks ago, no response\nCompany B (ABC Corp): Recruiter call completed, waiting for next step\nCompany C (XYZ LLC): First interview scheduled for next week...'},
       {id:'activity',label:'What happened this week',required:true,rows:3,placeholder:'Outreach sent: [number and type]\nResponses received: [summarize]\nInterviews or calls: [list with outcome]\nNew opportunities: [list]\nDocuments sent: [list]'},
@@ -2560,7 +2738,7 @@ Tell me:
 
 function renderAgent12(body){
   renderGenericAgent(body,'p4a12',
-    '<strong>Agent 12 — Onboarding Intelligence.</strong> Activated at offer acceptance. Converts everything the system learned about the company during your search into a structured onboarding strategy. Build this before your first day.',
+    '<strong>Agent 12 — Onboarding Intelligence.</strong> Accepting an offer is not the finish line — it is the starting line. The first 90 days in a new role are the highest-stakes period of your tenure: impressions form quickly, relationships establish themselves in patterns that are difficult to change, and early wins or early failures define how your manager and colleagues think about you for years. Most professionals show up on day one without a plan. This agent builds one that is specific to the company, the role, and everything you learned during your search.<br><br><strong>Why it matters:</strong> A structured 30-60-90 day plan built from real intelligence — not a generic framework — tells you specifically what to do, who to build relationships with, what risks to manage, and what early wins to target. Managers consistently rate structured, well-prepared onboarding as a strong signal of professional maturity and commitment. The plan this agent produces is grounded in your actual search intelligence — it is a strategy, not a template.<br><br><strong>What you need to do:</strong> Run this agent within 48 hours of accepting your offer. Paste your interview intelligence brief and everything you learned about the company, the team, and the manager during the search. Be candid about your concerns — the more honest your input, the more actionable the plan. Consider sharing the onboarding plan with your new manager in your first week as a demonstration of your intentionality and preparation.',
     [
       {id:'rolecompany',label:'Role accepted and company',required:true,placeholder:'e.g. Operations Supervisor at Meridian Health Systems. Start date: [date]'},
       {id:'challenges',label:'The business challenges you were hired to address',required:true,rows:2,placeholder:'e.g. Inventory accuracy issues, team of 8 needing development, new warehouse system implementation...'},
@@ -2686,48 +2864,188 @@ function updateStatus(idx){
 // ═══════════════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
-async function init(){
-  // 1. Try localStorage first (instant, no network)
-  const localRestored = loadLocal();
 
-  // 2. If we have a client key, try cloud load and merge (richer data)
-  const storedKey = localStorage.getItem('cl_client_key');
-  if (storedKey) {
-    try {
-      const cloudRestored = await loadCloudData(storedKey);
-      if (cloudRestored && STATE.clientName) {
-        // Cloud data loaded — re-sync to localStorage
-        saveLocal();
-        showToast('\u2713 Progress restored from cloud', 2000);
-      }
-    } catch(e){ console.warn('Cloud restore failed, using local:', e); }
-  }
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTH — UI FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
 
-  if (STATE.clientName) {
-    document.getElementById('clientNameDisplay').textContent = STATE.clientName;
-    updatePlanBadge();
-    buildNav();
-    updateProgress();
-    const lastAgent = STATE.currentAgent;
-    if (lastAgent) {
-      navigateTo(lastAgent);
-    } else if (STATE.completedAgents.size > 0) {
-      const navItems = NAV.filter(n=>n.id);
-      const lastDone = [...navItems].reverse().find(n=>STATE.completedAgents.has(n.id));
-      const nextItem = lastDone ? NAV.find(n=>n.id===lastDone.next) : null;
-      navigateTo(nextItem?.id||'step0');
+function showView(view){
+  ['Login','Register','Forgot','Reset','Confirm'].forEach(v=>{
+    const el = document.getElementById('view'+v);
+    if(el) el.style.display = v.toLowerCase()===view?'block':'none';
+  });
+  // Clear errors
+  document.querySelectorAll('.auth-error,.auth-success').forEach(el=>{
+    el.classList.remove('show'); el.textContent='';
+  });
+}
+
+function showAuthScreen(view){
+  document.getElementById('authScreen').classList.add('active');
+  document.getElementById('agentArea').style.display='none';
+  document.getElementById('onboardingScreen').style.display='none';
+  showView(view||'login');
+}
+
+function hideAuthScreen(){
+  document.getElementById('authScreen').classList.remove('active');
+}
+
+function authError(id, msg){
+  const el = document.getElementById(id);
+  if(el){ el.textContent=msg; el.classList.add('show'); }
+}
+
+function authSuccess(id, msg){
+  const el = document.getElementById(id);
+  if(el){ el.textContent=msg; el.classList.add('show'); }
+}
+
+function setBtnLoading(id, loading, text){
+  const btn = document.getElementById(id);
+  if(!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading ? '<span class="spinner"></span> ' + (text||'Please wait...') : (text||'Submit');
+}
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  if(!email||!pass){ authError('loginError','Please enter your email and password.'); return; }
+  setBtnLoading('loginBtn', true, 'Signing in...');
+  const {data, error} = await SB.auth.signInWithPassword({email, password: pass});
+  setBtnLoading('loginBtn', false, 'Sign In');
+  if(error){ authError('loginError', error.message==='Invalid login credentials'?'Incorrect email or password. Please try again.':error.message); return; }
+  // onAuthStateChange will fire and call onSignedIn
+}
+
+async function doRegister(){
+  const first   = document.getElementById('regFirst').value.trim();
+  const last    = document.getElementById('regLast').value.trim();
+  const email   = document.getElementById('regEmail').value.trim();
+  const pass    = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regConfirm').value;
+  if(!first||!last){ authError('registerError','Please enter your first and last name.'); return; }
+  if(!email){ authError('registerError','Please enter your email address.'); return; }
+  if(pass.length < 8){ authError('registerError','Password must be at least 8 characters.'); return; }
+  if(pass !== confirm){ authError('registerError','Passwords do not match.'); return; }
+  setBtnLoading('registerBtn', true, 'Creating account...');
+  const {data, error} = await SB.auth.signUp({
+    email, password: pass,
+    options: {
+      data: { full_name: first+' '+last, first_name: first, last_name: last },
+      emailRedirectTo: APP_URL
     }
+  });
+  setBtnLoading('registerBtn', false, 'Create Account');
+  if(error){ authError('registerError', error.message); return; }
+  // Show confirmation pending screen
+  document.getElementById('confirmEmail').textContent = email;
+  showView('confirm');
+}
+
+async function doForgot(){
+  const email = document.getElementById('forgotEmail').value.trim();
+  if(!email){ authError('forgotError','Please enter your email address.'); return; }
+  setBtnLoading('forgotBtn', true, 'Sending...');
+  const {error} = await SB.auth.resetPasswordForEmail(email, { redirectTo: APP_URL });
+  setBtnLoading('forgotBtn', false, 'Send Reset Link');
+  if(error){ authError('forgotError', error.message); return; }
+  authSuccess('forgotSuccess', 'Reset link sent. Check your email and click the link to choose a new password.');
+}
+
+async function doReset(){
+  const pass    = document.getElementById('resetPassword').value;
+  const confirm = document.getElementById('resetConfirm').value;
+  if(pass.length < 8){ authError('resetError','Password must be at least 8 characters.'); return; }
+  if(pass !== confirm){ authError('resetError','Passwords do not match.'); return; }
+  setBtnLoading('resetBtn', true, 'Updating...');
+  const {error} = await SB.auth.updateUser({password: pass});
+  setBtnLoading('resetBtn', false, 'Update Password');
+  if(error){ authError('resetError', error.message); return; }
+  authSuccess('resetSuccess', 'Password updated successfully. Signing you in...');
+  setTimeout(()=>{ hideAuthScreen(); launchApp(); }, 1500);
+}
+
+async function doSignOut(){
+  if(!confirm('Sign out of CareerLaunch AI™?')) return;
+  await SB.auth.signOut();
+  STATE.clientName=''; STATE.plan=null; STATE.currentAgent=null;
+  STATE.completedAgents=new Set(); STATE.savedInputs={}; STATE.savedOutputs={};
+  STATE.assessmentScores={}; STATE.assessmentComplete={}; STATE.checklistState={};
+  ['SCI','TSP','VWSI','PPI'].forEach(k=>{ ASMT_ANSWERS[k]={}; });
+  localStorage.removeItem('cl_state');
+  document.getElementById('agentArea').style.display='none';
+  document.getElementById('onboardingScreen').style.display='none';
+  showAuthScreen('login');
+}
+
+async function onSignedIn(session){
+  hideAuthScreen();
+  // Load cloud data using auth user ID
+  const uid = session.user.id;
+  const cloudLoaded = await loadCloudData(uid);
+  // If no cloud data yet, pre-fill name from auth metadata
+  if(!STATE.clientName){
+    const meta = session.user.user_metadata||{};
+    STATE.clientName = meta.full_name || meta.name || session.user.email.split('@')[0];
+  }
+  saveLocal();
+  launchApp();
+}
+
+function launchApp(){
+  document.getElementById('clientNameDisplay').textContent = STATE.clientName;
+  updatePlanBadge();
+  buildNav();
+  updateProgress();
+  if(STATE.plan && STATE.clientName && STATE.completedAgents.size === 0){
+    // New user with plan already set — go straight to step0
+    navigateTo('step0');
+  } else if(STATE.currentAgent){
+    navigateTo(STATE.currentAgent);
+  } else if(STATE.completedAgents.size > 0){
+    const navItems = NAV.filter(n=>n.id);
+    const lastDone = [...navItems].reverse().find(n=>STATE.completedAgents.has(n.id));
+    const nextItem = lastDone ? NAV.find(n=>n.id===lastDone.next) : null;
+    navigateTo(nextItem?.id||'step0');
   } else {
-    buildNav();
+    // New user — show onboarding to collect name and plan
+    document.getElementById('onboardingScreen').style.display='flex';
+    // Pre-fill name if we got it from auth metadata
+    if(STATE.clientName){
+      const inp = document.getElementById('clientNameInput');
+      if(inp) inp.value = STATE.clientName;
+    }
   }
 }
 
-// Also save to cloud when client first starts the system
+async function init(){
+  // Init Supabase client
+  initSupabase();
+  // Restore local state for instant UI
+  loadLocal();
+  buildNav();
+  // Check if already authenticated
+  const { data: { session } } = await SB.auth.getSession();
+  if (session) {
+    await onSignedIn(session);
+  } else {
+    // Not logged in — check URL for password recovery token
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      showAuthScreen('reset');
+    } else {
+      showAuthScreen('login');
+    }
+  }
+}
+
+// startSystem saves plan + name to cloud after onboarding
 const _origStartSystem = startSystem;
 startSystem = function(){
   _origStartSystem();
-  // Give state a moment to set, then push to cloud
-  setTimeout(saveToCloud, 1000);
+  setTimeout(saveToCloud, 800);
 };
 
 init();
