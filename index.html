@@ -2486,42 +2486,237 @@ async function runOnDemand(type){
 }
 
 function renderAgent5(body){
-  renderGenericAgent(body,'p2a5',
-    '<strong>Agent 5 — Job Application Engine.</strong> ATS systems score your résumé against the specific language in each job posting before a human ever sees it. A master résumé optimized for your background will not score as well as one customized for the exact terminology, skills, and priorities in a specific posting. Most professionals submit the same document to every role and wonder why they do not hear back. This agent closes that gap — it analyzes each posting, identifies keyword mismatches, reorders bullets for relevance, and produces a fully customized, ATS-ready résumé for that specific opportunity.<br><br><strong>Why it matters:</strong> Customized applications receive response rates two to three times higher than generic ones. At the professional level, where you may submit 20 to 50 applications over the course of a search, this difference compounds significantly. The 10 minutes invested in each customization will produce more interviews than 10 additional applications submitted with an unmodified résumé. Do not skip this step to save time — it costs you far more time in the long run.<br><br><strong>What you need to do:</strong> Run this agent before every Tier 1 and Tier 2 application. Paste the complete job posting — not just the title, the full text including requirements, responsibilities, and any company description. Review the change log so you understand what changed and why. Save the customized version with the company name in the filename. Never submit the master base résumé directly.',
-    [
-      {id:'jobposting',label:'Complete job posting',required:true,hint:'Paste the full job description — title, requirements, responsibilities, and any company description included.',rows:8,placeholder:'Paste the complete job posting here...'},
-      {id:'company',label:'Company name and what you know about them',required:true,placeholder:'e.g. Meridian Health Systems — regional healthcare network, recently expanded...'},
-    ],
-    'p2a5_customresume',
-    'Customized Résumé + Change Log',
-    (vals, profile, name) => `Act as a senior résumé strategist and ATS optimization specialist. Customize the résumé for ${name}.
+  const profile = getOutput('step0_profile');
+  const masterResume = getOutput('stepB_resume');
+  const savedStage1 = getOutput('p2a5_customresume');
+  const savedScore = getOutput('p2a5_atsscore');
 
-Career Capital Profile: ${profile.substring(0,500)}
+  body.innerHTML = `
+  <div class="ctx-panel">
+    <div class="ctx-icon">◆</div>
+    <div class="ctx-text"><strong>Agent 5 — Job Application Engine.</strong> ATS systems score your résumé against the specific language in each job posting before a human ever sees it. A generic résumé — even a strong one — will score 40 to 60% on most ATS systems against a specific posting. This agent closes that gap through a two-stage process: Stage 1 produces a keyword-engineered, ATS-optimized résumé with a placement map showing where every critical keyword was placed and how many times. Stage 2 runs a scoring check and returns an estimated keyword match percentage with a gap list so you can close any remaining misses before submitting.<br><br><strong>Target score: 85–90%.</strong> Below 75% the résumé will be filtered by most ATS systems before a human sees it. Above 85% it passes screening and competes on merit. The scoring check in Stage 2 is a proxy — not a real ATS system. To get a true ATS score, run the final résumé through Jobscan (jobscan.co) or Resume Worded (resumeworded.com) before submitting. Both offer free scans.<br><br><strong>What you need to do:</strong> Paste the complete job posting — the full text, not just the title. Paste your master base résumé from Step B if you have not already generated it. Run Stage 1 first. Review the keyword placement map and change log. Then run Stage 2 to get the estimated score. If the score is below 85%, use the gap list to make manual adjustments before downloading. Never submit the master résumé unmodified.</div>
+  </div>
+  ${profile ? '<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div><div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile is feeding this agent automatically.</span></div></div>' : ''}
+  ${masterResume ? '<div class="carry-box"><div class="carry-title">Master Résumé — Loaded from Step B</div><div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your master base résumé from Step B is the primary input for customization.</span></div></div>' : '<div style="background:var(--gold-lt);border:1px solid rgba(186,138,42,.3);border-radius:5px;padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--text-2)">⚠ Master résumé not yet generated. Complete Step B first for best results — or paste your résumé in the field below.</div>'}
 
-Master base résumé: ${getOutput('stepB_resume')?.substring(0,2000)||'[Master résumé not yet generated — using Career Capital Profile as context]'}
+  <div class="input-section">
+    <div class="input-label">Complete job posting <span class="input-req">Required</span></div>
+    <div class="input-hint">Paste the full text — title, all requirements, all responsibilities, preferred qualifications, and any company description in the posting. The more complete, the better the keyword extraction.</div>
+    <textarea id="inp_p2a5_jobposting" rows="8" placeholder="Paste the complete job description here...">${esc(getInput('p2a5_jobposting'))}</textarea>
+  </div>
+  <div class="input-section">
+    <div class="input-label">Company name and context <span class="input-req">Required</span></div>
+    <input type="text" id="inp_p2a5_company" placeholder="e.g. Meridian Health Systems — regional healthcare network, recently expanded" value="${esc(getInput('p2a5_company'))}">
+  </div>
+  ${!masterResume ? `<div class="input-section">
+    <div class="input-label">Your current résumé <span class="input-req">Required if Step B not complete</span></div>
+    <div class="input-hint">Paste your résumé here if you have not yet generated your master base résumé in Step B.</div>
+    <textarea id="inp_p2a5_manualresume" rows="6" placeholder="Paste your current résumé here...">${esc(getInput('p2a5_manualresume'))}</textarea>
+  </div>` : ''}
 
-Job posting I am targeting: ${vals.jobposting}
-Company: ${vals.company}
+  <div style="background:var(--navy);border-radius:6px;padding:16px 18px;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#7EEFD4;margin-bottom:8px">Stage 1 — Keyword-Engineered Résumé</div>
+    <div style="font-size:12px;color:rgba(232,248,244,.85);margin-bottom:14px;line-height:1.65">Extracts every required and preferred keyword from the posting, maps each to a specific résumé section with a target frequency, rewrites each section with precision placement, and produces a change log and keyword placement map.</div>
+    <button class="btn btn-primary" id="btnStage1" onclick="runAgent5Stage1()">⚡ Run Stage 1 — Generate Customized Résumé</button>
+  </div>
 
-Produce a fully customized résumé for this specific posting:
+  <div class="output-section">
+    <div class="output-header">
+      <div class="output-label">Stage 1 — Customized Résumé + Keyword Placement Map</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('p2a5_customresume'))">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('p2a5_customresume'),'Customized_Resume_'+esc(getInput('p2a5_company').split(' ')[0]||'Draft'))">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_p2a5_customresume">${savedStage1 ? esc(savedStage1) : '<span class="output-placeholder">Run Stage 1 to generate your customized résumé and keyword placement map.</span>'}</div>
+  </div>
 
-1. Keyword Analysis: Identify the 10–15 most important keywords and phrases in this posting. Flag any missing or underrepresented in the current résumé.
+  <div style="background:var(--navy);border-radius:6px;padding:16px 18px;margin:16px 0">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#7EEFD4;margin-bottom:8px">Stage 2 — ATS Score Check</div>
+    <div style="font-size:12px;color:rgba(232,248,244,.85);margin-bottom:14px;line-height:1.65">Reads the customized résumé from Stage 1 alongside the job description and returns an estimated keyword match percentage, a section-by-section scoring breakdown, and a gap list of any keywords still missing or underrepresented. Target: 85–90%.</div>
+    <button class="btn btn-primary" id="btnStage2" onclick="runAgent5Stage2()" ${!savedStage1 ? 'disabled' : ''}>📊 Run Stage 2 — ATS Score Check</button>
+    ${!savedStage1 ? '<div style="font-size:11px;color:rgba(232,248,244,.5);margin-top:8px">Run Stage 1 first to enable the score check.</div>' : ''}
+  </div>
 
-2. Summary Section: Rewrite to mirror the posting's language. Open with the exact title from the posting. Incorporate top 3–5 keywords naturally.
+  <div class="output-section">
+    <div class="output-header">
+      <div class="output-label">Stage 2 — ATS Score + Gap Analysis</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('p2a5_atsscore'))">⎘ Copy</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_p2a5_atsscore">${savedScore ? esc(savedScore) : '<span class="output-placeholder">Run Stage 2 after Stage 1 to get your estimated ATS score and gap analysis.</span>'}</div>
+  </div>
 
-3. Core Competencies: Adjust the skills block to front-load keywords most relevant to this posting.
+  <div style="background:var(--gold-lt);border:1px solid rgba(186,138,42,.3);border-radius:6px;padding:14px 16px;margin:16px 0;font-size:12.5px;color:var(--text-2);line-height:1.7">
+    <strong style="color:var(--navy)">Verify with a real ATS scanner before submitting:</strong> This agent produces a high-quality estimated score — but it is not a real ATS system. For a verified score, run your final customized résumé through
+    <strong>Jobscan</strong> (jobscan.co) or <strong>Resume Worded</strong> (resumeworded.com) before submitting any Tier 1 application. Both offer free scans. Target 85% or above before submitting. If your score is below 80%, return to Stage 1 and run it again with the gap list from Stage 2 as additional input.
+  </div>
 
-4. Experience Section: Reorder bullets within each role to surface the most relevant experience first. Rewrite 2–3 bullets per role using the posting's specific language where accurate. Do not fabricate — reframe and reorder only.
+  ${buildChecklist('p2a5',[
+    'Complete job posting pasted in full — not just the title',
+    'Stage 1 run — customized résumé and keyword placement map reviewed',
+    'Change log reviewed — every change understood before submitting',
+    'Stage 2 run — ATS score at 85% or above confirmed',
+    'Gap list from Stage 2 addressed — any remaining keywords added manually',
+    'Final résumé verified on Jobscan or Resume Worded (optional but recommended)',
+    'Customized résumé downloaded with company name in filename',
+    'Master base résumé NOT submitted — customized version only',
+    'Application submitted and logged in Search Dashboard',
+  ])}
+  <button class="btn-proceed" onclick="navigateTo('p2a6')">Proceed to Agent 6 →</button>`;
+}
 
-5. ATS Compliance: Confirm no ATS-incompatible formatting. Confirm keyword density is strong without being artificial.
+async function runAgent5Stage1(){
+  const jd = document.getElementById('inp_p2a5_jobposting')?.value.trim();
+  const company = document.getElementById('inp_p2a5_company')?.value.trim();
+  if(!jd){ showToast('Please paste the complete job posting.'); return; }
+  if(!company){ showToast('Please enter the company name.'); return; }
+  setInput('p2a5_jobposting', jd);
+  setInput('p2a5_company', company);
+  const manualResume = document.getElementById('inp_p2a5_manualresume')?.value.trim()||'';
+  if(manualResume) setInput('p2a5_manualresume', manualResume);
+  const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
+  const masterResume = getOutput('stepB_resume') || manualResume || '[No résumé provided — generate output based on Career Capital Profile]';
 
-Produce the complete customized résumé — ready to submit.
+  const prompt = `You are a senior ATS optimization specialist and résumé strategist. Your task is to produce a keyword-engineered, ATS-optimized résumé for ${STATE.clientName} that targets a score of 85–90% on ATS keyword matching systems.
 
-Then:
-CHANGE LOG: What changed, what keywords were added, and why each change was made.`,
-    ['Job description fully reviewed before submitting','Job Application Engine run for this specific posting','Customized résumé downloaded and saved with company name in filename','Change log reviewed — understand what changed and why','ATS keyword match confirmed','Application submitted with customized résumé','Application logged in Search Dashboard'],
-    'p2a6'
-  );
+CANDIDATE PROFILE:
+${profile.substring(0,600)}
+
+MASTER BASE RÉSUMÉ:
+${masterResume.substring(0,2500)}
+
+TARGET JOB POSTING:
+${jd.substring(0,2000)}
+
+TARGET COMPANY: ${company}
+
+INSTRUCTIONS — follow this exact sequence:
+
+STEP 1 — KEYWORD EXTRACTION AND FREQUENCY MAP
+Extract every keyword and phrase from the job posting. Categorize as:
+- CRITICAL (appears in requirements or responsibilities 2+ times, or is the core function of the role): must appear 3–4 times across the résumé
+- IMPORTANT (appears once in requirements, or in preferred qualifications): must appear 2–3 times
+- SUPPORTING (company culture, soft skills, industry terms): appear 1–2 times
+
+List every keyword in a table: | Keyword | Category | Target frequency | Placement sections |
+
+STEP 2 — SECTION-BY-SECTION REWRITE
+Rewrite every section of the résumé with keyword placement engineered to the map above.
+
+PROFESSIONAL SUMMARY (4–6 lines): Open with the exact job title from the posting. Embed 4–6 critical keywords naturally. This section must score highest — it is weighted most heavily by most ATS systems.
+
+CORE COMPETENCIES (keyword block): List 18–22 skills. Front-load every critical and important keyword. Use exact phrasing from the posting — not synonyms. ATS systems match on exact strings, not concepts.
+
+PROFESSIONAL EXPERIENCE (each role): Keep all dates, titles, and company names verbatim — never alter factual information. Reorder bullets to surface the most posting-relevant experience first. Rewrite 3–4 bullets per role using the posting's exact language where the underlying experience is genuine. Add quantified outcomes wherever possible. Do not fabricate — reframe and reorder only.
+
+EDUCATION AND CERTIFICATIONS: No changes unless the posting requires specific credentials not currently listed.
+
+STEP 3 — ATS FORMATTING RULES
+The résumé must comply with all of the following. State compliance explicitly at the end:
+- Single column layout only — no tables, no columns, no text boxes
+- No headers or footers — ATS systems cannot read them
+- No graphics, icons, logos, or images of any kind
+- Standard section headings only: Professional Summary, Core Competencies, Professional Experience, Education, Certifications
+- Font: standard (Arial, Calibri, or Times New Roman equivalent)
+- All dates in consistent format: Month YYYY or MM/YYYY
+- No special characters except standard punctuation
+- Bullet points using standard hyphens or round bullets only
+
+STEP 4 — KEYWORD PLACEMENT MAP
+After the résumé, produce a placement map showing:
+| Keyword | Appearances | Sections | Frequency met? |
+
+STEP 5 — CHANGE LOG
+List every change made to the original résumé: what was changed, what keyword it serves, and why. This helps the candidate verify accuracy.
+
+PRODUCE THE COMPLETE RÉSUMÉ FIRST. Then the keyword placement map. Then the change log.`;
+
+  const btn = document.getElementById('btnStage1');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating customized résumé...';
+  const outEl = document.getElementById('out_p2a5_customresume');
+  outEl.innerHTML='<span class="output-placeholder">Extracting keywords and engineering résumé...</span>';
+  try{
+    const result = await callClaude(prompt, 5000, text=>{
+      outEl.textContent=text; outEl.classList.add('streaming-cursor');
+    });
+    outEl.classList.remove('streaming-cursor');
+    outEl.textContent=result;
+    setOutput('p2a5_customresume', result);
+    STATE.completedAgents.add('p2a5');
+    buildNav(); updateProgress();
+    showToast('✓ Stage 1 complete — run Stage 2 to check your ATS score');
+    // Re-render to enable Stage 2 button
+    renderAgent5(document.getElementById('agentBody'));
+  } catch(e){
+    outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}. Please try again.</div>`;
+  }
+  if(btn) { btn.disabled=false; btn.innerHTML='⚡ Run Stage 1 — Generate Customized Résumé'; }
+}
+
+async function runAgent5Stage2(){
+  const jd = getInput('p2a5_jobposting');
+  const customResume = getOutput('p2a5_customresume');
+  if(!customResume){ showToast('Run Stage 1 first to generate the customized résumé.'); return; }
+  if(!jd){ showToast('Job posting not found. Please re-run Stage 1 with the posting pasted in.'); return; }
+
+  const prompt = `You are an ATS scoring analyst. Your task is to evaluate how well a customized résumé matches a specific job posting and return a precise, actionable score with a gap analysis.
+
+JOB POSTING:
+${jd.substring(0,2000)}
+
+CUSTOMIZED RÉSUMÉ:
+${customResume.substring(0,3000)}
+
+SCORING METHODOLOGY:
+Score the résumé on a 0–100% scale using this weighting:
+- Critical keyword presence and frequency (40% of score): Are all critical keywords present at target frequency?
+- Section-specific placement (25% of score): Are keywords in the right sections — summary, skills block, experience bullets?
+- Title and seniority match (15% of score): Does the résumé title match the posting title? Does the level match?
+- Required qualifications coverage (15% of score): Are all stated requirements addressed somewhere in the résumé?
+- Formatting compliance (5% of score): Is the résumé ATS-compatible in format?
+
+PRODUCE:
+
+1. OVERALL ATS SCORE: [X%]
+State the score prominently. Be honest — an inflated score helps no one.
+
+2. SCORE BREAKDOWN BY CATEGORY:
+- Critical keyword match: [X%] — list which critical keywords are present and which are missing
+- Section placement: [X%] — which keywords are in the right sections vs. wrong sections
+- Title/seniority match: [X%] — is the title exact or close?
+- Required qualifications coverage: [X%] — which requirements are addressed, which are not
+- Formatting compliance: [X%] — any formatting issues detected
+
+3. GAP LIST — MUST FIX BEFORE SUBMITTING:
+List every keyword or qualification that is missing or underrepresented. For each:
+- Keyword/phrase missing
+- Where it should be added (which section)
+- Suggested language to incorporate it naturally
+
+4. OPTIONAL IMPROVEMENTS (nice to have, not critical):
+Any additional enhancements that would push the score from good to excellent.
+
+5. FINAL RECOMMENDATION:
+Is this résumé ready to submit? If score is 85%+: Ready — submit with confidence. If 75–84%: Close — address the must-fix gaps before submitting. If below 75%: Not ready — significant gaps remain, re-run Stage 1 with the gap list as additional input.`;
+
+  const btn = document.getElementById('btnStage2');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Scoring...'; }
+  const outEl = document.getElementById('out_p2a5_atsscore');
+  outEl.innerHTML='<span class="output-placeholder">Analyzing keyword match and generating score...</span>';
+  try{
+    const result = await callClaude(prompt, 3000, text=>{
+      outEl.textContent=text; outEl.classList.add('streaming-cursor');
+    });
+    outEl.classList.remove('streaming-cursor');
+    outEl.textContent=result;
+    setOutput('p2a5_atsscore', result);
+    showToast('✓ ATS score check complete');
+  } catch(e){
+    outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}. Please try again.</div>`;
+  }
+  if(btn){ btn.disabled=false; btn.innerHTML='📊 Run Stage 2 — ATS Score Check'; }
 }
 
 function renderAgent6(body){
