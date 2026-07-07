@@ -2222,11 +2222,17 @@ function renderAgent4(body){
     <textarea id="inp_p2a4_research" rows="2" placeholder="e.g. Recently expanded to three new locations, implementing new inventory system...">${esc(getInput('p2a4_research'))}</textarea>
   </div>
 
-  <div style="background:var(--teal-lt);border:1px solid var(--teal-2);border-radius:6px;padding:14px 16px;margin-bottom:16px">
-    <div style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:10px">Auto-Generate — 5 Documents Simultaneously</div>
-    <div style="font-size:12px;color:var(--text-2);margin-bottom:12px">Generates in parallel: Recruiter outreach email · LinkedIn outreach message · Professional value proposition · Professional bio · 3-touch follow-up sequence</div>
-    <button class="btn btn-primary" id="btnAutoGen" onclick="runAutoGenerate()">✦ Generate All 5 Documents Now →</button>
+  <div class="ctx-panel" style="margin-bottom:18px">
+    <div class="ctx-icon">✦</div>
+    <div class="ctx-text">
+      <strong>Auto-Generate — 5 Documents Simultaneously.</strong>
+      Most professionals spend hours writing outreach emails, bios, and follow-up sequences one at a time — with no consistent positioning thread connecting them. This feature generates all five core demand-creation documents in a single pass, all drawn from the same Career Capital Profile and target company context, so every document tells a consistent story.<br><br>
+      <strong>The five documents:</strong> (1) Recruiter outreach email — a targeted, under-150-word email to a recruiter or hiring contact at this company, leading with their business context rather than your needs. (2) LinkedIn outreach message — a shorter version calibrated for LinkedIn's tone and character limits. (3) Professional value proposition — a one-page document framing your background as the solution to this company's likely business need, suitable for sending after a recruiter call. (4) Professional bio — 150 to 200 words, third person, for applications, LinkedIn Featured section, and introductions. Built once, used everywhere. (5) Three-touch follow-up sequence — pre-written follow-up messages at 7, 14, and 30 days after initial outreach, so the follow-up system is built before you send the first message.<br><br>
+      <strong>Why it matters:</strong> Follow-up is where most professional searches stall. The majority of candidates send one outreach message, hear nothing, and move on. Research consistently shows that the second and third contacts in a sequence produce a disproportionate share of responses — because the first message established awareness and the follow-up arrives when the timing is better. Having the sequence written before you send the outreach removes the friction that causes follow-up to be skipped.<br><br>
+      <strong>What you need to do:</strong> Fill in the target company and role above, and add what you know about their business situation. The more specific your context — a recent expansion, a known challenge, a product launch — the more targeted the outreach. Run this once per target company or recruiter contact. After generating, review all five documents before sending. Download and save the full set.
+    </div>
   </div>
+  <button class="btn btn-primary" id="btnAutoGen" onclick="runAutoGenerate()" style="margin-bottom:16px">✦ Generate All 5 Documents Now →</button>
 
   <div class="output-section">
     <div class="output-header">
