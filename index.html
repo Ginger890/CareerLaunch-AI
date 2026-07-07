@@ -50,10 +50,10 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 
 .sidebar-logo{padding:28px 22px 18px;border-bottom:1px solid rgba(29,158,117,.2)}
 .logo-mark{font-family:var(--font-d);font-size:21px;font-weight:600;color:var(--teal-mid);letter-spacing:.02em;line-height:1.2}
-.logo-sub{font-size:10px;font-weight:400;color:rgba(29,158,117,.55);letter-spacing:.18em;text-transform:uppercase;margin-top:3px}
+.logo-sub{font-size:10px;font-weight:400;color:rgba(255,255,255,.6);letter-spacing:.18em;text-transform:uppercase;margin-top:3px}
 
-.progress-wrap{padding:12px 22px;border-bottom:1px solid rgba(29,158,117,.12)}
-.progress-meta{display:flex;justify-content:space-between;font-size:10px;color:rgba(29,158,117,.5);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.progress-wrap{padding:12px 22px;border-bottom:1px solid rgba(255,255,255,.1)}
+.progress-meta{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.65);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
 .progress-track{height:2px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--teal-dk),var(--teal-mid));border-radius:2px;transition:width .4s ease;width:0%}
 
@@ -69,9 +69,9 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 .nav-badge{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.08em;background:rgba(29,158,117,.2);color:var(--teal-mid);padding:2px 6px;border-radius:10px;border:1px solid rgba(29,158,117,.3)}
 .nav-badge.new{background:rgba(186,138,42,.2);color:#D4A84B;border-color:rgba(186,138,42,.3)}
 
-.sidebar-footer{padding:14px 22px;border-top:1px solid rgba(29,158,117,.15)}
-.client-name{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:6px}
-.client-name span{color:rgba(255,255,255,.75);font-weight:500}
+.sidebar-footer{padding:14px 22px;border-top:1px solid rgba(255,255,255,.12)}
+.client-name{font-size:11px;color:rgba(255,255,255,.75);margin-bottom:6px}
+.client-name span{color:rgba(255,255,255,.95);font-weight:500}
 
 /* ── Main content ── */
 .main{display:flex;flex-direction:column;min-height:100vh;background:var(--cream)}
@@ -289,7 +289,7 @@ textarea{min-height:86px}
 .plan-card-feature{font-size:11px;color:var(--text-2);margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
 .feature-row{display:flex;align-items:center;gap:6px}
 .feature-dot{width:4px;height:4px;border-radius:50%;background:var(--teal-mid);flex-shrink:0}
-.plan-badge-wrap{padding:10px 22px;border-bottom:1px solid rgba(29,158,117,.12)}
+.plan-badge-wrap{padding:10px 22px;border-bottom:1px solid rgba(255,255,255,.1)}
 .plan-badge{padding:4px 10px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;display:inline-block;cursor:pointer;transition:opacity .15s}
 .plan-badge:hover{opacity:.8}
 .plan-badge.free{background:rgba(29,158,117,.15);color:var(--teal-mid);border:1px solid rgba(29,158,117,.3)}
@@ -327,6 +327,19 @@ textarea{min-height:86px}
 .auth-success.show{display:block}
 .auth-name-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:480px){.auth-name-row{grid-template-columns:1fr}}
+
+
+/* ── On-demand document cards ── */
+.od-card{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px;background:var(--surface)}
+.od-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:background .15s;user-select:none}
+.od-hdr:hover{background:var(--teal-lt)}
+.od-title{font-size:13.5px;font-weight:600;color:var(--navy);flex:1}
+.od-tag{font-size:10px;color:var(--text-3);letter-spacing:.04em;font-style:italic}
+.od-arrow{color:var(--teal-mid);font-size:11px;transition:transform .2s;flex-shrink:0}
+.od-arrow.open{transform:rotate(90deg)}
+.od-body{padding:0 16px 16px;border-top:1px solid var(--border);background:#FAFCFB}
+.od-desc{font-size:12.5px;color:var(--text-2);line-height:1.75;margin-top:12px}
+.od-desc strong{color:var(--navy);font-weight:600}
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -464,8 +477,8 @@ textarea{min-height:86px}
     <div class="sidebar-footer">
       <div class="client-name">Client: <span id="clientNameDisplay">—</span></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-action" style="font-size:10px" onclick="saveToCloud().then(()=>{}).catch(()=>{})">☁ Save</button>
-        <button class="btn-action" style="font-size:10px;color:rgba(193,68,14,.8);border-color:rgba(193,68,14,.3)" onclick="doSignOut()">Sign out</button>
+        <button class="btn-action" style="font-size:10px;color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.06)" onclick="saveToCloud().then(()=>{}).catch(()=>{})">☁ Save</button>
+        <button class="btn-action" style="font-size:10px;color:rgba(255,160,130,.9);border-color:rgba(255,120,80,.35);background:rgba(255,255,255,.04)" onclick="doSignOut()">Sign out</button>
       </div>
     </div>
   </nav>
@@ -554,11 +567,13 @@ function initSupabase(){
   });
   // Listen for auth state changes (handles email confirmation redirect)
   SB.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
+    if (event === 'SIGNED_IN' && session && !window._appLaunched) {
+      // Only fire onSignedIn on first login, not on background token refreshes
       await onSignedIn(session);
     } else if (event === 'PASSWORD_RECOVERY') {
       showAuthScreen('reset');
     } else if (event === 'SIGNED_OUT') {
+      window._appLaunched = false;
       showAuthScreen('login');
     }
   });
@@ -1138,7 +1153,15 @@ function navigateTo(id){
     document.getElementById('navOverlay').classList.remove('open');
   }
   updateProgress();
-  window.scrollTo(0,0);
+}
+
+function toggleOD(key, hdrEl){
+  const body = document.getElementById('od_'+key);
+  if(!body) return;
+  const arrow = hdrEl.querySelector('.od-arrow');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if(arrow) arrow.classList.toggle('open', !isOpen);
 }
 
 function toggleSidebar(){
@@ -2218,19 +2241,20 @@ function renderAgent4(body){
     <input type="text" id="inp_p2a4_company" placeholder="e.g. Meridian Health Systems — Operations Supervisor" value="${esc(getInput('p2a4_company'))}">
   </div>
   <div class="input-section">
-    <div class="input-label">What you know about their business situation</div>
-    <textarea id="inp_p2a4_research" rows="2" placeholder="e.g. Recently expanded to three new locations, implementing new inventory system...">${esc(getInput('p2a4_research'))}</textarea>
+    <div class="input-label">Job description <span style="font-size:10px;color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0">(paste or drag and drop — strongly recommended)</span></div>
+    <div class="input-hint">Paste the complete job posting. The more complete the JD, the more targeted every document — especially the outreach email, value proposition, and cover letter.</div>
+    <textarea id="inp_p2a4_jd" rows="7" placeholder="Paste the full job description here — title, requirements, responsibilities, and any company description included in the posting...">${esc(getInput('p2a4_jd'))}</textarea>
   </div>
 
-  <div class="ctx-panel" style="margin-bottom:18px">
+  <div class="input-section">
+    <div class="input-label">Additional context about this company</div>
+    <div class="input-hint">Anything beyond the JD — recent news, growth plans, referral source, or known challenges.</div>
+    <textarea id="inp_p2a4_research" rows="2" placeholder="e.g. Recently expanded, referred by former colleague, known for high turnover in this role...">${esc(getInput('p2a4_research'))}</textarea>
+  </div>
+
+  <div class="ctx-panel" style="margin-bottom:16px">
     <div class="ctx-icon">✦</div>
-    <div class="ctx-text">
-      <strong>Auto-Generate — 5 Documents Simultaneously.</strong>
-      Most professionals spend hours writing outreach emails, bios, and follow-up sequences one at a time — with no consistent positioning thread connecting them. This feature generates all five core demand-creation documents in a single pass, all drawn from the same Career Capital Profile and target company context, so every document tells a consistent story.<br><br>
-      <strong>The five documents:</strong> (1) Recruiter outreach email — a targeted, under-150-word email to a recruiter or hiring contact at this company, leading with their business context rather than your needs. (2) LinkedIn outreach message — a shorter version calibrated for LinkedIn's tone and character limits. (3) Professional value proposition — a one-page document framing your background as the solution to this company's likely business need, suitable for sending after a recruiter call. (4) Professional bio — 150 to 200 words, third person, for applications, LinkedIn Featured section, and introductions. Built once, used everywhere. (5) Three-touch follow-up sequence — pre-written follow-up messages at 7, 14, and 30 days after initial outreach, so the follow-up system is built before you send the first message.<br><br>
-      <strong>Why it matters:</strong> Follow-up is where most professional searches stall. The majority of candidates send one outreach message, hear nothing, and move on. Research consistently shows that the second and third contacts in a sequence produce a disproportionate share of responses — because the first message established awareness and the follow-up arrives when the timing is better. Having the sequence written before you send the outreach removes the friction that causes follow-up to be skipped.<br><br>
-      <strong>What you need to do:</strong> Fill in the target company and role above, and add what you know about their business situation. The more specific your context — a recent expansion, a known challenge, a product launch — the more targeted the outreach. Run this once per target company or recruiter contact. After generating, review all five documents before sending. Download and save the full set.
-    </div>
+    <div class="ctx-text"><strong>Auto-Generate — 5 Documents Simultaneously.</strong> Most professionals spend hours writing outreach emails, bios, and follow-up sequences one at a time — with no consistent positioning thread connecting them. This feature generates all five core demand-creation documents in a single pass, drawn from the same Career Capital Profile, job description, and company context, so every document tells a consistent story.<br><br><strong>The five documents:</strong> (1) Recruiter outreach email — targeted, under 150 words, leading with the company's business context rather than your needs. (2) LinkedIn outreach message — a shorter version calibrated for LinkedIn's tone and character limits. (3) Professional value proposition — a one-page document framing your background as the solution to this company's specific requirements, suitable for sending after a recruiter call. (4) Professional bio — 150 to 200 words, third person, for applications, LinkedIn Featured section, and introductions. (5) Three-touch follow-up sequence — pre-written messages at 7, 14, and 30 days, so the follow-up system is built before you send the first message.<br><br><strong>Why it matters:</strong> Most professional searches stall on follow-up. Research consistently shows that the second and third contacts in an outreach sequence produce a disproportionate share of responses. Having the sequence written before you send the first outreach removes the friction that causes follow-up to be skipped.<br><br><strong>What you need to do:</strong> Fill in the company and role above, paste the job description, and add any additional context you have. Click Generate. Review all five documents before sending anything. Download the full set and save it with this company's name in the filename.</div>
   </div>
   <button class="btn btn-primary" id="btnAutoGen" onclick="runAutoGenerate()" style="margin-bottom:16px">✦ Generate All 5 Documents Now →</button>
 
@@ -2245,18 +2269,122 @@ function renderAgent4(body){
     <div class="output-box" id="out_p2a4_docs">${savedDocs?esc(savedDocs):'<span class="output-placeholder">Your 5 documents will stream in here simultaneously.</span>'}</div>
   </div>
 
-  <div class="divider"></div>
-  <h3 style="font-family:var(--font-d);font-size:17px;color:var(--navy);margin-bottom:12px">On-Demand Documents</h3>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-    <button class="btn-action" onclick="runOnDemand('coverletter')">Cover Letter</button>
-    <button class="btn-action" onclick="runOnDemand('impactbrief')">Impact Brief</button>
-    <button class="btn-action" onclick="runOnDemand('jobfit')">Job Fit Analysis</button>
-    <button class="btn-action" onclick="runOnDemand('thankyou')">Thank-You Message</button>
-    <button class="btn-action" onclick="runOnDemand('906090')">30-60-90 Plan</button>
-    <button class="btn-action" onclick="runOnDemand('leavebehind')">Leave-Behind</button>
-    <button class="btn-action" onclick="runOnDemand('rejection')">Rejection Recovery</button>
+    <div class="divider"></div>
+  <h3 style="font-family:var(--font-d);font-size:19px;color:var(--navy);margin-bottom:6px">On-Demand Documents</h3>
+  <p style="font-size:13px;color:var(--text-3);margin-bottom:18px;line-height:1.6">Each document below is generated individually when you need it. Click the card to expand it, read the description, then generate. Output appears in the box at the bottom of this section.</p>
+
+  <div id="odAccordion">
+
+  <div class="od-card">
+    <div class="od-hdr" onclick="toggleOD(\'coverletter\',this)">
+      <div class="od-title">Cover Letter</div>
+      <div class="od-tag">Per application · when required or a strong differentiator</div>
+      <div class="od-arrow">▸</div>
+    </div>
+    <div class="od-body" id="od_coverletter" style="display:none">
+      <p class="od-desc"><strong>What it is:</strong> A role-specific, under-300-word letter written for a specific job posting at a specific company. Three paragraphs: why this company and role specifically, the most relevant experience from your background, and a direct ask for a conversation. It is not a summary of your résumé — it is a targeted argument for why you are the right candidate for this particular opportunity.</p>
+      <p class="od-desc"><strong>Why it matters:</strong> Most cover letters are generic and add no value. A genuinely specific cover letter — one that names something real about the company, connects it to a specific piece of your experience, and makes a clear case — can differentiate you significantly, especially in sectors where cover letters are still read (nonprofit, education, government, small companies). It also gives you something to reference in the first 30 seconds of a recruiter call: "I sent you a note about the operations role — the reason I reached out specifically is..."</p>
+      <p class="od-desc"><strong>When to use it:</strong> When the application explicitly requires one. When you have a strong personal connection to the company or role that the résumé cannot convey. When you are making a pivot or transition and need to explain why. For Tier 1 target companies where you want to make the strongest possible first impression. Skip it for Easy Apply applications and high-volume board submissions where it will not be read.</p>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="runOnDemand(\'coverletter\')">Generate Cover Letter</button>
+    </div>
   </div>
-  <div class="output-box" id="out_p2a4_ondemand"><span class="output-placeholder">Select a document above to generate.</span></div>
+
+  <div class="od-card">
+    <div class="od-hdr" onclick="toggleOD(\'impactbrief\',this)">
+      <div class="od-title">Professional Impact Brief</div>
+      <div class="od-tag">After recruiter call · before hiring manager interview</div>
+      <div class="od-arrow">▸</div>
+    </div>
+    <div class="od-body" id="od_impactbrief" style="display:none">
+      <p class="od-desc"><strong>What it is:</strong> A one-page document that frames your professional background as the direct solution to this company's business need. Three sections: the problem this role exists to solve, your relevant experience as the solution (two specific proof points with context and numbers), and a closing positioning statement. It is more strategic than a résumé and more specific than a bio.</p>
+      <p class="od-desc"><strong>Why it matters:</strong> After a recruiter call goes well, there is often a 24 to 72-hour window before the recruiter presents you to the hiring manager. Sending a Professional Impact Brief in that window gives the recruiter something concrete to forward — and it frames you in your own words rather than in whatever the recruiter remembers from the call. It also signals professionalism and preparation that most candidates do not demonstrate at this stage.</p>
+      <p class="od-desc"><strong>When to use it:</strong> Send it within 24 hours of a recruiter call where genuine interest was expressed. Ask the recruiter: "I'll send you a one-page overview of my background for the role — is it okay if I forward that to you?" Almost no recruiter will say no. Do not use it as a cold outreach document — it is a confirmation and amplification tool, not an introduction.</p>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="runOnDemand(\'impactbrief\')">Generate Impact Brief</button>
+    </div>
+  </div>
+
+  <div class="od-card">
+    <div class="od-hdr" onclick="toggleOD(\'jobfit\',this)">
+      <div class="od-title">Job Fit Analysis</div>
+      <div class="od-tag">Before every targeted application · know where you stand</div>
+      <div class="od-arrow">▸</div>
+    </div>
+    <div class="od-body" id="od_jobfit" style="display:none">
+      <p class="od-desc"><strong>What it is:</strong> A structured analysis of how well your Career Capital Profile matches the requirements of a specific job posting. Two sections: where you are a strong fit — specific matches between your profile and the stated requirements — and where you have potential gaps — honest assessment of what is missing and how to address each gap in your application and interview.</p>
+      <p class="od-desc"><strong>Why it matters:</strong> Most professionals either over-apply (submitting to roles they are clearly underqualified for, wasting time and burning goodwill) or under-apply (talking themselves out of roles they could genuinely compete for because they focus on gaps rather than strengths). A Job Fit Analysis gives you an objective read before you commit time to customizing a résumé or preparing for an interview. It also tells you exactly which gaps to address preemptively in your cover letter and which objections to prepare for in the interview.</p>
+      <p class="od-desc"><strong>When to use it:</strong> Run it before every Tier 1 and Tier 2 application — especially for roles where you are unsure whether you clear the bar. Also run it before an interview for a role you have already applied to, to sharpen your preparation around the specific gaps identified. Use it as a filter: if the fit analysis consistently shows gaps in the same area across multiple postings, that is a signal to address the gap directly (a certification, a reframing) rather than continuing to apply.</p>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="runOnDemand(\'jobfit\')">Generate Job Fit Analysis</button>
+    </div>
+  </div>
+
+  <div class="od-card">
+    <div class="od-hdr" onclick="toggleOD(\'thankyou\',this)">
+      <div class="od-title">Post-Interview Thank-You Messages</div>
+      <div class="od-tag">Within 2 hours of every interview · calibrated by interviewer type</div>
+      <div class="od-arrow">▸</div>
+    </div>
+    <div class="od-body" id="od_thankyou" style="display:none">
+      <p class="od-desc"><strong>What it is:</strong> Individualized thank-you messages for each person you interviewed with, calibrated by their role in the process. Four versions: HR screener (brief, warm, process-oriented), hiring manager (substantive, reinforces your strongest qualification for the role, references a specific topic from the conversation), peer or team member (collegial, addresses culture fit and what it would be like to work together), and senior leader (strategic, brief, one sentence reinforcing your executive presence and fit).</p>
+      <p class="od-desc"><strong>Why it matters:</strong> A thank-you message is not a courtesy — it is a second chance to make your case. A message that references a specific moment from the conversation, reinforces your top qualification for this role, and advances your candidacy by one degree is categorically different from a generic "thank you for your time" note. Hiring managers notice the difference. More importantly, the 2-hour window is real: messages sent the same day the interview ends arrive while the interviewer's impression of you is still fresh and before they have moved on to other candidates.</p>
+      <p class="od-desc"><strong>When to use it:</strong> After every interview, without exception. Run this agent before you leave the building or within the first hour after a video call — while your notes from the conversation are still specific. Add one detail from the actual conversation to each message before sending. A thank-you that says "I appreciated your point about the inventory system implementation timeline" is ten times more effective than one that does not reference anything real.</p>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="runOnDemand(\'thankyou\')">Generate Thank-You Messages</button>
+    </div>
+  </div>
+
+  <div class="od-card">
+    <div class="od-hdr" onclick="toggleOD(\'906090\',this)">
+      <div class="od-title">30-60-90 Day Entry Plan</div>
+      <div class="od-tag">Finalist stage only · second or third interview</div>
+      <div class="od-arrow">▸</div>
+    </div>
+    <div class="od-body" id="od_906090" style="display:none">
+      <p class="od-desc"><strong>What it is:</strong> A structured onboarding plan for the first three months in the role, built from what you know about the company's business situation, team, and challenges. Not a generic framework — a real plan with specific actions for Days 1 to 30 (learn, observe, build relationships, avoid making premature changes), Days 31 to 60 (begin contributing, deliver a first visible output, establish credibility with key stakeholders), and Days 61 to 90 (take ownership of a defined area, propose a first initiative, demonstrate the value that drove the hire).</p>
+      <p class="od-desc"><strong>Why it matters:</strong> A well-constructed 30-60-90 day plan presented in a final interview signals three things that most candidates never demonstrate at this stage: that you have thought seriously about how to succeed in this specific role (not just how to get it), that you understand the company's actual challenges and priorities, and that you are already operating like someone who works there. Hiring managers consistently report that candidates who present a thoughtful plan in the final interview stand out significantly from those who simply answer questions.</p>
+      <p class="od-desc"><strong>When to use it:</strong> At the second or third interview — not the first. Bringing a 30-60-90 plan to a first-round screen is premature and can read as presumptuous. At the final round, it is a powerful closing move. You can either present it proactively ("I put together some initial thinking on how I would approach the first 90 days — would it be helpful to walk through it?") or have it ready to share if the conversation naturally goes there.</p>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="runOnDemand(\'906090\')">Generate 30-60-90 Plan</button>
+    </div>
+  </div>
+
+  <div class="od-card">
+    <div class="od-hdr" onclick="toggleOD(\'leavebehind\',this)">
+      <div class="od-title">Interview Leave-Behind</div>
+      <div class="od-tag">In-person or panel interviews · one page, printed or emailed</div>
+      <div class="od-arrow">▸</div>
+    </div>
+    <div class="od-body" id="od_leavebehind" style="display:none">
+      <p class="od-desc"><strong>What it is:</strong> A one-page document you bring to an in-person interview and leave with each interviewer at the end, or send as a PDF attachment with your thank-you email. Three sections: a one-sentence professional identity statement, two key themes that demonstrate your fit for this specific role (each with a brief proof point drawn from your experience), and a closing statement about the specific value you would create in this role. Professional enough to share with a full panel. Specific enough to reinforce your candidacy.</p>
+      <p class="od-desc"><strong>Why it matters:</strong> After an interview, the interviewer has your résumé and their notes. A leave-behind gives them a third artifact — one that is more memorable than a résumé and more specific than a business card. It also solves a common problem in panel interviews: by the time a panel of four people discusses candidates, they are working from imperfect memories. A leave-behind gives each panelist something concrete to point to when they advocate for you in the debrief conversation.</p>
+      <p class="od-desc"><strong>When to use it:</strong> Any in-person interview where you will be meeting two or more people. Bring printed copies — one per interviewer plus one extra. For video interviews, offer to send it as a PDF with your follow-up: "I put together a one-page overview of my background for the role — I'll include it with my follow-up note." Do not use it for phone screens or casual recruiter calls — it is a mid-to-late stage tool.</p>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="runOnDemand(\'leavebehind\')">Generate Leave-Behind</button>
+    </div>
+  </div>
+
+  <div class="od-card">
+    <div class="od-hdr" onclick="toggleOD(\'rejection\',this)">
+      <div class="od-title">Rejection Recovery Messages</div>
+      <div class="od-tag">After any rejection · silver medalist strategy</div>
+      <div class="od-arrow">▸</div>
+    </div>
+    <div class="od-body" id="od_rejection" style="display:none">
+      <p class="od-desc"><strong>What it is:</strong> Two documents produced together. First: a gracious rejection response sent within 24 hours — under 80 words, thanking the employer for the process, expressing continued genuine interest in the company, and leaving the door open for future opportunities without bitterness or desperation. Second: a 60-day silver medalist reconnection message — sent two months later, referencing something new about the company or industry, expressing continued interest professionally, with no mention of the original rejection.</p>
+      <p class="od-desc"><strong>Why it matters:</strong> The silver medalist dynamic is real and significantly underutilized. When a first-choice candidate falls through — declines the offer, does not pass a background check, takes a counteroffer, or fails in the role within 90 days — the employer's first call is almost always to the finalist they did not hire. Candidates who send a gracious rejection response and follow up 60 days later are the ones who get that call. Candidates who go silent after a rejection are forgotten. At the professional level, a single silver medalist hire can represent $70,000 to $120,000 in total compensation — the 10 minutes it takes to send two messages is among the highest-return activities in any search.</p>
+      <p class="od-desc"><strong>When to use it:</strong> After every rejection where you reached the interview stage — not just finalists. Any employer who interviewed you has already invested time in your candidacy and has at least one open role in your function. Send the gracious response within 24 hours of the rejection notification, while the recruiter or hiring manager still remembers you warmly. Calendar the 60-day reconnection and send it without fail.</p>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="runOnDemand(\'rejection\')">Generate Rejection Recovery Messages</button>
+    </div>
+  </div>
+
+  </div>
+
+  <div class="output-section" style="margin-top:18px">
+    <div class="output-header">
+      <div class="output-label">On-Demand Document Output</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(document.getElementById(\'out_p2a4_ondemand\').textContent)">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(document.getElementById(\'out_p2a4_ondemand\').textContent,\'On_Demand_Document\')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_p2a4_ondemand"><span class="output-placeholder">Select a document above and click Generate to produce it here.</span></div>
+  </div>
   <div id="a4ProceedWrap">${savedDocs?`<button class="btn-proceed" onclick="navigateTo('p2a5')">Proceed to Agent 5 →</button>`:''}</div>
   ${buildChecklist('p2a4',[
     'Auto-generate run — all 5 documents reviewed',
@@ -2272,6 +2400,8 @@ async function runAutoGenerate(){
   const company = document.getElementById('inp_p2a4_company').value.trim();
   if (!company) { showToast('Please enter the target company and role.'); return; }
   setInput('p2a4_company', company);
+  const jd = document.getElementById('inp_p2a4_jd')?.value.trim()||'';
+  setInput('p2a4_jd', jd);
   const research = document.getElementById('inp_p2a4_research').value.trim();
   setInput('p2a4_research', research);
   const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
@@ -2281,7 +2411,8 @@ async function runAutoGenerate(){
 
 Career Capital Profile: ${profile.substring(0,600)}
 Target company and role: ${company}
-Business situation: ${research||'Not specified'}
+Job description: ${jd ? jd.substring(0,1800) : 'Not provided'}
+Additional context: ${research||'Not specified'}
 
 Produce all 5 documents, clearly separated:
 
@@ -2984,6 +3115,7 @@ async function doSignOut(){
 }
 
 async function onSignedIn(session){
+  window._appLaunched = true;
   hideAuthScreen();
   // Load cloud data using auth user ID
   const uid = session.user.id;
@@ -3002,25 +3134,46 @@ function launchApp(){
   updatePlanBadge();
   buildNav();
   updateProgress();
-  if(STATE.plan && STATE.clientName && STATE.completedAgents.size === 0){
-    // New user with plan already set — go straight to step0
+  const isNewUser = STATE.completedAgents.size === 0 && !STATE.currentAgent;
+  if(STATE.plan && STATE.clientName && isNewUser){
+    // Brand new user — start at Step 0
     navigateTo('step0');
+    window.scrollTo(0,0);
   } else if(STATE.currentAgent){
-    navigateTo(STATE.currentAgent);
+    // Returning user — restore their last agent WITHOUT scrolling
+    restoreAgent(STATE.currentAgent);
   } else if(STATE.completedAgents.size > 0){
     const navItems = NAV.filter(n=>n.id);
     const lastDone = [...navItems].reverse().find(n=>STATE.completedAgents.has(n.id));
     const nextItem = lastDone ? NAV.find(n=>n.id===lastDone.next) : null;
-    navigateTo(nextItem?.id||'step0');
+    restoreAgent(nextItem?.id||'step0');
   } else {
-    // New user — show onboarding to collect name and plan
+    // New user without plan — show onboarding
     document.getElementById('onboardingScreen').style.display='flex';
-    // Pre-fill name if we got it from auth metadata
     if(STATE.clientName){
       const inp = document.getElementById('clientNameInput');
       if(inp) inp.value = STATE.clientName;
     }
   }
+}
+
+// restoreAgent: like navigateTo but without scroll reset
+// Used when returning users land on the app — keeps cursor position stable
+function restoreAgent(id){
+  STATE.currentAgent = id;
+  buildNav();
+  document.getElementById('onboardingScreen').style.display = 'none';
+  const aa = document.getElementById('agentArea');
+  aa.style.display = 'flex';
+  const item = NAV.find(n=>n.id===id);
+  if(item){
+    document.getElementById('agentBreadcrumb').textContent = 'CareerLaunch AI™ · ' + item.label;
+    document.getElementById('agentTitle').textContent = item.label;
+    document.getElementById('agentSubtitle').textContent = item.subtitle || '';
+  }
+  renderAgent(id);
+  updateProgress();
+  // No window.scrollTo — let the browser keep its position
 }
 
 async function init(){
@@ -3050,6 +3203,34 @@ startSystem = function(){
   _origStartSystem();
   setTimeout(saveToCloud, 800);
 };
+// ── Drag-and-drop for JD textareas ───────────────────────────────────────
+(function(){
+  function enableDrop(el){
+    if(!el||el._dd) return; el._dd=true;
+    el.addEventListener('dragover',e=>{e.preventDefault();el.style.borderColor='var(--teal-mid)';el.style.background='var(--teal-lt)';});
+    el.addEventListener('dragleave',()=>{el.style.borderColor='';el.style.background='';});
+    el.addEventListener('drop',e=>{
+      e.preventDefault(); el.style.borderColor=''; el.style.background='';
+      const f=e.dataTransfer.files[0];
+      if(f){
+        if(f.type==='text/plain'||f.name.endsWith('.txt')){
+          const r=new FileReader(); r.onload=ev=>{el.value=ev.target.result; showToast('\u2713 File loaded');};
+          r.readAsText(f);
+        } else { showToast('Plain text files only. For PDFs, copy and paste the text.'); }
+      } else {
+        const t=e.dataTransfer.getData('text/plain'); if(t) el.value=t;
+      }
+    });
+  }
+  const obs=new MutationObserver(()=>{
+    ['inp_p2a4_jd','inp_p2a5_jobposting','inp_p3a9_jd'].forEach(id=>{
+      enableDrop(document.getElementById(id));
+    });
+  });
+  document.addEventListener('DOMContentLoaded',()=>{
+    obs.observe(document.body,{childList:true,subtree:true});
+  });
+})();
 
 init();
 </script>
