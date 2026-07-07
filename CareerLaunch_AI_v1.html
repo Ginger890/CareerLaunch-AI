@@ -1,0 +1,2736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerLaunch AI™ — Professional Career Operating System</title>
+<meta name="version" content="1.0.0">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Brand palette — teal/sky for professional tier */
+  --teal-dk:   #085041;
+  --teal:      #0F6E56;
+  --teal-mid:  #1D9E75;
+  --teal-lt:   #E1F5EE;
+  --teal-2:    #C8EDE2;
+  --sky:       #3B9AC4;
+  --sky-lt:    #D6F0F8;
+  --navy:      #0E1A2B;
+  --navy-mid:  #1C2E45;
+  --navy-lt:   #2A4260;
+  --cream:     #F5F8F7;
+  --cream-dk:  #EAF0EE;
+  --surface:   #FFFFFF;
+  --border:    rgba(15,110,86,.2);
+  --border-str:rgba(15,110,86,.4);
+  --text:      #0E1A2B;
+  --text-2:    #3A5048;
+  --text-3:    #6B8880;
+  --success:   #0F6E56;
+  --success-lt:#E1F5EE;
+  --danger:    #C1440E;
+  --danger-lt: #FEF2ED;
+  --gold:      #BA8A2A;
+  --gold-lt:   #FEF8EC;
+  --font-d:    'Cormorant Garamond', serif;
+  --font-b:    'DM Sans', sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+/* ── App shell ── */
+.shell{display:grid;grid-template-columns:268px 1fr;min-height:100vh;max-width:1240px;margin:0 auto;background:var(--surface);box-shadow:0 0 60px rgba(14,26,43,.1)}
+
+/* ── Sidebar ── */
+.sidebar{background:var(--navy);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal-dk),var(--teal-mid),var(--sky),var(--teal-mid),var(--teal-dk))}
+
+.sidebar-logo{padding:28px 22px 18px;border-bottom:1px solid rgba(29,158,117,.2)}
+.logo-mark{font-family:var(--font-d);font-size:21px;font-weight:600;color:var(--teal-mid);letter-spacing:.02em;line-height:1.2}
+.logo-sub{font-size:10px;font-weight:400;color:rgba(29,158,117,.55);letter-spacing:.18em;text-transform:uppercase;margin-top:3px}
+
+.progress-wrap{padding:12px 22px;border-bottom:1px solid rgba(29,158,117,.12)}
+.progress-meta{display:flex;justify-content:space-between;font-size:10px;color:rgba(29,158,117,.5);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.progress-track{height:2px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--teal-dk),var(--teal-mid));border-radius:2px;transition:width .4s ease;width:0%}
+
+.nav{flex:1;padding:14px 0;overflow-y:auto}
+.nav-section{font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:rgba(29,158,117,.4);padding:10px 22px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 22px;cursor:pointer;color:rgba(255,255,255,.5);font-size:12.5px;font-weight:400;transition:all .15s;border-left:2px solid transparent;position:relative}
+.nav-item:hover{background:rgba(29,158,117,.08);color:rgba(255,255,255,.8);border-left-color:rgba(29,158,117,.3)}
+.nav-item.active{background:rgba(29,158,117,.14);color:var(--teal-mid);border-left-color:var(--teal-mid);font-weight:500}
+.nav-item.complete .nav-num{background:rgba(15,110,86,.5);color:#8FDCC4;border-color:rgba(15,110,86,.6)}
+.nav-item.locked{opacity:.3;cursor:not-allowed;pointer-events:none}
+.nav-num{width:19px;height:19px;border-radius:50%;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0;border:1px solid rgba(255,255,255,.1);transition:all .15s}
+.nav-item.active .nav-num{background:var(--teal-mid);color:var(--navy);border-color:var(--teal-mid)}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.08em;background:rgba(29,158,117,.2);color:var(--teal-mid);padding:2px 6px;border-radius:10px;border:1px solid rgba(29,158,117,.3)}
+.nav-badge.new{background:rgba(186,138,42,.2);color:#D4A84B;border-color:rgba(186,138,42,.3)}
+
+.sidebar-footer{padding:14px 22px;border-top:1px solid rgba(29,158,117,.15)}
+.client-name{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:6px}
+.client-name span{color:rgba(255,255,255,.75);font-weight:500}
+
+/* ── Main content ── */
+.main{display:flex;flex-direction:column;min-height:100vh;background:var(--cream)}
+
+/* ── Onboarding ── */
+.onboarding{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:60px 40px;text-align:center}
+.ob-crest{font-family:var(--font-d);font-size:52px;font-weight:600;color:var(--navy);line-height:1;margin-bottom:4px}
+.ob-sub{font-family:var(--font-d);font-size:16px;font-style:italic;color:var(--teal);letter-spacing:.06em;margin-bottom:48px}
+.ob-form{max-width:360px;width:100%;text-align:left}
+.ob-form label{display:block;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-2);margin-bottom:6px}
+.ob-form input{width:100%;padding:12px 14px;font-family:var(--font-b);font-size:15px;border:1.5px solid var(--border-str);border-radius:6px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s;text-align:center}
+.ob-form input:focus{border-color:var(--teal-mid);box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+.ob-stats{display:flex;justify-content:center;gap:28px;margin:32px 0}
+.ob-stat-val{font-family:var(--font-d);font-size:34px;font-weight:600;color:var(--teal-mid);line-height:1}
+.ob-stat-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-top:3px}
+.ob-desc{font-size:13.5px;color:var(--text-2);line-height:1.75;max-width:460px;margin:0 auto 32px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-b);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:5px;cursor:pointer;transition:all .18s;padding:12px 26px}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--teal-dk);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{background:transparent;border:1.5px solid var(--border-str);color:var(--teal);padding:10px 20px}
+.btn-ghost:hover{background:var(--teal-lt);border-color:var(--teal)}
+.btn-action{padding:5px 12px;border:1px solid var(--border-str);border-radius:4px;background:transparent;font-family:var(--font-b);font-size:11px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-action:hover{background:var(--teal-lt);border-color:var(--teal);color:var(--teal-dk)}
+.btn-sky{background:var(--sky);color:#fff}
+.btn-sky:hover:not(:disabled){background:#2A86B0}
+.btn-proceed{background:transparent;color:var(--teal);border:1.5px solid var(--teal);padding:10px 22px;border-radius:5px;font-family:var(--font-b);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:7px;margin-top:14px}
+.btn-proceed:hover{background:var(--teal);color:#fff}
+.spinner{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+.spinner.dark{border-color:rgba(15,110,86,.2);border-top-color:var(--teal)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Agent panels ── */
+.agent-header{padding:22px 36px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.agent-breadcrumb{font-size:10px;color:var(--text-3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.agent-title{font-family:var(--font-d);font-size:28px;font-weight:600;color:var(--navy);line-height:1.2}
+.agent-subtitle{font-family:var(--font-d);font-size:15px;font-style:italic;color:var(--teal);margin-top:2px}
+.agent-body{flex:1;padding:26px 36px;overflow-y:auto}
+
+/* ── Context panel ── */
+.ctx-panel{background:var(--navy);border-radius:6px;padding:13px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px}
+.ctx-icon{color:var(--teal-mid);font-size:13px;flex-shrink:0;margin-top:2px}
+.ctx-text{font-size:12px;color:rgba(29,158,117,.85);line-height:1.6}
+.ctx-text strong{color:var(--teal-mid);font-weight:500}
+
+/* ── Inputs ── */
+.input-section{margin-bottom:18px}
+.input-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.input-req{color:var(--teal-mid);font-size:10px}
+.input-hint{font-size:11px;color:var(--text-3);margin-bottom:6px;font-style:italic;line-height:1.5}
+textarea,input[type="text"]{width:100%;border:1px solid var(--border-str);border-radius:5px;padding:10px 12px;font-family:var(--font-b);font-size:13px;color:var(--text);background:var(--surface);resize:vertical;transition:border-color .15s;line-height:1.6}
+textarea:focus,input[type="text"]:focus{outline:none;border-color:var(--teal-mid);box-shadow:0 0 0 3px rgba(29,158,117,.08)}
+textarea{min-height:86px}
+
+/* ── Output ── */
+.output-section{margin-top:8px}
+.output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;flex-wrap:wrap;gap:8px}
+.output-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}
+.output-actions{display:flex;gap:7px}
+.output-box{border:1px solid var(--border);border-radius:6px;background:var(--surface);min-height:160px;padding:16px;font-size:13px;line-height:1.85;color:var(--text);white-space:pre-wrap;word-wrap:break-word;font-family:var(--font-b)}
+.output-placeholder{color:var(--text-3);font-style:italic;font-size:13px}
+.streaming-cursor::after{content:'▋';animation:blink .7s infinite;color:var(--teal-mid)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.save-cta{margin-top:14px;padding:12px 14px;background:var(--success-lt);border:1px solid rgba(15,110,86,.2);border-radius:6px;display:flex;align-items:center;gap:10px}
+.save-icon{color:var(--success);font-size:17px;flex-shrink:0}
+.save-title{font-size:12px;font-weight:500;color:var(--success);margin-bottom:2px}
+.save-desc{font-size:11px;color:var(--text-3)}
+.error-box{background:var(--danger-lt);border:1px solid rgba(193,68,14,.25);border-radius:5px;padding:11px 14px;font-size:12px;color:var(--danger);margin-top:11px;line-height:1.6}
+
+/* ── Carry-forward ── */
+.carry-box{background:#F0FAF6;border:1px solid var(--border);border-left:3px solid var(--teal-mid);border-radius:4px;padding:11px 14px;margin-bottom:18px}
+.carry-title{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+.carry-item{font-size:12px;color:var(--text-2);display:flex;align-items:flex-start;gap:7px;margin-bottom:3px}
+
+/* ── Assessment engine ── */
+.asmt-shell{display:none}
+.asmt-shell.active{display:block}
+.asmt-start-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:40px;text-align:center;max-width:560px;margin:20px auto}
+.asmt-start-card h2{font-family:var(--font-d);font-size:28px;font-weight:500;margin-bottom:10px;color:var(--navy)}
+.asmt-start-card p{font-size:13.5px;color:var(--text-2);line-height:1.75;max-width:460px;margin:0 auto 24px}
+.asmt-meta-row{display:flex;justify-content:center;gap:28px;margin-bottom:28px;flex-wrap:wrap}
+.asmt-meta-val{font-family:var(--font-d);font-size:32px;font-weight:600;color:var(--teal-mid);line-height:1}
+.asmt-meta-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-top:3px}
+.asmt-name-wrap{max-width:280px;margin:0 auto 26px;text-align:left}
+.asmt-name-wrap label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;font-weight:500}
+.asmt-name-wrap input{width:100%;padding:11px 14px;font-family:var(--font-b);font-size:14px;border:1.5px solid var(--border-str);border-radius:5px;background:#FAFCFB;color:var(--text);text-align:center;outline:none;transition:border-color .2s}
+.asmt-name-wrap input:focus{border-color:var(--teal-mid)}
+
+/* Instrument header */
+.inst-header{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:18px 22px;margin-bottom:14px}
+.inst-badge{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-mid);margin-bottom:5px}
+.inst-header h2{font-family:var(--font-d);font-size:21px;font-weight:500;margin-bottom:4px;color:var(--navy)}
+.inst-header p{font-size:13px;color:var(--text-2);line-height:1.65}
+
+/* Progress */
+.prog-wrap{margin-bottom:12px}
+.prog-meta{display:flex;justify-content:space-between;margin-bottom:5px;font-size:11px;color:var(--text-3)}
+.prog-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--teal-dk),var(--teal-mid));border-radius:2px;transition:width .35s ease}
+
+/* Scale legend */
+.scale-legend{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:12px;font-size:10px;color:var(--text-3);flex-wrap:wrap;gap:4px}
+
+/* Question */
+.question{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:13px 16px;margin-bottom:8px;transition:border-color .15s}
+.question.answered{border-color:rgba(29,158,117,.3);background:#FAFCFB}
+.question.error{border-color:var(--danger);background:var(--danger-lt)}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.q-num{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
+.q-dim{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:3px}
+.q-text{font-size:13px;line-height:1.6;margin-bottom:9px;color:var(--text)}
+.likert{display:flex;gap:5px}
+.l-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.l-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:#FAFCFB;font-family:var(--font-b);font-size:12px;font-weight:500;color:var(--text-3);cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.l-btn:hover{border-color:var(--teal-mid);color:var(--teal-mid);background:var(--teal-lt)}
+.l-btn.sel{background:var(--navy);border-color:var(--navy);color:#fff}
+.l-lbl{font-size:8px;color:var(--text-3);text-align:center;line-height:1.2}
+
+/* Action row */
+.asmt-action-row{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:13px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.asmt-err-msg{font-size:12px;color:var(--danger)}
+
+/* Results */
+.res-wrap{display:none}
+.res-wrap.visible{display:block}
+.res-header{text-align:center;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:12px}
+.res-header h3{font-family:var(--font-d);font-size:22px;font-weight:500;margin-bottom:4px;color:var(--navy)}
+.res-header p{font-size:13px;color:var(--text-2)}
+.dim-card{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:13px 16px;margin-bottom:8px}
+.dim-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px}
+.dim-name{font-size:13px;font-weight:500;color:var(--text)}
+.dim-score{font-family:var(--font-d);font-size:24px;font-weight:600;line-height:1}
+.dim-level{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:5px}
+.dim-bar-w{height:2px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:7px}
+.dim-bar{height:100%;border-radius:2px}
+.dim-desc{font-size:12px;color:var(--text-2);line-height:1.6;margin-bottom:5px}
+.dim-rec{font-size:12px;line-height:1.6;padding:8px 11px;border-left:2px solid var(--teal-mid);background:var(--teal-lt);border-radius:0 4px 4px 0;font-style:italic;color:var(--text)}
+
+/* Complete panel */
+.complete-panel{background:var(--teal);border-radius:7px;padding:24px 28px;text-align:center;margin:14px 0}
+.complete-title{font-family:var(--font-d);font-size:24px;font-weight:600;color:#fff;margin-bottom:6px}
+.complete-desc{font-size:13px;color:rgba(255,255,255,.82);margin-bottom:18px;line-height:1.6}
+.scores-row{display:flex;justify-content:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.score-item{background:rgba(255,255,255,.15);border-radius:5px;padding:10px 14px;text-align:center;min-width:72px}
+.score-val{font-family:var(--font-d);font-size:28px;font-weight:600;color:#fff;line-height:1}
+.score-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:3px}
+
+/* Tab nav for assessments */
+.asmt-tab-nav{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin:14px 0;background:var(--surface)}
+.asmt-tab{flex:1;padding:9px 6px;font-family:var(--font-b);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-right:1px solid var(--border);transition:all .15s;line-height:1.3}
+.asmt-tab:last-child{border-right:none}
+.asmt-tab.active{background:var(--navy);color:#fff}
+.asmt-tab .ck{display:inline-block;width:12px;height:12px;background:var(--teal-mid);border-radius:50%;color:#fff;font-size:7px;line-height:12px;text-align:center;margin-left:3px;vertical-align:middle}
+.asmt-screen{display:none}
+.asmt-screen.active{display:block}
+
+/* Report */
+.report-section{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.report-bar{background:var(--navy);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.report-bar-title{font-family:var(--font-d);font-size:16px;font-weight:600;color:var(--teal-mid)}
+.report-bar-sub{font-size:11px;color:rgba(29,158,117,.55)}
+.report-output{padding:18px;font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap;word-wrap:break-word;font-family:var(--font-b);max-height:520px;overflow-y:auto}
+
+/* Checklist */
+.checklist{margin-top:18px;border:1px solid var(--border);border-radius:6px;background:var(--surface);overflow:hidden}
+.checklist-hdr{background:var(--cream-dk);padding:9px 14px;font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--navy);border-bottom:1px solid var(--border)}
+.checklist-item{display:flex;align-items:flex-start;gap:9px;padding:9px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item:hover{background:#F0FAF6}
+.check-box{width:16px;height:16px;border:1.5px solid rgba(29,158,117,.35);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .15s}
+.check-box.checked{background:var(--teal-mid);border-color:var(--teal-mid)}
+.check-mark{font-size:9px;color:#fff;display:none}
+.check-box.checked .check-mark{display:block}
+.check-text{font-size:12px;color:var(--text-2);line-height:1.5}
+.check-text.checked{text-decoration:line-through;color:var(--text-3)}
+
+/* Divider */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:18px 0}
+
+/* Toast */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:10px 18px;border-radius:6px;font-size:12.5px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:99}
+.toast.show{opacity:1}
+
+/* Hamburger mobile */
+.hamburger{display:none;position:fixed;top:12px;left:12px;z-index:400;background:var(--navy-mid);border:1px solid var(--border);border-radius:5px;padding:8px 10px;cursor:pointer;flex-direction:column;gap:4px;align-items:center}
+.hamburger span{display:block;width:18px;height:2px;background:var(--teal-mid);border-radius:2px}
+.nav-overlay{display:none;position:fixed;inset:0;background:rgba(14,26,43,.7);z-index:150}
+
+@media(max-width:800px){
+  .hamburger{display:flex}
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;width:268px;transform:translateX(-100%);transition:transform .25s;z-index:200}
+  .sidebar.open{transform:translateX(0)}
+  .nav-overlay.open{display:block}
+  .agent-header{padding:72px 20px 16px}
+  .agent-body{padding:18px 20px}
+  .onboarding{padding:80px 20px 40px}
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(29,158,117,.25);border-radius:2px}
+
+/* ── Plan selection ── */
+.plan-selector-title{font-size:13px;font-weight:500;color:var(--text-2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
+.plan-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:500px;width:100%;margin-bottom:28px}
+@media(max-width:560px){.plan-cards{grid-template-columns:1fr}}
+.plan-card{border:1.5px solid var(--border);border-radius:8px;padding:24px 20px;cursor:pointer;transition:all .2s;background:var(--surface);text-align:left}
+.plan-card:hover{border-color:var(--teal-mid);background:#F0FAF6;transform:translateY(-2px)}
+.plan-card.selected{border-color:var(--teal-mid);background:#F0FAF6;box-shadow:0 0 0 3px rgba(29,158,117,.12)}
+.plan-card-icon{font-size:24px;margin-bottom:12px;color:var(--teal-mid)}
+.plan-card-name{font-family:var(--font-d);font-size:20px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.plan-card-desc{font-size:12px;color:var(--text-3);line-height:1.5}
+.plan-card-feature{font-size:11px;color:var(--text-2);margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
+.feature-row{display:flex;align-items:center;gap:6px}
+.feature-dot{width:4px;height:4px;border-radius:50%;background:var(--teal-mid);flex-shrink:0}
+.plan-badge-wrap{padding:10px 22px;border-bottom:1px solid rgba(29,158,117,.12)}
+.plan-badge{padding:4px 10px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;display:inline-block;cursor:pointer;transition:opacity .15s}
+.plan-badge:hover{opacity:.8}
+.plan-badge.free{background:rgba(29,158,117,.15);color:var(--teal-mid);border:1px solid rgba(29,158,117,.3)}
+.plan-badge.pro{background:rgba(29,158,117,.3);color:var(--teal-mid);border:1px solid rgba(29,158,117,.6)}
+.btn-start{background:var(--navy);color:#fff;border:none;padding:14px 40px;font-family:var(--font-b);font-size:13px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;cursor:pointer;transition:all .2s}
+.btn-start:hover{background:var(--navy-mid);transform:translateY(-1px)}
+.btn-start:disabled{opacity:.4;cursor:not-allowed;transform:none}
+</style>
+</head>
+<body>
+
+<button class="hamburger" onclick="toggleSidebar()" aria-label="Open navigation">
+  <span></span><span></span><span></span>
+</button>
+<div class="nav-overlay" id="navOverlay" onclick="toggleSidebar()"></div>
+
+<div class="shell">
+  <!-- ═══ SIDEBAR ═══ -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">CareerLaunch AI™</div>
+      <div class="logo-sub">Professional Career System</div>
+    </div>
+    <div class="plan-badge-wrap">
+      <div id="planBadge" class="plan-badge" style="display:none" onclick="showPlanScreen()"></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span>Progress</span><span id="progressPct">0%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div class="nav" id="navList"></div>
+    <div class="sidebar-footer">
+      <div class="client-name">Client: <span id="clientNameDisplay">—</span></div>
+      <button class="btn-action" style="font-size:10px" onclick="saveToCloud().then(()=>{}).catch(()=>{})">☁ Save to cloud</button>
+    </div>
+  </nav>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main" id="mainContent">
+    <!-- Onboarding screen -->
+    <div class="onboarding" id="onboardingScreen">
+      <div class="ob-crest">CareerLaunch AI™</div>
+      <div class="ob-sub">Professional Career Operating System</div>
+      <div class="ob-stats">
+        <div><div class="ob-stat-val">12</div><div class="ob-stat-lbl">Agents</div></div>
+        <div><div class="ob-stat-val">4</div><div class="ob-stat-lbl">Assessments</div></div>
+        <div><div class="ob-stat-val">4</div><div class="ob-stat-lbl">Phases</div></div>
+      </div>
+      <p class="ob-desc">A complete, AI-powered career operating system for exempt-level professionals. Built to compress your search timeline and maximize your outcome.</p>
+
+      <div class="ob-form">
+        <label>Your full name</label>
+        <input type="text" id="clientNameInput" placeholder="First Last" autocomplete="name">
+      </div>
+
+      <p class="plan-selector-title" style="margin-top:28px">Select your Claude plan</p>
+      <div class="plan-cards">
+        <div class="plan-card" id="cardFree" onclick="selectPlan('free')">
+          <div class="plan-card-icon">◇</div>
+          <div class="plan-card-name">Claude Free</div>
+          <div class="plan-card-desc">Using Claude on a free account</div>
+          <div class="plan-card-feature">
+            <div class="feature-row"><span class="feature-dot"></span>All 12 agents available</div>
+            <div class="feature-row"><span class="feature-dot"></span>Full assessment engine</div>
+            <div class="feature-row"><span class="feature-dot"></span>Guided prompts included</div>
+          </div>
+        </div>
+        <div class="plan-card" id="cardPro" onclick="selectPlan('pro')">
+          <div class="plan-card-icon">◆</div>
+          <div class="plan-card-name">Claude Pro</div>
+          <div class="plan-card-desc">Using Claude with a paid subscription</div>
+          <div class="plan-card-feature">
+            <div class="feature-row"><span class="feature-dot"></span>All 12 agents available</div>
+            <div class="feature-row"><span class="feature-dot"></span>Full assessment engine</div>
+            <div class="feature-row"><span class="feature-dot"></span>Higher usage limits</div>
+            <div class="feature-row"><span class="feature-dot"></span>Faster response times</div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--text-3);margin-bottom:20px;max-width:380px;line-height:1.6;text-align:center">You can switch plans at any time from the sidebar. Your progress is always saved automatically.</p>
+
+      <button class="btn-start" id="btnStart" onclick="startSystem()" disabled>Begin Your Search →</button>
+    </div>
+
+    <!-- Agent content area -->
+    <div id="agentArea" style="display:none;flex-direction:column;flex:1">
+      <div class="agent-header">
+        <div class="agent-breadcrumb" id="agentBreadcrumb"></div>
+        <div class="agent-title" id="agentTitle"></div>
+        <div class="agent-subtitle" id="agentSubtitle"></div>
+      </div>
+      <div class="agent-body" id="agentBody"></div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// CONSTANTS & CONFIG
+// ═══════════════════════════════════════════════════════════════════════════
+const PROXY = 'https://anthropic-proxy.cssceo.workers.dev';
+const MODEL  = 'claude-sonnet-4-6';
+
+// ── Supabase config ──────────────────────────────────────────────────────
+const SB_URL   = 'https://vkrhjirkqziuwboovbgf.supabase.co';
+const SB_KEY   = 'sb_publishable__3ZhbHvsOu6seV0fKFjaVA_s0gGAW6I';
+const SB_TABLE = 'careerlaunch_data';
+
+function sbHeaders(){
+  return {
+    'Content-Type':      'application/json',
+    'apikey':            SB_KEY,
+    'Authorization':     'Bearer ' + SB_KEY,
+    'Prefer':            'resolution=merge-duplicates',
+    'X-Client-Info':     'careerlaunch-ai/1.0',
+  };
+}
+
+function getClientKey(){
+  let key = localStorage.getItem('cl_client_key');
+  if (!key){
+    const slug = (STATE.clientName||'client').toLowerCase().replace(/[^a-z0-9]+/g,'_');
+    key = slug + '_' + Math.random().toString(36).slice(2,10);
+    localStorage.setItem('cl_client_key', key);
+  }
+  return key;
+}
+
+function buildCloudPayload(clientKey){
+  const rows = [];
+  const push = (k, v) => {
+    if (v !== undefined && v !== null){
+      const val = typeof v === 'string' ? v : JSON.stringify(v);
+      if (val !== '') rows.push({ client_key: clientKey, data_key: k, data_value: val, updated_at: new Date().toISOString() });
+    }
+  };
+  push('client_name',       STATE.clientName);
+  push('plan',              STATE.plan);
+  push('current_agent',     STATE.currentAgent);
+  push('completed_agents',  [...STATE.completedAgents]);
+  push('saved_inputs',      STATE.savedInputs);
+  push('saved_outputs',     STATE.savedOutputs);
+  push('assessment_scores', STATE.assessmentScores);
+  push('assessment_complete', STATE.assessmentComplete);
+  push('checklist_state',   STATE.checklistState);
+  push('asmt_SCI',  ASMT_ANSWERS.SCI);
+  push('asmt_TSP',  ASMT_ANSWERS.TSP);
+  push('asmt_VWSI', ASMT_ANSWERS.VWSI);
+  push('asmt_PPI',  ASMT_ANSWERS.PPI);
+  if (STATE.searchDashboard) push('search_dashboard', STATE.searchDashboard);
+  return rows;
+}
+
+async function saveToCloud(){
+  if (!STATE.clientName) return;
+  try {
+    const clientKey = getClientKey();
+    const payload   = buildCloudPayload(clientKey);
+    const resp = await fetch(`${SB_URL}/rest/v1/${SB_TABLE}`, {
+      method:  'POST',
+      headers: sbHeaders(),
+      body:    JSON.stringify(payload),
+    });
+    if (!resp.ok){
+      const err = await resp.json().catch(()=>({}));
+      throw new Error(err.message || 'HTTP ' + resp.status);
+    }
+    showToast('\u2713 Progress saved to cloud');
+  } catch(e){
+    showToast('Cloud save failed: ' + e.message, 3000);
+    console.error('Cloud save error:', e);
+  }
+}
+
+async function loadCloudData(clientKey){
+  try {
+    const resp = await fetch(
+      `${SB_URL}/rest/v1/${SB_TABLE}?client_key=eq.${encodeURIComponent(clientKey)}&select=data_key,data_value`,
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+    );
+    if (!resp.ok) return false;
+    const rows = await resp.json();
+    if (!rows || rows.length === 0) return false;
+    const map = {};
+    rows.forEach(r => { map[r.data_key] = r.data_value; });
+    const parse = (k, fb) => { try { return map[k] ? JSON.parse(map[k]) : fb; } catch(e){ return map[k] || fb; } };
+    if (map['client_name'])       STATE.clientName        = map['client_name'];
+    if (map['plan'])              STATE.plan              = map['plan'];
+    if (map['current_agent'])     STATE.currentAgent      = map['current_agent'];
+    if (map['completed_agents'])  STATE.completedAgents   = new Set(parse('completed_agents',[]));
+    if (map['saved_inputs'])      STATE.savedInputs       = parse('saved_inputs',{});
+    if (map['saved_outputs'])     STATE.savedOutputs      = parse('saved_outputs',{});
+    if (map['assessment_scores']) STATE.assessmentScores  = parse('assessment_scores',{});
+    if (map['assessment_complete']) STATE.assessmentComplete = parse('assessment_complete',{});
+    if (map['checklist_state'])   STATE.checklistState    = parse('checklist_state',{});
+    if (map['search_dashboard'])  STATE.searchDashboard   = parse('search_dashboard',null);
+    ['SCI','TSP','VWSI','PPI'].forEach(k => {
+      const val = parse('asmt_'+k, null);
+      if (val) ASMT_ANSWERS[k] = val;
+    });
+    return true;
+  } catch(e){ console.error('Cloud load error:', e); return false; }
+}
+
+function autoSave(){
+  saveLocal();
+  clearTimeout(window._autoSaveTimer);
+  window._autoSaveTimer = setTimeout(saveToCloud, 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+const STATE = {
+  clientName: '',
+  plan: null,
+  currentAgent: null,
+  completedAgents: new Set(),
+  savedInputs: {},
+  savedOutputs: {},
+  assessmentScores: {},
+  assessmentComplete: {},
+  checklistState: {},
+};
+
+function selectPlan(p){
+  STATE.plan = p;
+  document.getElementById('cardFree').classList.toggle('selected', p==='free');
+  document.getElementById('cardPro').classList.toggle('selected', p==='pro');
+  // Enable start button only if name is also filled
+  const name = document.getElementById('clientNameInput').value.trim();
+  document.getElementById('btnStart').disabled = !name;
+}
+
+function showPlanScreen(){
+  // Return to onboarding to switch plan
+  document.getElementById('agentArea').style.display = 'none';
+  document.getElementById('onboardingScreen').style.display = 'flex';
+  // Pre-fill name and restore plan selection
+  document.getElementById('clientNameInput').value = STATE.clientName;
+  if (STATE.plan) selectPlan(STATE.plan);
+}
+
+// Enable start button when name is typed
+document.addEventListener('DOMContentLoaded', ()=>{
+  const nameInput = document.getElementById('clientNameInput');
+  if (nameInput){
+    nameInput.addEventListener('input', ()=>{
+      const name = nameInput.value.trim();
+      document.getElementById('btnStart').disabled = !(name && STATE.plan);
+    });
+    nameInput.addEventListener('keydown', e=>{
+      if (e.key === 'Enter' && STATE.plan && nameInput.value.trim()) startSystem();
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NAVIGATION STRUCTURE
+// ═══════════════════════════════════════════════════════════════════════════
+const NAV = [
+  { section: 'Foundation' },
+  { id:'step0',   label:'Career Capital Assessment',    num:'0',   subtitle:'Four psychometric instruments',                 next:'stepA' },
+  { id:'stepA',   label:'Career Capital Options',       num:'A',   subtitle:'Choose your search direction',                 next:'stepB', badge:'New' },
+  { id:'stepB',   label:'Résumé Build',                 num:'B',   subtitle:'Master base résumé',                           next:'stepC' },
+  { id:'stepC',   label:'LinkedIn Profile Build',       num:'C',   subtitle:'All 9 sections optimized',                     next:'stepD' },
+  { id:'stepD',   label:'Digital Reputation Audit',     num:'D',   subtitle:'Know what the market sees',                    next:'p1a1',  badge:'New' },
+  { section: 'Phase 1 — Market Entry' },
+  { id:'p1a1',    label:'Market & Opportunity',         num:'1',   subtitle:'Live opportunity intelligence',                 next:'p1a2' },
+  { id:'p1a2',    label:'Positioning & Brand',          num:'2',   subtitle:'Value proposition + bio',                      next:'p2a3' },
+  { section: 'Phase 2 — Demand Creation' },
+  { id:'p2a3',    label:'Outreach, Network & Info Interviews', num:'3', subtitle:'Five-tier demand creation',              next:'p2a4',  badge:'New' },
+  { id:'p2a4',    label:'Career Toolkit',               num:'4',   subtitle:'Auto-generate 5 documents',                    next:'p2a5' },
+  { id:'p2a5',    label:'Job Application Engine',       num:'5',   subtitle:'ATS optimization per posting',                 next:'p2a6' },
+  { id:'p2a6',    label:'References',                   num:'6',   subtitle:'Reference alignment system',                   next:'p2a7',  badge:'New' },
+  { id:'p2a7',    label:'Compensation Benchmarking',    num:'7',   subtitle:'Know your value before the interview',         next:'p2a8',  badge:'New' },
+  { id:'p2a8',    label:'Job Search Intelligence',      num:'8',   subtitle:'Board strategy + live search',                 next:'p3a9',  badge:'New' },
+  { section: 'Phase 3 — Compete & Convert' },
+  { id:'p3a9',    label:'Interview Intelligence',       num:'9',   subtitle:'Brief + live mock interview',                  next:'p3a10' },
+  { id:'p3a10',   label:'Offer & Negotiation',          num:'10',  subtitle:'Close at your true market value',              next:'p4a11' },
+  { section: 'Phase 4 — Sustain & Close' },
+  { id:'p4a11',   label:'Execution & Coaching',         num:'11',  subtitle:'Weekly intelligence core',                     next:'p4a12' },
+  { id:'p4a12',   label:'Onboarding Intelligence',      num:'12',  subtitle:'Enter your new role with a plan',              next: null },
+  { section: 'Search Dashboard' },
+  { id:'dashboard', label:'Search Dashboard',           num:'⬡',   subtitle:'Live pipeline tracker',                        next: null },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ASSESSMENT DATA — Four instruments
+// ═══════════════════════════════════════════════════════════════════════════
+const INSTRUMENTS = {
+  SCI: {
+    id:'SCI', title:'Skills Capital Inventory',
+    short:'Core Skills', abbr:'SCI',
+    desc:'Surfaces the functional skills you use every day — planning, problem-solving, communication, technical ability, and teamwork.',
+    scale:['Rarely / Never','Sometimes','Often','Usually','Almost Always'],
+    dims:[
+      { id:'planning', name:'Planning & Organization', color:'#0F6E56',
+        desc:'Ability to structure work, set priorities, and manage multiple tasks effectively.',
+        rH:'Lead with this in any coordination or operations role. Quantify: "manage X simultaneous priorities."',
+        rL:'Build a simple task management system before applying. Describe it clearly in behavioral interviews.' },
+      { id:'problem',  name:'Problem Solving', color:'#1D9E75',
+        desc:'Capacity to identify root causes, analyze options, and implement workable solutions.',
+        rH:'Lead with specific problems you solved and the method you used — not just the outcome.',
+        rL:'Practice root-cause thinking: ask "why did this happen?" twice before jumping to solutions.' },
+      { id:'comms',    name:'Communication', color:'#3B9AC4',
+        desc:'Ability to convey information clearly in writing, verbally, and in presentations.',
+        rH:'Your outreach and résumé must match this standard. Review them against it.',
+        rL:'Record yourself answering one behavioral question per day for two weeks. Self-correct what you hear.' },
+      { id:'tech',     name:'Technical Proficiency', color:'#085041',
+        desc:'Depth of functional or technical skill in your primary work area.',
+        rH:'Name specific tools, systems, and platforms in your résumé and LinkedIn Skills section.',
+        rL:'Identify the top 2–3 skills in postings you lack. Address with a short course before applications go out.' },
+      { id:'collab',   name:'Collaboration', color:'#2A86B0',
+        desc:'Effectiveness working within teams, across departments, and with external stakeholders.',
+        rH:'Surface cross-functional examples in behavioral interviews. Ensure references speak to this.',
+        rL:'Reflect on friction patterns with colleagues. Prepare interview answers that acknowledge them maturely.' },
+    ],
+    qs:[
+      {t:'I break large projects into clear steps and can accurately estimate how long each will take.',d:'planning'},
+      {t:'When I have multiple competing priorities, I determine the correct order of importance and work accordingly.',d:'planning'},
+      {t:'I track my own work and commitments consistently — things rarely fall through the cracks.',d:'planning'},
+      {t:'I adjust my plans quickly and effectively when circumstances change without losing momentum.',d:'planning'},
+      {t:'I build systems and habits that keep me organized even during high-workload periods.',d:'planning'},
+      {t:'When a problem arises, I take time to understand the root cause before proposing a solution.',d:'problem'},
+      {t:'I can analyze a situation using available data and arrive at a clear recommendation, even with incomplete information.',d:'problem'},
+      {t:'I am comfortable handling unusual or ambiguous situations that fall outside of standard procedures.',d:'problem'},
+      {t:'I follow through on solutions — I track whether my fix actually worked and adjust if it did not.',d:'problem'},
+      {t:'My colleagues and managers bring difficult problems to me because they trust my judgment.',d:'problem'},
+      {t:'I write clearly and concisely — my emails and reports communicate what I intend without confusion.',d:'comms'},
+      {t:'I adjust how I explain things based on who I am talking to — differently to a manager than to a peer.',d:'comms'},
+      {t:'In meetings and presentations, I can communicate my ideas clearly even when I am nervous or the stakes are high.',d:'comms'},
+      {t:'I listen actively in conversations — I understand what someone needs before I respond.',d:'comms'},
+      {t:'I am comfortable raising difficult issues or delivering unwelcome information in a professional way.',d:'comms'},
+      {t:'I am genuinely skilled in the core tools and systems used in my field of work.',d:'tech'},
+      {t:'When I encounter a new tool or system, I can learn it quickly without extensive hand-holding.',d:'tech'},
+      {t:'I stay current in my field — I actively learn about developments, best practices, and new approaches.',d:'tech'},
+      {t:'Other people come to me for guidance or help with the technical aspects of our shared work.',d:'tech'},
+      {t:'I can apply my technical skills to situations that differ from what I have done before.',d:'tech'},
+      {t:'I contribute actively in team settings — I pull my weight and support others who need help.',d:'collab'},
+      {t:'I build productive working relationships with people whose personalities or working styles differ from mine.',d:'collab'},
+      {t:'I share information and credit generously — I do not protect knowledge or position as a personal advantage.',d:'collab'},
+      {t:'When conflict or friction arises in a team, I address it constructively rather than avoiding it.',d:'collab'},
+      {t:'I work effectively with people from different departments or functions who have different priorities than I do.',d:'collab'},
+    ]
+  },
+  TSP: {
+    id:'TSP', title:'Transferable Skills Profiler',
+    short:'Transferable Skills', abbr:'TSP',
+    desc:'Maps the capabilities that travel with you from role to role — initiative, analytical thinking, adaptability, relationship building, and accountability.',
+    scale:['Rarely / Never','Sometimes','Often','Usually','Almost Always'],
+    dims:[
+      { id:'initiative', name:'Initiative & Drive', color:'#0F6E56',
+        desc:'Tendency to act proactively, identify opportunities, and go beyond minimum requirements.',
+        rH:'Lead every behavioral answer with what you noticed and chose to do, not just what was assigned.',
+        rL:'Commit to one proactive action per week outside your job description. After 30 days, you have four examples.' },
+      { id:'analytical', name:'Analytical Thinking', color:'#1D9E75',
+        desc:'Ability to use data, research, and logic to understand situations and make sound decisions.',
+        rH:'Quantify your résumé bullets wherever possible. Describe your decision-making process, not just the outcome.',
+        rL:'Before any significant decision, write down two options and one piece of evidence for each. Build the habit.' },
+      { id:'adaptability', name:'Adaptability', color:'#3B9AC4',
+        desc:'Capacity to remain effective through change, ambiguity, and shifting priorities.',
+        rH:'Frame your career narrative around adaptability if you have pivoted or navigated significant change.',
+        rL:'Identify one situation where you adapted and performed well. Build it into a behavioral answer.' },
+      { id:'relationship', name:'Relationship Building', color:'#085041',
+        desc:'Skill in forming productive, trust-based working relationships inside and outside the organization.',
+        rH:'Your network is your fastest job-search channel. Activate it before you need it.',
+        rL:'Identify 10 contacts you have not spoken to in over a year. Reach out to five — no agenda.' },
+      { id:'results', name:'Results & Accountability', color:'#2A86B0',
+        desc:'Consistent orientation toward producing measurable outcomes and owning both successes and failures.',
+        rH:'Ensure every résumé bullet leads with the result, not the activity. Results-first language is the standard.',
+        rL:'For each role, identify one number: a percentage, dollar amount, volume, or timeframe that reflects your contribution.' },
+    ],
+    qs:[
+      {t:'I notice problems or opportunities in my work environment and act on them without being asked.',d:'initiative'},
+      {t:'I take on challenging work voluntarily, even when easier options are available.',d:'initiative'},
+      {t:'When I see a process that is inefficient or broken, I take steps to improve it.',d:'initiative'},
+      {t:'I set goals for myself beyond what my job description requires.',d:'initiative'},
+      {t:'I am known as someone who gets things done without needing to be pushed.',d:'initiative'},
+      {t:'Before making a decision, I gather relevant information and consider multiple options.',d:'analytical'},
+      {t:'I use data or evidence to support my recommendations rather than relying only on instinct.',d:'analytical'},
+      {t:'I question assumptions — including my own — when analyzing a situation.',d:'analytical'},
+      {t:'I can identify the most important factor in a complex situation and focus my attention there.',d:'analytical'},
+      {t:'I think through the downstream consequences of decisions before committing to a course of action.',d:'analytical'},
+      {t:'When priorities shift suddenly, I adjust my approach without losing effectiveness.',d:'adaptability'},
+      {t:'I perform well in environments that are changing or uncertain, not just in stable ones.',d:'adaptability'},
+      {t:'I learn from situations that did not go as planned and apply those lessons quickly.',d:'adaptability'},
+      {t:'I am comfortable being assigned to unfamiliar tasks or projects outside my area of expertise.',d:'adaptability'},
+      {t:'I treat setbacks as information rather than as evidence of failure.',d:'adaptability'},
+      {t:'I maintain professional relationships consistently — not only when I need something.',d:'relationship'},
+      {t:'People I have worked with in the past would refer me to a new employer or colleague.',d:'relationship'},
+      {t:'I build trust with new colleagues and managers quickly.',d:'relationship'},
+      {t:'I am known for following through on commitments — people rely on what I say I will do.',d:'relationship'},
+      {t:'I invest in relationships before I need them — not only in moments of urgency.',d:'relationship'},
+      {t:'I define what success looks like before I begin a project, not after.',d:'results'},
+      {t:'I own my results — I do not attribute poor outcomes only to external factors.',d:'results'},
+      {t:'I consistently deliver what I commit to, on the timelines I commit to.',d:'results'},
+      {t:'I welcome feedback, including critical feedback, because it helps me improve.',d:'results'},
+      {t:'My track record demonstrates consistent, measurable contributions in every role I have held.',d:'results'},
+    ]
+  },
+  VWSI: {
+    id:'VWSI', title:'Values & Work Style Inventory',
+    short:'Values & Work Style', abbr:'VWSI',
+    desc:'Surfaces what you genuinely need from an employer — environment, culture, management style, and the kind of work that sustains your engagement.',
+    scale:['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'],
+    dims:[
+      { id:'integrity', name:'Integrity & Professionalism', color:'#0F6E56',
+        desc:'Commitment to honest, ethical, and reliable conduct as a non-negotiable personal standard.',
+        rH:'"I am known as someone you can trust with confidential information" is a credibility statement most candidates never make.',
+        rL:'Identify any area where you have rationalized a behavior you knew was not right. Close that gap.' },
+      { id:'growth', name:'Growth Orientation', color:'#1D9E75',
+        desc:'Drive to continuously develop skills, seek feedback, and take on stretching challenges.',
+        rH:'Include professional development on your résumé and LinkedIn. Mention it in interviews proactively.',
+        rL:'Start one learning activity before your search ends. Being able to say "I am currently completing X" signals the orientation.' },
+      { id:'workstyle', name:'Work Style Preferences', color:'#3B9AC4',
+        desc:'Clarity about how you work best — independently vs. collaboratively, structured vs. flexible.',
+        rH:'Use your preferences as a filter. Declining a poor-fit role is a better outcome than accepting one.',
+        rL:'Review your last two roles. Identify what you would change about the environment. That pattern is your actual preference profile.' },
+      { id:'mission', name:'Mission & Purpose Alignment', color:'#085041',
+        desc:'Degree to which meaningful work, organizational values, and social impact drive your engagement.',
+        rH:'Research organizational values before applying — not as a box-checking exercise, but as a genuine filter.',
+        rL:'Define two or three organizational characteristics that are non-negotiable for your engagement. Use them as filters.' },
+      { id:'stability', name:'Stability vs. Agility Drive', color:'#2A86B0',
+        desc:'Directional: high score = preference for structure and stability. Low score = preference for dynamic environments. Neither is better.',
+        rH:'HIGH SCORE: Target established organizations. Avoid early-stage startups.\nLOW SCORE: Target growing companies. Avoid bureaucratic environments.',
+        rL:'This is directional, not a gap. Use it as a targeting filter.' },
+    ],
+    qs:[
+      {t:'I hold myself to the same standards I expect from others — I do not make exceptions for myself.',d:'integrity'},
+      {t:'I am honest about my mistakes rather than minimizing them or attributing them to others.',d:'integrity'},
+      {t:'I keep confidential information confidential, even when sharing it would be advantageous to me.',d:'integrity'},
+      {t:'I behave consistently whether or not I think I am being observed or evaluated.',d:'integrity'},
+      {t:'I am known as someone whose word can be relied on — I do not commit to things I cannot deliver.',d:'integrity'},
+      {t:'I actively seek out opportunities to learn new skills or take on stretching responsibilities.',d:'growth'},
+      {t:'I regularly invest time in my own professional development — not only when an employer requires it.',d:'growth'},
+      {t:'I ask for feedback consistently and use it to improve rather than feeling defensive about it.',d:'growth'},
+      {t:'I view challenging assignments as development opportunities even when they are uncomfortable.',d:'growth'},
+      {t:'I have a clear sense of where I want to be professionally in three to five years and I take steps toward it.',d:'growth'},
+      {t:'I know the conditions under which I do my best work and I can describe them clearly.',d:'workstyle'},
+      {t:'I know whether I am more productive working independently or collaboratively and I communicate that appropriately.',d:'workstyle'},
+      {t:'I understand my preferences around structure, deadlines, and supervision and I seek environments that match them.',d:'workstyle'},
+      {t:'I can articulate what kind of manager brings out my best performance.',d:'workstyle'},
+      {t:'I know which work environments have not been a good fit for me and why — and I use that knowledge in my search.',d:'workstyle'},
+      {t:'I am energized by work that I find meaningful — compensation alone does not sustain my engagement long-term.',d:'mission'},
+      {t:"I research an organization's values and culture before accepting a role — not only the salary and title.",d:'mission'},
+      {t:'I care about the impact of my work beyond my immediate tasks and responsibilities.',d:'mission'},
+      {t:'I have turned down or would turn down an opportunity that paid well but conflicted with my values.',d:'mission'},
+      {t:'I feel most engaged when I understand how my individual contribution connects to a larger organizational goal.',d:'mission'},
+      {t:'I thrive in environments with clear structure, defined processes, and predictable expectations.',d:'stability'},
+      {t:'I perform well in fast-moving, ambiguous environments where the rules are still being written.',d:'stability'},
+      {t:'I know whether I prefer a steady, predictable role or one with variety and change — and I target accordingly.',d:'stability'},
+      {t:'I have a realistic understanding of which types of work environments bring out my best.',d:'stability'},
+      {t:'My past roles reflect a pattern that is consistent with the type of work environment I actually prefer.',d:'stability'},
+    ]
+  },
+  PPI: {
+    id:'PPI', title:'Professional Presence Inventory',
+    short:'Professional Presence', abbr:'PPI',
+    desc:'Measures emotional intelligence and professional presence — the capabilities that differentiate candidates with similar technical backgrounds at the finalist stage.',
+    scale:['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'],
+    dims:[
+      { id:'selfaware', name:'Self-Awareness', color:'#0F6E56',
+        desc:'Ability to recognize your own emotional states and how they affect your behavior and performance.',
+        rH:'In interviews, give one genuine answer about a real development area. It builds credibility, not vulnerability.',
+        rL:'After each significant interaction, spend 2 minutes reflecting: "How did I come across? What was I feeling?"' },
+      { id:'regulation', name:'Emotional Regulation', color:'#1D9E75',
+        desc:'Capacity to manage your own emotional responses under pressure, in conflict, and under criticism.',
+        rH:'Ensure your mock interviews include pressure questions. Exercise this muscle before the real thing.',
+        rL:'Practice the pause. Before responding to anything that produces a strong reaction, take one deliberate breath.' },
+      { id:'empathy', name:'Empathy & Reading Others', color:'#3B9AC4',
+        desc:'Accuracy in reading the emotional states, needs, and concerns of colleagues, managers, and clients.',
+        rH:'Use this actively in interviews. Read the interviewer\'s engagement level and adjust in real time.',
+        rL:'In any conversation this week, make it your only goal to identify how the other person is feeling.' },
+      { id:'resilience', name:'Professional Resilience', color:'#085041',
+        desc:'Ability to recover from setbacks, rejection, and difficult feedback without losing momentum.',
+        rH:'Track your search as a numbers exercise. Rejection is a ratio, not a verdict.',
+        rL:'Identify an accountability partner who will review your weekly activity numbers, not just your outcomes.' },
+      { id:'interpersonal', name:'Interpersonal Effectiveness', color:'#2A86B0',
+        desc:'Skill in navigating professional relationships, giving and receiving feedback, and managing conflict.',
+        rH:'Ensure your outreach messages reflect the same quality — direct, warm, and specific.',
+        rL:'Identify one relationship where you have been avoiding a direct conversation. Have it.' },
+    ],
+    qs:[
+      {t:'I can accurately identify what I am feeling in the moment, including in high-pressure situations.',d:'selfaware'},
+      {t:'I understand which types of situations, people, or tasks tend to produce stress or frustration in me.',d:'selfaware'},
+      {t:'I can see how my current emotional state is affecting my work or my interactions in real time.',d:'selfaware'},
+      {t:'I reflect on my own patterns of behavior and understand why I react the way I do in certain situations.',d:'selfaware'},
+      {t:'I am honest with myself when my emotions are driving a decision rather than logic or evidence.',d:'selfaware'},
+      {t:'I manage my emotional responses at work — I do not let frustration or anxiety drive my behavior.',d:'regulation'},
+      {t:'When I receive critical feedback, I can process it without becoming defensive in the moment.',d:'regulation'},
+      {t:'In tense conversations or difficult meetings, I stay composed and focused rather than reactive.',d:'regulation'},
+      {t:'I have strategies for managing stress that I use reliably, not just in extreme situations.',d:'regulation'},
+      {t:'I can deliver difficult information — to a peer, a manager, or a client — with composure and tact.',d:'regulation'},
+      {t:'I accurately read how others are feeling in conversations, including when they are not saying so directly.',d:'empathy'},
+      {t:'I notice when a colleague or manager is under stress and adjust my approach accordingly.',d:'empathy'},
+      {t:"I genuinely try to understand someone else's perspective before forming a strong opinion.",d:'empathy'},
+      {t:'I recognize when my communication style is not landing and I shift my approach.',d:'empathy'},
+      {t:'People feel comfortable being honest with me because they trust I will not react badly to what they share.',d:'empathy'},
+      {t:'I recover from professional setbacks — missed promotions, critical feedback, difficult projects — without a prolonged dip in performance.',d:'resilience'},
+      {t:'I treat rejection or criticism as information rather than as a reflection of my worth.',d:'resilience'},
+      {t:'After a difficult period at work, I return to my normal level of effectiveness fairly quickly.',d:'resilience'},
+      {t:'I do not carry negative emotions from one situation into unrelated ones during the same workday.',d:'resilience'},
+      {t:'I am able to stay motivated and engaged during a job search or professional transition, even when progress is slow.',d:'resilience'},
+      {t:'I address interpersonal friction directly rather than letting it fester or avoiding the person.',d:'interpersonal'},
+      {t:'I give feedback to others in a way they can actually hear and use — not just in a way that makes me feel better.',d:'interpersonal'},
+      {t:'I navigate disagreements with colleagues professionally — I can hold my position without damaging the relationship.',d:'interpersonal'},
+      {t:'I build trust with new colleagues and managers quickly, regardless of whether I like them personally.',d:'interpersonal'},
+      {t:'I am effective in relationships that require me to influence without authority — no formal power over the other person.',d:'interpersonal'},
+    ]
+  }
+};
+
+// Per-assessment answer state
+const ASMT_ANSWERS = { SCI:{}, TSP:{}, VWSI:{}, PPI:{} };
+const INST_ORDER = ['SCI','TSP','VWSI','PPI'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CLAUDE API — streaming via proxy
+// ═══════════════════════════════════════════════════════════════════════════
+async function callClaude(content, maxTokens, onChunk) {
+  const resp = await fetch(PROXY, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: maxTokens || 4000,
+      stream: true,
+      messages:[{ role:'user', content }]
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(()=>({}));
+    throw new Error((err.error && err.error.message) || 'HTTP ' + resp.status);
+  }
+  const reader = resp.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '', full = '';
+  while (true) {
+    const {done, value} = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, {stream:true});
+    const lines = buf.split('\n');
+    buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6);
+      if (data === '[DONE]') break;
+      try {
+        const p = JSON.parse(data);
+        if (p.type === 'content_block_delta' && p.delta?.text) {
+          full += p.delta.text;
+          if (onChunk) onChunk(full);
+        }
+      } catch(e) {}
+    }
+  }
+  return full;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UTILITY
+// ═══════════════════════════════════════════════════════════════════════════
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(msg, dur) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur||1800);
+}
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied to clipboard'));
+}
+function dlDoc(text, filename) {
+  const title = filename.replace(/_/g,' ');
+  const html = `<html><head><meta charset="utf-8"><title>${title}</title></head><body><h2>${title}</h2><pre style="font-family:Calibri,sans-serif;white-space:pre-wrap;font-size:12pt">${text.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</pre></body></html>`;
+  const blob = new Blob([html],{type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename+'.doc';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function getOutput(key){ return STATE.savedOutputs[key]||''; }
+function setOutput(key,val){ STATE.savedOutputs[key]=val; autoSave(); }
+function getInput(key){ return STATE.savedInputs[key]||''; }
+function setInput(key,val){ STATE.savedInputs[key]=val; saveLocal(); }
+function saveLocal(){
+  try{ localStorage.setItem('cl_state', JSON.stringify({
+    clientName: STATE.clientName,
+    plan: STATE.plan,
+    completedAgents: [...STATE.completedAgents],
+    savedInputs: STATE.savedInputs,
+    savedOutputs: STATE.savedOutputs,
+    assessmentScores: STATE.assessmentScores,
+    assessmentComplete: STATE.assessmentComplete,
+    checklistState: STATE.checklistState,
+    asmtAnswers: ASMT_ANSWERS,
+  })); } catch(e){}
+}
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem('cl_state');
+    if (!raw) return false;
+    const d = JSON.parse(raw);
+    STATE.clientName = d.clientName || '';
+    STATE.plan = d.plan || null;
+    STATE.completedAgents = new Set(d.completedAgents||[]);
+    STATE.savedInputs = d.savedInputs||{};
+    STATE.savedOutputs = d.savedOutputs||{};
+    STATE.assessmentScores = d.assessmentScores||{};
+    STATE.assessmentComplete = d.assessmentComplete||{};
+    STATE.checklistState = d.checklistState||{};
+    if (d.asmtAnswers) { Object.assign(ASMT_ANSWERS, d.asmtAnswers); }
+    return !!STATE.clientName;
+  } catch(e){ return false; }
+}
+// saveToCloud is defined above in the Supabase config section
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════════════════════════════════
+function updateProgress(){
+  const agents = NAV.filter(n=>n.id);
+  const done = agents.filter(n=>STATE.completedAgents.has(n.id)).length;
+  const pct = Math.round((done/agents.length)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressPct').textContent = pct+'%';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SIDEBAR NAV BUILD
+// ═══════════════════════════════════════════════════════════════════════════
+function buildNav(){
+  const navEl = document.getElementById('navList');
+  let html = '';
+  NAV.forEach(item => {
+    if (item.section) {
+      html += `<div class="nav-section">${esc(item.section)}</div>`;
+      return;
+    }
+    const done = STATE.completedAgents.has(item.id);
+    const active = STATE.currentAgent === item.id;
+    const classes = ['nav-item', done?'complete':'', active?'active':''].filter(Boolean).join(' ');
+    html += `<div class="${classes}" id="nav_${item.id}" onclick="navigateTo('${item.id}')">
+      <div class="nav-num">${done?'✓':esc(item.num)}</div>
+      <span>${esc(item.label)}</span>
+      ${item.badge?`<span class="nav-badge${item.badge==='New'?' new':''}">${item.badge}</span>`:''}
+    </div>`;
+  });
+  navEl.innerHTML = html;
+}
+
+function navigateTo(id){
+  STATE.currentAgent = id;
+  buildNav();
+  document.getElementById('onboardingScreen').style.display = 'none';
+  const aa = document.getElementById('agentArea');
+  aa.style.display = 'flex';
+  const item = NAV.find(n=>n.id===id);
+  if (item) {
+    document.getElementById('agentBreadcrumb').textContent = 'CareerLaunch AI™ · ' + item.label;
+    document.getElementById('agentTitle').textContent = item.label;
+    document.getElementById('agentSubtitle').textContent = item.subtitle || '';
+  }
+  renderAgent(id);
+  if (window.innerWidth <= 800) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('navOverlay').classList.remove('open');
+  }
+  updateProgress();
+  window.scrollTo(0,0);
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('navOverlay').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// START SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+function startSystem(){
+  const name = document.getElementById('clientNameInput').value.trim();
+  if (!name) { showToast('Please enter your name to begin.'); return; }
+  if (!STATE.plan) { showToast('Please select your Claude plan to begin.'); return; }
+  STATE.clientName = name;
+  document.getElementById('clientNameDisplay').textContent = name;
+  // Update plan badge in sidebar
+  updatePlanBadge();
+  saveLocal();
+  buildNav();
+  navigateTo('step0');
+}
+
+function updatePlanBadge(){
+  const b = document.getElementById('planBadge');
+  if (!b || !STATE.plan) return;
+  b.style.display = 'inline-block';
+  b.textContent = STATE.plan === 'pro' ? '◆ Pro Plan' : '◇ Free Plan';
+  b.className = 'plan-badge ' + STATE.plan;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER AGENT DISPATCHER
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAgent(id){
+  const body = document.getElementById('agentBody');
+  body.innerHTML = '';
+  switch(id){
+    case 'step0':    renderStep0(body); break;
+    case 'stepA':    renderStepA(body); break;
+    case 'stepB':    renderStepB(body); break;
+    case 'stepC':    renderStepC(body); break;
+    case 'stepD':    renderStepD(body); break;
+    case 'p1a1':     renderAgent1(body); break;
+    case 'p1a2':     renderAgent2(body); break;
+    case 'p2a3':     renderAgent3(body); break;
+    case 'p2a4':     renderAgent4(body); break;
+    case 'p2a5':     renderAgent5(body); break;
+    case 'p2a6':     renderAgent6(body); break;
+    case 'p2a7':     renderAgent7(body); break;
+    case 'p2a8':     renderAgent8(body); break;
+    case 'p3a9':     renderAgent9(body); break;
+    case 'p3a10':    renderAgent10(body); break;
+    case 'p4a11':    renderAgent11(body); break;
+    case 'p4a12':    renderAgent12(body); break;
+    case 'dashboard': renderDashboard(body); break;
+    default: body.innerHTML = `<div class="ctx-panel"><div class="ctx-text">This agent is being built. Check back soon.</div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STEP 0 — FULL IN-APP ASSESSMENT ENGINE
+// ═══════════════════════════════════════════════════════════════════════════
+function renderStep0(body){
+  body.innerHTML = `
+  <div class="ctx-panel">
+    <div class="ctx-icon">◆</div>
+    <div class="ctx-text"><strong>Career Capital Assessment — Step 0.</strong>
+    Four instruments across 20 dimensions. Complete all four in sequence.
+    Your scores calculate automatically and auto-populate your Career Capital Profile prompt.
+    Answer based on how you actually behave — not how you aspire to. Accurate scores produce useful guidance.</div>
+  </div>
+
+  <div id="asmt-start-screen">
+    <div class="asmt-start-card">
+      <h2>Career Capital Assessments</h2>
+      <p>Four instruments across 20 dimensions of professional capability. Complete all four in sequence. When you finish, your results flow directly into your Career Capital Profile.</p>
+      <div class="asmt-meta-row">
+        <div><div class="asmt-meta-val">4</div><div class="asmt-meta-lbl">Assessments</div></div>
+        <div><div class="asmt-meta-val">100</div><div class="asmt-meta-lbl">Items</div></div>
+        <div><div class="asmt-meta-val">~32</div><div class="asmt-meta-lbl">Minutes</div></div>
+        <div><div class="asmt-meta-val">20</div><div class="asmt-meta-lbl">Dimensions</div></div>
+      </div>
+      <button class="btn btn-primary" onclick="startAssessments()">Begin Assessments →</button>
+    </div>
+  </div>
+
+  <div id="asmt-active-screen" style="display:none">
+    <div class="asmt-tab-nav" id="asmtTabNav"></div>
+    <div id="asmtScreens"></div>
+  </div>
+
+  <div id="asmt-complete-screen" style="display:none">
+    <div class="complete-panel">
+      <div class="complete-title">All Four Assessments Complete</div>
+      <div class="complete-desc">Your Career Capital Assessment results have been scored across all 20 dimensions.<br>Review your results below, then generate your Career Capital Profile.</div>
+      <div class="scores-row" id="completeScoresRow"></div>
+      <p style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px">↓ Scroll down to review your full results and generate your Career Capital Profile</p>
+    </div>
+    <div id="allResultsWrap"></div>
+    <div id="profilePromptSection" style="margin-top:24px"></div>
+  </div>`;
+
+  // Restore state if already in progress
+  if (STATE.assessmentComplete.SCI && STATE.assessmentComplete.TSP && STATE.assessmentComplete.VWSI && STATE.assessmentComplete.PPI) {
+    document.getElementById('asmt-start-screen').style.display = 'none';
+    showCompleteScreen();
+  } else if (Object.values(ASMT_ANSWERS.SCI).length > 0 || Object.values(ASMT_ANSWERS.TSP).length > 0) {
+    document.getElementById('asmt-start-screen').style.display = 'none';
+    document.getElementById('asmt-active-screen').style.display = 'block';
+    buildAssessmentTabs();
+  }
+}
+
+function startAssessments(){
+  document.getElementById('asmt-start-screen').style.display = 'none';
+  document.getElementById('asmt-active-screen').style.display = 'block';
+  buildAssessmentTabs();
+}
+
+function buildAssessmentTabs(){
+  const tabNav = document.getElementById('asmtTabNav');
+  const screens = document.getElementById('asmtScreens');
+  let tabHtml = '', screenHtml = '';
+  INST_ORDER.forEach((key, i) => {
+    const inst = INSTRUMENTS[key];
+    const done = STATE.assessmentComplete[key];
+    const active = !done && INST_ORDER.slice(0,i).every(k=>STATE.assessmentComplete[k]);
+    const isFirst = i === 0;
+    const actualActive = done || active || (isFirst && INST_ORDER.slice(0,i).every(k=>STATE.assessmentComplete[k]));
+    tabHtml += `<button class="asmt-tab${actualActive&&!done?' active':''}" id="tab_${key}" onclick="switchAsmtTab('${key}')">
+      ${inst.short}${done?'<span class="ck">✓</span>':''}
+    </button>`;
+    screenHtml += `<div class="asmt-screen${actualActive&&!done?' active':''}" id="screen_${key}"></div>`;
+  });
+  tabNav.innerHTML = tabHtml;
+  screens.innerHTML = screenHtml;
+  // Render first incomplete instrument
+  const firstIncomplete = INST_ORDER.find(k=>!STATE.assessmentComplete[k]);
+  if (firstIncomplete) renderInstrument(firstIncomplete);
+  else showCompleteScreen();
+}
+
+function switchAsmtTab(key){
+  document.querySelectorAll('.asmt-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.asmt-screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab_'+key).classList.add('active');
+  document.getElementById('screen_'+key).classList.add('active');
+  if (document.getElementById('screen_'+key).innerHTML === '') {
+    renderInstrument(key);
+  }
+}
+
+function renderInstrument(key){
+  const inst = INSTRUMENTS[key];
+  const el = document.getElementById('screen_'+key);
+  if (!el) return;
+  const answers = ASMT_ANSWERS[key];
+  const answered = Object.keys(answers).length;
+  const total = inst.qs.length;
+  const pct = Math.round((answered/total)*100);
+
+  // Group questions by dimension for display
+  const dimColors = {};
+  inst.dims.forEach(d=>{ dimColors[d.id]=d.color; });
+
+  let qHtml = '';
+  inst.qs.forEach((q,i)=>{
+    const ans = answers[i];
+    const isAnswered = ans !== undefined;
+    const dimName = inst.dims.find(d=>d.id===q.d)?.name || q.d;
+    qHtml += `<div class="question${isAnswered?' answered':''}" id="q_${key}_${i}">
+      <div class="q-meta">
+        <span class="q-num">Q${i+1}</span>
+        <span class="q-dim" style="background:${dimColors[q.d]}20;color:${dimColors[q.d]}">${esc(dimName)}</span>
+      </div>
+      <div class="q-text">${esc(q.t)}</div>
+      <div class="likert">
+        ${inst.scale.map((lbl,v)=>`
+          <div class="l-opt">
+            <button class="l-btn${ans===v+1?' sel':''}" onclick="answerQ('${key}',${i},${v+1})" title="${esc(lbl)}">${v+1}</button>
+            <div class="l-lbl">${esc(lbl)}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = `
+    <div class="inst-header">
+      <div class="inst-badge">Assessment ${INST_ORDER.indexOf(key)+1} of 4</div>
+      <h2>${esc(inst.title)}</h2>
+      <p>${esc(inst.desc)}</p>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-meta"><span>${answered} of ${total} answered</span><span>${pct}%</span></div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="scale-legend">
+      ${inst.scale.map((l,i)=>`<span>${i+1} = ${l}</span>`).join('')}
+    </div>
+    ${qHtml}
+    <div class="asmt-action-row">
+      <span class="asmt-err-msg" id="err_${key}"></span>
+      <button class="btn btn-primary" onclick="submitInstrument('${key}')">
+        ${answered===total ? 'Submit & See Results →' : 'Submit Assessment →'}
+      </button>
+    </div>`;
+}
+
+function answerQ(key, idx, val){
+  ASMT_ANSWERS[key][idx] = val;
+  const btn = document.querySelector(`#q_${key}_${idx} .l-btn.sel`);
+  if (btn) btn.classList.remove('sel');
+  const allBtns = document.querySelectorAll(`#q_${key}_${idx} .l-btn`);
+  if (allBtns[val-1]) allBtns[val-1].classList.add('sel');
+  const qEl = document.getElementById(`q_${key}_${idx}`);
+  if (qEl) qEl.classList.add('answered');
+  // Update progress bar
+  const inst = INSTRUMENTS[key];
+  const answered = Object.keys(ASMT_ANSWERS[key]).length;
+  const pct = Math.round((answered/inst.qs.length)*100);
+  const fill = document.querySelector(`#screen_${key} .prog-fill`);
+  const meta = document.querySelector(`#screen_${key} .prog-meta span`);
+  if (fill) fill.style.width = pct+'%';
+  if (meta) meta.textContent = `${answered} of ${inst.qs.length} answered`;
+  autoSave();
+}
+
+function submitInstrument(key){
+  const inst = INSTRUMENTS[key];
+  const answers = ASMT_ANSWERS[key];
+  const missing = [];
+  inst.qs.forEach((_,i)=>{ if(answers[i]===undefined) missing.push(i); });
+  if (missing.length > 0) {
+    document.getElementById('err_'+key).textContent = `Please answer all questions. ${missing.length} question${missing.length>1?'s':''} remaining.`;
+    // Highlight unanswered
+    missing.forEach(i=>{ const el=document.getElementById(`q_${key}_${i}`); if(el) el.classList.add('error'); });
+    document.getElementById(`q_${key}_${missing[0]}`)?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  // Calculate scores
+  const dimTotals = {};
+  const dimCounts = {};
+  inst.dims.forEach(d=>{ dimTotals[d.id]=0; dimCounts[d.id]=0; });
+  inst.qs.forEach((q,i)=>{ dimTotals[q.d]+=(answers[i]||0); dimCounts[q.d]++; });
+  const scores = {};
+  inst.dims.forEach(d=>{ scores[d.id] = Math.round((dimTotals[d.id]/(dimCounts[d.id]*5))*100); });
+  STATE.assessmentScores[key] = scores;
+  STATE.assessmentComplete[key] = true;
+  saveLocal();
+  // Update tab
+  const tab = document.getElementById('tab_'+key);
+  if (tab) { tab.innerHTML = INSTRUMENTS[key].short+'<span class="ck">✓</span>'; tab.classList.remove('active'); }
+  // Check if all complete
+  const allDone = INST_ORDER.every(k=>STATE.assessmentComplete[k]);
+  if (allDone) {
+    document.getElementById('asmt-active-screen').style.display = 'none';
+    showCompleteScreen();
+    STATE.completedAgents.add('step0');
+    buildNav();
+    updateProgress();
+  } else {
+    // Move to next instrument
+    const nextKey = INST_ORDER.find(k=>!STATE.assessmentComplete[k]);
+    if (nextKey) {
+      switchAsmtTab(nextKey);
+      renderInstrument(nextKey);
+      document.getElementById('tab_'+nextKey)?.classList.add('active');
+    }
+  }
+  showToast(`✓ ${INSTRUMENTS[key].title} complete`);
+}
+
+function showCompleteScreen(){
+  document.getElementById('asmt-start-screen').style.display = 'none';
+  document.getElementById('asmt-active-screen').style.display = 'none';
+  document.getElementById('asmt-complete-screen').style.display = 'block';
+
+  // Overall scores row
+  const scoresRow = document.getElementById('completeScoresRow');
+  let scRow = '';
+  INST_ORDER.forEach(key=>{
+    const scores = STATE.assessmentScores[key]||{};
+    const vals = Object.values(scores);
+    const avg = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+    scRow += `<div class="score-item">
+      <div class="score-val">${avg}%</div>
+      <div class="score-lbl">${INSTRUMENTS[key].short}</div>
+    </div>`;
+  });
+  scoresRow.innerHTML = scRow;
+
+  // All dimension results
+  const wrap = document.getElementById('allResultsWrap');
+  let rHtml = '';
+  INST_ORDER.forEach(key=>{
+    const inst = INSTRUMENTS[key];
+    const scores = STATE.assessmentScores[key]||{};
+    rHtml += `<div style="margin-bottom:20px">
+      <div class="carry-box"><div class="carry-title">${esc(inst.title)} — Dimension Results</div></div>`;
+    inst.dims.forEach(d=>{
+      const pct = scores[d.id]||0;
+      const level = pct>=80?'Strong':pct>=52?'Developing':'Emerging';
+      const levelColor = pct>=80?'var(--teal)':pct>=52?'var(--gold)':'var(--danger)';
+      const rec = pct>=80?d.rH:(pct>=52?d.rL:d.rL);
+      rHtml += `<div class="dim-card">
+        <div class="dim-top">
+          <div class="dim-name">${esc(d.name)}</div>
+          <div class="dim-score" style="color:${levelColor}">${pct}%</div>
+        </div>
+        <div class="dim-level" style="color:${levelColor}">${level}</div>
+        <div class="dim-bar-w"><div class="dim-bar" style="width:${pct}%;background:${d.color}"></div></div>
+        <div class="dim-desc">${esc(d.desc)}</div>
+        <div class="dim-rec">${esc(rec)}</div>
+      </div>`;
+    });
+    rHtml += `</div>`;
+  });
+  wrap.innerHTML = rHtml;
+
+  // Career Capital Profile prompt section
+  buildProfilePrompt();
+}
+
+function buildProfilePrompt(){
+  const section = document.getElementById('profilePromptSection');
+  if (!section) return;
+  const sciS = STATE.assessmentScores.SCI||{};
+  const tspS = STATE.assessmentScores.TSP||{};
+  const vwsiS= STATE.assessmentScores.VWSI||{};
+  const ppiS = STATE.assessmentScores.PPI||{};
+
+  const formatScores = (inst, scores) => inst.dims.map(d=>`${d.name}: ${scores[d.id]||0}%`).join(' | ');
+  const promptText = `Act as my CareerLaunch AI™ Career Capital Analyst.
+
+I have completed all four CareerLaunch AI™ assessments. Here are my scored results:
+
+SKILLS CAPITAL INVENTORY (SCI):
+${formatScores(INSTRUMENTS.SCI, sciS)}
+
+TRANSFERABLE SKILLS PROFILER (TSP):
+${formatScores(INSTRUMENTS.TSP, tspS)}
+
+VALUES & WORK STYLE INVENTORY (VWSI):
+${formatScores(INSTRUMENTS.VWSI, vwsiS)}
+(Note: Stability vs. Agility Drive — high % = structure preference; low % = agility preference)
+
+PROFESSIONAL PRESENCE INVENTORY (PPI):
+${formatScores(INSTRUMENTS.PPI, ppiS)}
+
+My current background: [paste your résumé or a 3-sentence work history summary]
+My target role: [title]
+My target industries and geography: [list]
+
+Produce my Career Capital Profile — a single structured document I will paste into every subsequent agent prompt:
+
+1. Professional Identity Statement (3–4 sentences): Who I am professionally, how I work, and what I am known for delivering. First person. Ready to use in interviews and networking conversations.
+
+2. Top Skills & Strengths Summary (8–12 bullets): My strongest, most marketable skills from the SCI and TSP — named with ATS precision.
+
+3. Values & Environment Filters (5–7 bullets): The employer and cultural characteristics I should prioritize — and red flags to screen out. Based on VWSI results and Stability vs. Agility direction.
+
+4. Target Role & Adjacent Opportunities (1 paragraph): Based on my TSP results and Adaptability score, the roles and industries I should target — including adjacent options I am well-suited for but may not have considered.
+
+5. Interview & Positioning Themes (3 themes): The 3 core themes I should anchor every interview and networking conversation to. Each theme: the strength, why it matters to employers, and one supporting example prompt.
+
+6. Professional Presence Notes (1 short paragraph): Based on my PPI results, how I come across professionally and one practical coaching note.
+
+7. Ideal Employer Profile (1 paragraph): The specific organizational characteristics that represent my best-fit environment.
+
+Format this as a professional document I can paste into any subsequent agent prompt. This is my Career Capital Profile — it replaces my raw résumé in all future prompts.`;
+
+  const savedProfile = getOutput('step0_profile');
+  section.innerHTML = `
+    <div class="carry-box">
+      <div class="carry-title">Career Capital Profile — Generate Now</div>
+      <div class="carry-item"><span style="color:var(--teal-mid)">▸</span>
+      <span>Add your background context below, then generate your Career Capital Profile. This document feeds every agent in the system.</span></div>
+    </div>
+    <div class="input-section">
+      <div class="input-label">Your background <span class="input-req">Required</span></div>
+      <div class="input-hint">Paste your résumé or write a 3-sentence work history summary.</div>
+      <textarea id="inp_step0_bg" rows="5" placeholder="e.g. 8 years in operations and supply chain management across manufacturing and distribution...">${esc(getInput('step0_bg'))}</textarea>
+    </div>
+    <div class="input-section">
+      <div class="input-label">Target role <span class="input-req">Required</span></div>
+      <input type="text" id="inp_step0_role" placeholder="e.g. Operations Supervisor, Senior Accountant, IT Project Manager" value="${esc(getInput('step0_role'))}">
+    </div>
+    <div class="input-section">
+      <div class="input-label">Target industries & geography</div>
+      <input type="text" id="inp_step0_geo" placeholder="e.g. Healthcare and logistics, Austin TX metro, open to hybrid" value="${esc(getInput('step0_geo'))}">
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn btn-primary" id="btnGenProfile" onclick="generateProfile()">⚡ Generate Career Capital Profile</button>
+      <button class="btn-action" onclick="copyText(document.getElementById('promptPreview').textContent)">⎘ Copy Prompt</button>
+    </div>
+    <div class="output-section" style="margin-top:16px">
+      <div class="output-header">
+        <div class="output-label">Career Capital Profile</div>
+        <div class="output-actions">
+          <button class="btn-action" onclick="copyText(getOutput('step0_profile'))">⎘ Copy</button>
+          <button class="btn-action" onclick="dlDoc(getOutput('step0_profile'),'Career_Capital_Profile_${esc(STATE.clientName.replace(/\s+/g,'_'))}')">↓ Download</button>
+          <button class="btn-action" onclick="saveToCloud()">☁ Save</button>
+        </div>
+      </div>
+      <div class="output-box" id="out_step0_profile">${savedProfile ? esc(savedProfile) : '<span class="output-placeholder">Your Career Capital Profile will appear here. Complete all fields above and click Generate.</span>'}</div>
+    </div>
+    ${savedProfile?`<div class="save-cta"><div class="save-icon">✓</div><div class="save-text"><div class="save-title">Career Capital Profile saved</div><div class="save-desc">Proceed to Step A — Career Capital Options Analysis to choose your search direction.</div></div><button class="btn-proceed" onclick="navigateTo('stepA')">Proceed to Step A →</button></div>`:''}
+    <pre id="promptPreview" style="display:none">${esc(promptText)}</pre>
+    ${buildChecklist('step0',[
+      'Skills Capital Inventory (SCI) — all 25 items completed and scored',
+      'Transferable Skills Profiler (TSP) — all 25 items completed and scored',
+      'Values & Work Style Inventory (VWSI) — all 25 items completed and scored',
+      'Professional Presence Inventory (PPI) — all 25 items completed and scored',
+      'Career Capital Profile generated and reviewed',
+      'Profile saved and ready to paste into Step A',
+    ])}`;
+}
+
+async function generateProfile(){
+  const bg = document.getElementById('inp_step0_bg').value.trim();
+  const role = document.getElementById('inp_step0_role').value.trim();
+  const geo = document.getElementById('inp_step0_geo').value.trim();
+  if (!bg || !role) { showToast('Please fill in your background and target role.'); return; }
+  setInput('step0_bg', bg); setInput('step0_role', role); setInput('step0_geo', geo);
+  const sciS = STATE.assessmentScores.SCI||{};
+  const tspS = STATE.assessmentScores.TSP||{};
+  const vwsiS= STATE.assessmentScores.VWSI||{};
+  const ppiS = STATE.assessmentScores.PPI||{};
+  const fmt = (inst,scores) => inst.dims.map(d=>`${d.name}: ${scores[d.id]||0}%`).join(' | ');
+  const prompt = `Act as my CareerLaunch AI™ Career Capital Analyst.
+
+I have completed all four CareerLaunch AI™ assessments. Here are my scored results:
+
+SKILLS CAPITAL INVENTORY (SCI):
+${fmt(INSTRUMENTS.SCI,sciS)}
+
+TRANSFERABLE SKILLS PROFILER (TSP):
+${fmt(INSTRUMENTS.TSP,tspS)}
+
+VALUES & WORK STYLE INVENTORY (VWSI):
+${fmt(INSTRUMENTS.VWSI,vwsiS)}
+(Note: Stability vs. Agility Drive — high % = structure preference; low % = agility preference)
+
+PROFESSIONAL PRESENCE INVENTORY (PPI):
+${fmt(INSTRUMENTS.PPI,ppiS)}
+
+My background: ${bg}
+My target role: ${role}
+Target industries and geography: ${geo||'Not specified'}
+
+Produce my Career Capital Profile with these 7 sections:
+
+1. Professional Identity Statement (3–4 sentences): Who I am professionally, how I work, what I am known for delivering. First person. Interview-ready.
+
+2. Top Skills & Strengths Summary (8–12 bullets): Strongest, most marketable skills from SCI and TSP — named with ATS precision.
+
+3. Values & Environment Filters (5–7 bullets): Employer and cultural characteristics to prioritize, and red flags to screen out. Based on VWSI results.
+
+4. Target Role & Adjacent Opportunities (1 paragraph): Roles and industries to target, including adjacent options based on TSP and Adaptability score.
+
+5. Interview & Positioning Themes (3 themes): Core themes to anchor every interview conversation to. For each: the strength, why it matters to employers, one supporting example prompt.
+
+6. Professional Presence Notes (1 paragraph): Based on PPI results — how I come across professionally and one practical coaching note.
+
+7. Ideal Employer Profile (1 paragraph): The specific organizational characteristics that represent my best-fit environment.
+
+Format as a professional document ready to paste into any subsequent agent prompt. Use ${STATE.clientName.split(' ')[0]} throughout.`;
+
+  const btn = document.getElementById('btnGenProfile');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Generating...';
+  const outEl = document.getElementById('out_step0_profile');
+  outEl.innerHTML = '<span class="output-placeholder">Generating your Career Capital Profile...</span>';
+  try {
+    const result = await callClaude(prompt, 3000, text => {
+      outEl.textContent = text;
+      outEl.classList.add('streaming-cursor');
+    });
+    outEl.classList.remove('streaming-cursor');
+    outEl.textContent = result;
+    setOutput('step0_profile', result);
+    STATE.completedAgents.add('step0');
+    buildNav(); updateProgress();
+    showToast('✓ Career Capital Profile generated and saved');
+    // Refresh to show proceed button
+    buildProfilePrompt();
+  } catch(e) {
+    outEl.innerHTML = `<div class="error-box">Generation failed: ${esc(e.message)}. Please try again.</div>`;
+  }
+  btn.disabled = false; btn.innerHTML = '⚡ Generate Career Capital Profile';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHECKLIST HELPER
+// ═══════════════════════════════════════════════════════════════════════════
+function buildChecklist(agentId, items){
+  const state = STATE.checklistState[agentId]||{};
+  let html = `<div class="checklist"><div class="checklist-hdr">Completion Checklist</div>`;
+  items.forEach((item,i)=>{
+    const checked = !!state[i];
+    html += `<div class="checklist-item" onclick="toggleCheck('${agentId}',${i},this)">
+      <div class="check-box${checked?' checked':''}"><span class="check-mark">✓</span></div>
+      <div class="check-text${checked?' checked':''}">${esc(item)}</div>
+    </div>`;
+  });
+  return html + '</div>';
+}
+
+function toggleCheck(agentId, idx, el){
+  if (!STATE.checklistState[agentId]) STATE.checklistState[agentId]={};
+  const cur = STATE.checklistState[agentId][idx];
+  STATE.checklistState[agentId][idx] = !cur;
+  const box = el.querySelector('.check-box');
+  const txt = el.querySelector('.check-text');
+  box.classList.toggle('checked');
+  txt.classList.toggle('checked');
+  autoSave();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GENERIC AGENT RENDERER — for agents not yet fully built
+// ═══════════════════════════════════════════════════════════════════════════
+function renderGenericAgent(body, agentId, contextMsg, inputs, outputKey, outputLabel, promptBuilder, checklistItems, nextId){
+  const profile = getOutput('step0_profile');
+  const savedOut = getOutput(outputKey);
+  let html = `<div class="ctx-panel"><div class="ctx-icon">◆</div><div class="ctx-text">${contextMsg}</div></div>`;
+  if (profile) {
+    html += `<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div>
+    <div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile from Step 0 is feeding this agent automatically.</span></div></div>`;
+  }
+  inputs.forEach(inp=>{
+    html += `<div class="input-section">
+      <div class="input-label">${esc(inp.label)}${inp.required?`<span class="input-req">Required</span>`:''}</div>
+      ${inp.hint?`<div class="input-hint">${esc(inp.hint)}</div>`:''}
+      ${inp.rows
+        ? `<textarea id="inp_${agentId}_${inp.id}" rows="${inp.rows}" placeholder="${esc(inp.placeholder||'')}">${esc(getInput(agentId+'_'+inp.id))}</textarea>`
+        : `<input type="text" id="inp_${agentId}_${inp.id}" placeholder="${esc(inp.placeholder||'')}" value="${esc(getInput(agentId+'_'+inp.id))}">`
+      }
+    </div>`;
+  });
+  html += `<div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-primary" id="btnGen_${agentId}" onclick="runGenericAgent('${agentId}','${outputKey}',${JSON.stringify(inputs).replace(/</g,'\\u003c')})">⚡ Generate</button>
+    <button class="btn-action" onclick="saveToCloud()">☁ Save</button>
+  </div>
+  <div class="output-section" style="margin-top:14px">
+    <div class="output-header">
+      <div class="output-label">${esc(outputLabel)}</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('${outputKey}'))">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('${outputKey}'),'${outputKey}')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_${agentId}">${savedOut?esc(savedOut):'<span class="output-placeholder">Output will appear here.</span>'}</div>
+  </div>
+  ${savedOut&&nextId?`<button class="btn-proceed" onclick="navigateTo('${nextId}')">Proceed to Next Step →</button>`:''}
+  ${buildChecklist(agentId, checklistItems)}`;
+  body.innerHTML = html;
+  // Store prompt builder for this agent
+  window['promptBuilder_'+agentId] = promptBuilder;
+}
+
+async function runGenericAgent(agentId, outputKey, inputs){
+  const vals = {};
+  let missing = false;
+  inputs.forEach(inp=>{
+    const el = document.getElementById('inp_'+agentId+'_'+inp.id);
+    if (el) { vals[inp.id]=el.value.trim(); setInput(agentId+'_'+inp.id, vals[inp.id]); }
+    if (inp.required && !vals[inp.id]) missing=true;
+  });
+  if (missing) { showToast('Please fill in all required fields.'); return; }
+  const profile = getOutput('step0_profile')||'[Career Capital Profile not yet generated — complete Step 0 first]';
+  const builder = window['promptBuilder_'+agentId];
+  if (!builder) return;
+  const prompt = builder(vals, profile, STATE.clientName);
+  const btn = document.getElementById('btnGen_'+agentId);
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating...';
+  const outEl = document.getElementById('out_'+agentId);
+  outEl.innerHTML='<span class="output-placeholder">Generating...</span>';
+  try{
+    const result = await callClaude(prompt, 4000, text=>{
+      outEl.textContent=text; outEl.classList.add('streaming-cursor');
+    });
+    outEl.classList.remove('streaming-cursor');
+    outEl.textContent=result;
+    setOutput(outputKey,result);
+    STATE.completedAgents.add(agentId);
+    buildNav(); updateProgress();
+    showToast('✓ Generated and saved');
+    renderAgent(agentId);
+  } catch(e){
+    outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}. Please try again.</div>`;
+  }
+  btn.disabled=false; btn.innerHTML='⚡ Generate';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STEP A — CAREER CAPITAL OPTIONS ANALYSIS
+// ═══════════════════════════════════════════════════════════════════════════
+function renderStepA(body){
+  renderGenericAgent(body,'stepA',
+    '<strong>Step A — Career Capital Options Analysis.</strong> This step answers the question every search depends on: where are you going? Evaluate 2–3 realistic career paths against your profile before a single document is built.',
+    [
+      {id:'currentbg',label:'Current work history / résumé',required:true,hint:'Paste your résumé or a brief work history summary.',rows:5,placeholder:'e.g. 8 years in operations and inventory management...'},
+      {id:'paths',label:'Career paths to evaluate',required:true,hint:'List 2–3 paths you are considering. If unsure, describe what you are drawn toward.',rows:3,placeholder:'Path 1: Stay in current function, go deeper (e.g. Operations Coordinator → Operations Manager)\nPath 2: Lateral pivot to adjacent function\nPath 3: Industry change within same function'},
+      {id:'constraints',label:'Geographic and compensation constraints',required:false,hint:'Location, remote/hybrid preference, and minimum compensation.',placeholder:'e.g. Austin TX metro, hybrid preferred, minimum $65,000 base'},
+    ],
+    'stepA_options',
+    'Career Capital Options Analysis',
+    (vals, profile, name) => `Act as my Career Capital Options Analyst for ${name}.
+
+Here is my Career Capital Profile:
+${profile}
+
+My current work history:
+${vals.currentbg}
+
+Career paths to evaluate:
+${vals.paths}
+
+Constraints: ${vals.constraints||'None specified'}
+
+Evaluate each path and produce:
+
+For each path:
+1. Match Score (0–100%): How well does my Career Capital Profile align with what this path requires? Score against: functional skills match, transferable skills relevance, values-environment fit, and market demand.
+2. Realistic Timeline to First Interview: Given the market and my background.
+3. Compensation Range: Realistic market range for this path at my level.
+4. Key Strengths I Bring: What from my profile positions me well.
+5. Key Gaps: What is missing and how significant.
+6. Trade-offs: What choosing this path means for my next role, three-year trajectory, and daily work life.
+
+Then produce:
+
+RECOMMENDED PATH: Name the single path that offers the best combination of market demand, profile fit, timeline, and compensation. Explain why in 3–4 sentences. Be direct.
+
+POSITIONING LANGUAGE FOR RECOMMENDED PATH: The specific job titles I should use in my search, the industries to prioritize, and 2–3 sentences I can use in outreach and interviews to describe what I am seeking and why I am qualified.
+
+IMMEDIATE NEXT STEPS: Three concrete actions to take this week, specific to my recommended path.`,
+    ['Career Capital Options Analysis read in full','Recommended path identified and honestly considered','Trade-offs for chosen path acknowledged','Target title and industries confirmed','Positioning language noted for use in all subsequent steps','Immediate next steps calendared'],
+    'stepB'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STEP B — RESUME BUILD
+// ═══════════════════════════════════════════════════════════════════════════
+function renderStepB(body){
+  const optionsOut = getOutput('stepA_options');
+  renderGenericAgent(body,'stepB',
+    '<strong>Step B — Résumé Build.</strong> Your master base résumé — built once from your Career Capital Profile and chosen path, then customized per posting by the Job Application Engine in Phase 2.',
+    [
+      {id:'existingresume',label:'Your current résumé',required:true,hint:'Paste your existing résumé in full.',rows:8,placeholder:'Paste your current résumé here...'},
+      {id:'targetrole',label:'Target role and industries',required:true,hint:'Specific title and industries from your Options Analysis.',placeholder:'e.g. Operations Supervisor — manufacturing and distribution, Austin TX'},
+      {id:'keywords',label:'ATS keywords (from your SCI/TSP scores)',required:false,hint:'List 8–12 primary keywords for your target role.',placeholder:'e.g. inventory management, process improvement, cross-functional coordination...'},
+    ],
+    'stepB_resume',
+    'Master Base Résumé',
+    (vals, profile, name) => `Act as a senior résumé strategist and ATS optimization specialist. Build the master base résumé for ${name}.
+
+Career Capital Profile:
+${profile}
+
+${optionsOut?`Chosen path from Options Analysis:\n${optionsOut.substring(0,800)}\n\n`:''}Current résumé:
+${vals.existingresume}
+
+Target role and industries: ${vals.targetrole}
+ATS keywords: ${vals.keywords||'Derive from Career Capital Profile and target role'}
+
+Produce a fully rewritten master base résumé optimized for ATS, recruiter readability, and hiring manager impact.
+
+REQUIREMENTS:
+1. Header: Full name, city/state, phone, professional email, LinkedIn URL. No photo, no objective, no references line.
+2. Professional Summary (4–6 lines): Open with target title and years of experience. Include top 2–3 value themes. ATS-keyword-rich. Third person.
+3. Core Competencies (2–3 column keyword block): 12–18 skills from Career Capital Profile. Exact industry-standard terminology.
+4. Professional Experience (each role): Company name, title, location, dates. 2–3 sentence context paragraph. 5–8 achievement bullets — action verb, quantified, outcomes only. No responsibilities language.
+5. Education: Degree, institution, year. Relevant certifications and licenses.
+6. Additional sections if relevant: Professional affiliations, volunteer leadership, publications.
+
+ATS REQUIREMENTS: No tables, columns, headers/footers, text boxes, or graphics. Standard section headings. Clean single-column layout.
+
+Produce the complete résumé — fully written, every section filled in. This is the master document for customization.`,
+    ['Résumé Build prompt run with Career Capital Profile as primary input','All dates, titles, and company names verified for accuracy','Keyword density confirmed — primary ATS keywords present','Achievement bullets reviewed — each quantified or strengthened','Master résumé saved as Word document','Ready for customization in Job Application Engine (Phase 2, Agent 5)'],
+    'stepC'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STEP C — LINKEDIN BUILD
+// ═══════════════════════════════════════════════════════════════════════════
+function renderStepC(body){
+  renderGenericAgent(body,'stepC',
+    '<strong>Step C — LinkedIn Profile Build.</strong> All nine LinkedIn sections — fully written, ready to copy and paste. Build this before any outreach begins.',
+    [
+      {id:'targetrole',label:'Target role and industries',required:true,placeholder:'e.g. Operations Supervisor — manufacturing and distribution'},
+      {id:'geography',label:'Target geography and work preference',required:true,placeholder:'e.g. Austin TX metro, open to hybrid or remote'},
+      {id:'notes',label:'Any specific notes or instructions',required:false,rows:2,placeholder:'e.g. I want to emphasize my supply chain experience over my administrative background...'},
+    ],
+    'stepC_linkedin',
+    'LinkedIn Profile — All 9 Sections',
+    (vals, profile, name) => `Act as a LinkedIn profile strategist and personal branding specialist. Build the complete LinkedIn profile for ${name}.
+
+Career Capital Profile:
+${profile}
+
+Master résumé context: ${getOutput('stepB_resume')?.substring(0,600)||'Not yet generated — using Career Capital Profile'}
+
+Target role: ${vals.targetrole}
+Target geography and work preference: ${vals.geography}
+Additional notes: ${vals.notes||'None'}
+
+Produce a complete, copy-and-paste LinkedIn profile — all nine sections, fully written.
+
+SECTION 1 — HEADLINE (under 220 characters): [Target Title] | [Primary Value Theme] | [Industry or Audience Served]. 2–3 high-search-volume keywords.
+
+SECTION 2 — ABOUT (1,800–2,000 characters): First 2 lines visible before "see more" — hook with value proposition. Paragraph 1: who I am and problems I solve. Paragraph 2: industries and organizations I serve. Paragraph 3: two specific proof points with context and quantified results. Paragraph 4: what I am looking for and who should reach out. Close with call to action. First person. Keyword-rich.
+
+SECTION 3 — EXPERIENCE (each role): Company description 1–2 sentences. 4–6 achievement bullets per role.
+
+SECTION 4 — SKILLS (top 50): Priority order. Exact LinkedIn skill taxonomy terms. Organized by: Core Technical, Functional, Industry Knowledge, Soft Skills.
+
+SECTION 5 — FEATURED: 3–4 specific items to feature and why each strengthens the profile.
+
+SECTION 6 — EDUCATION: Degree, institution, dates. 2–3 relevant courses or activities.
+
+SECTION 7 — CERTIFICATIONS: All relevant certifications with issuing organization and date.
+
+SECTION 8 — RECOMMENDATIONS: 3 types of people who should write recommendations, plus a customizable request message for each.
+
+SECTION 9 — ALGORITHM & VISIBILITY: Open to Work settings, Creator Mode recommendation, profile completeness checklist, connection strategy, activity recommendations to increase visibility.
+
+Write every section fully — not as a template. Copy-and-paste ready.`,
+    ['Headline updated on LinkedIn — keyword-rich, role-specific','About section replaced — hook visible before "see more"','All Experience entries updated with achievement bullets','Skills section updated — 50 skills in priority order','Featured section populated with 3–4 high-value items','Education and certifications complete','Recommendation requests sent to at least 3 contacts','Open to Work settings configured','Profile at 100% completeness — All-Star status','LinkedIn live before Phase 1 outreach begins'],
+    'stepD'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STEP D — DIGITAL REPUTATION AUDIT
+// ═══════════════════════════════════════════════════════════════════════════
+function renderStepD(body){
+  const auditInstructions = `Before running this prompt, complete your manual self-audit:
+1. Open a private/incognito browser window
+2. Search "[Your Full Name]" in Google — review first 2 pages
+3. Search "[Your Full Name] + [most recent employer]"
+4. Search "[Your Full Name] + [your industry/profession]"
+5. Review your LinkedIn as a non-connection (log out, then search yourself)
+6. Review your LinkedIn activity feed — posts, likes, comments in the past 90 days
+7. Check any public social media accounts`;
+  renderGenericAgent(body,'stepD',
+    '<strong>Step D — Digital Reputation Audit.</strong> Know exactly what the market sees before the market starts looking. Complete your manual self-audit first, then run this agent.',
+    [
+      {id:'googleresults',label:'What appeared in your Google search results',required:true,hint:'Describe what appeared on the first two pages for each search you ran.',rows:4,placeholder:'e.g. LinkedIn profile (correct), company bio from previous employer, one mention in local newspaper from 2021, personal Facebook page visible...'},
+      {id:'linkedinview',label:'How your LinkedIn looks as a non-connection',required:true,hint:'What is visible? Headline, photo, About preview, recent activity?',rows:3,placeholder:'e.g. Headline shows old title, About section not visible, profile photo is 5 years old...'},
+      {id:'socialmedia',label:'Public social media accounts',required:false,hint:'Note any public accounts and any content concerns.',rows:2,placeholder:'e.g. Twitter public, no concerning content. Facebook private. Instagram public, personal photos only.'},
+      {id:'concerns',label:'Any known sensitive items',required:false,hint:'Anything you are aware of that could raise questions.',rows:2,placeholder:'e.g. I was mentioned in an article about a company controversy at a previous employer...'},
+    ],
+    'stepD_reputation',
+    'Digital Reputation Management Plan',
+    (vals, profile, name) => `Act as my Digital Reputation Analyst for ${name}.
+
+I am beginning a professional job search.
+Target role: ${getInput('step0_role')||'Professional/exempt level'}
+
+Here is what I found in my self-audit:
+
+Google search results (first 2 pages): ${vals.googleresults}
+
+LinkedIn as a non-connection sees it: ${vals.linkedinview}
+
+Social media accounts (public): ${vals.socialmedia||'Not provided'}
+
+Known sensitive items: ${vals.concerns||'None identified'}
+
+Produce:
+
+1. Overall Digital Footprint Assessment: What a recruiter or hiring manager would likely conclude after searching my name. Be direct.
+
+2. Risk Items: Anything that could raise a question or hesitation. Rate each: Low / Medium / High. Recommended action for each.
+
+3. Amplification Opportunities: Positive assets that could be made more visible with minimal effort.
+
+4. LinkedIn Visibility Gaps: What is missing or weak that recruiters in my space typically look for.
+
+5. Social Media Recommendations: What to make private, what to clean up, what to leave as-is.
+
+6. Priority Action Plan: Specific actions in priority order with a realistic timeline for each.
+
+7. Google Alert Setup: The exact search strings I should set up as Google Alerts to monitor my digital presence going forward.`,
+    ['Manual self-audit completed — first two pages of Google results reviewed in private browser','LinkedIn profile reviewed as a non-connection','LinkedIn activity feed reviewed — past 90 days','Social media accounts audited — privacy settings confirmed','Digital Reputation Audit prompt run','Risk items addressed before Phase 1 outreach begins','Amplification opportunities actioned','Google Alerts set up for your name'],
+    'p1a1'
+  );
+  // Add manual audit instructions at top
+  const ctx = body.querySelector('.ctx-panel');
+  if (ctx) {
+    const note = document.createElement('div');
+    note.style.cssText = 'background:var(--gold-lt);border:1px solid rgba(186,138,42,.3);border-radius:6px;padding:13px 16px;margin-bottom:16px;font-size:12px;color:var(--text-2);white-space:pre-line';
+    note.textContent = auditInstructions;
+    ctx.after(note);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PHASE 1: AGENTS 1 & 2
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAgent1(body){
+  renderGenericAgent(body,'p1a1',
+    '<strong>Agent 1 — Market & Opportunity.</strong> Identifies opportunity signals before positions are posted, maps recruiters in your space, and builds your target company list. Uses live intelligence — run it, do not just read it.',
+    [
+      {id:'targetrole',label:'Target role and level',required:true,placeholder:'e.g. Senior Accountant, Operations Supervisor, HR Generalist'},
+      {id:'industries',label:'Target industries',required:true,placeholder:'e.g. Healthcare, financial services, manufacturing'},
+      {id:'geography',label:'Target geography',required:true,placeholder:'e.g. Austin TX metro, open to hybrid'},
+      {id:'companies',label:'Companies already on your radar (optional)',required:false,rows:2,placeholder:'List any companies you are already targeting — I will analyze and rank them'},
+    ],
+    'p1a1_market',
+    'Market & Opportunity Intelligence',
+    (vals, profile, name) => `Act as the Market & Opportunity Intelligence Agent for ${name}.
+
+Career Capital Profile:
+${profile}
+
+Target role: ${vals.targetrole}
+Target industries: ${vals.industries}
+Target geography: ${vals.geography}
+Companies already on radar: ${vals.companies||'None yet'}
+
+Task 1 — Opportunity Radar: Identify 10 types of opportunity signals currently active in this target market. For each: name example companies, describe the business challenge, identify the likely role needed, and rate the timing (urgent / 3 months / 6+ months).
+
+Task 2 — Recruiter & Staffing Map: List the top recruiting firms and individual recruiters who place professionals at this level in this target industry. For each: specialty, typical client profile, and most effective way to approach them.
+
+Task 3 — Target Company Analysis: If companies were listed above, rank them by opportunity strength. For each: identify the likely business need, signal evidence, role that solves it, best contact to reach, and a one-sentence outreach hook.
+
+Task 4 — 20-Company Target List: Build a tiered list of 20 companies:
+— Tier 1 (5 companies): highest opportunity strength, best profile fit
+— Tier 2 (10 companies): strong fit, good timing
+— Tier 3 (5 companies): worth monitoring, timing may not be right yet
+For each company: name, industry, size estimate, why they belong on the list, likely role, best entry point.`,
+    ['Opportunity radar reviewed — top signals identified','Recruiter and staffing firm list built — minimum 10 contacts','Target company list tiered (Tier 1 / Tier 2 / Tier 3)','Top Tier 1 companies researched in depth','Market intelligence saved and ready to share with Agent 2'],
+    'p1a2'
+  );
+}
+
+function renderAgent2(body){
+  renderGenericAgent(body,'p1a2',
+    '<strong>Agent 2 — Positioning & Brand.</strong> Produces your Professional Value Proposition, outreach summary statement, and professional bio. Run Prompt 1 once now. Prompt 2 (résumé customization) is handled by Agent 5 — Job Application Engine.',
+    [
+      {id:'targetrole',label:'Target role and industries',required:true,placeholder:'e.g. Operations Supervisor — manufacturing and distribution'},
+      {id:'themes',label:'My primary contribution themes',required:false,hint:'What do you do that creates the most value for employers?',rows:2,placeholder:'e.g. I reduce operational costs through process improvement and build high-performing teams...'},
+    ],
+    'p1a2_positioning',
+    'Positioning & Brand — Professional Value Proposition + Bio',
+    (vals, profile, name) => `Act as the Professional Positioning & Brand Agent for ${name}.
+
+Career Capital Profile:
+${profile}
+
+Market intelligence context: ${getOutput('p1a1_market')?.substring(0,400)||'Not yet generated'}
+
+Target role: ${vals.targetrole}
+Primary contribution themes: ${vals.themes||'Derive from Career Capital Profile'}
+
+Produce all four fully written — not as templates:
+
+1. Professional Value Proposition (one page): The problem I solve, my approach, two brief proof points with context and results, closing statement. Written for a recruiter or hiring manager who has not met me.
+
+2. Outreach summary statement (2–3 sentences): What I do, what I deliver, and what I am looking for. For recruiter calls and networking conversations. Direct, no jargon.
+
+3. Professional bio (150–200 words, third person): For applications, LinkedIn Featured section, conference profiles, and introductions. Specific to my background.
+
+4. LinkedIn About section check: Based on what I know about the target role and market, suggest any refinements to the About section to sharpen keyword relevance or value proposition clarity.
+
+Do not use generic language. Every sentence must be specific to this background and target.`,
+    ['Positioning & Brand prompt run — Professional Value Proposition complete','Outreach summary statement ready to use in recruiter calls','Professional bio saved and added to LinkedIn Featured section','LinkedIn About section reviewed and updated if needed'],
+    'p2a3'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PHASE 2: AGENTS 3–8
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAgent3(body){
+  // Multi-prompt agent: Outreach + Informational Interviews
+  const profile = getOutput('step0_profile');
+  const savedOutreach = getOutput('p2a3_outreach');
+  const savedInfo = getOutput('p2a3_info');
+
+  body.innerHTML = `
+  <div class="ctx-panel">
+    <div class="ctx-icon">◆</div>
+    <div class="ctx-text"><strong>Agent 3 — Outreach, Network & Informational Interviews.</strong>
+    Two capabilities in one agent. Use the Outreach prompt for recruiter and direct company messages. Use the Informational Interview prompts to access the hidden job market — the primary demand-creation channel at this level.</div>
+  </div>
+  ${profile?`<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div>
+  <div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile is feeding this agent automatically.</span></div></div>`:''}
+
+  <div class="divider"></div>
+  <h3 style="font-family:var(--font-d);font-size:18px;color:var(--navy);margin-bottom:14px">Outreach Messages</h3>
+
+  <div class="input-section">
+    <div class="input-label">Contact information <span class="input-req">Required</span></div>
+    <div class="input-hint">Name, title, company, and how you know them (or how you found them).</div>
+    <textarea id="inp_p2a3_contact" rows="3" placeholder="e.g. Maria Chen, VP Operations, Meridian Health Systems&#10;Relationship: LinkedIn connection — second degree, recommended by former colleague">${esc(getInput('p2a3_contact'))}</textarea>
+  </div>
+  <div class="input-section">
+    <div class="input-label">Opportunity or context</div>
+    <div class="input-hint">What you know about their company, a recent posting, or a triggering event.</div>
+    <textarea id="inp_p2a3_context" rows="2" placeholder="e.g. Company recently opened three new locations, likely hiring for operations roles...">${esc(getInput('p2a3_context'))}</textarea>
+  </div>
+  <div class="input-section">
+    <div class="input-label">Desired outcome</div>
+    <input type="text" id="inp_p2a3_outcome" placeholder="e.g. referral / intro call / direct conversation about role" value="${esc(getInput('p2a3_outcome'))}">
+  </div>
+  <button class="btn btn-primary" id="btnOutreach" onclick="runOutreach()">⚡ Generate Outreach Messages</button>
+  <div class="output-section" style="margin-top:14px">
+    <div class="output-header">
+      <div class="output-label">Outreach — LinkedIn + Email</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('p2a3_outreach'))">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('p2a3_outreach'),'Outreach_Messages')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_p2a3_outreach">${savedOutreach?esc(savedOutreach):'<span class="output-placeholder">LinkedIn and email versions will appear here.</span>'}</div>
+  </div>
+
+  <div class="divider"></div>
+  <h3 style="font-family:var(--font-d);font-size:18px;color:var(--navy);margin-bottom:8px">Informational Interview Protocol</h3>
+  <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.65">Informational interviews are the primary access point to the hidden job market at the professional level. Most roles are filled before they are posted — and informational conversations are how you get in front of those opportunities. Use all three prompts in sequence.</p>
+
+  <div class="input-section">
+    <div class="input-label">Target contact for informational interview <span class="input-req">Required</span></div>
+    <div class="input-hint">Name, title, company, how you found them, and what you want to learn from them.</div>
+    <textarea id="inp_p2a3_infocontact" rows="3" placeholder="e.g. James Rodriguez, Director of Operations, Meridian Health Systems&#10;Found via LinkedIn — second degree connection through former manager&#10;Want to learn about operations career paths at regional health systems">${esc(getInput('p2a3_infocontact'))}</textarea>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+    <button class="btn btn-sky" onclick="runInfoRequest()">▸ Generate Request Message</button>
+    <button class="btn btn-sky" onclick="runInfoPrep()">▸ Generate Prep Brief</button>
+    <button class="btn btn-sky" onclick="runInfoFollowup()">▸ Generate Follow-Up + Conversion</button>
+  </div>
+  <div class="output-section">
+    <div class="output-header">
+      <div class="output-label">Informational Interview Output</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('p2a3_info'))">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('p2a3_info'),'Informational_Interview')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_p2a3_info">${savedInfo?esc(savedInfo):'<span class="output-placeholder">Select a prompt above to generate request, prep brief, or follow-up.</span>'}</div>
+  </div>
+  <div id="a3ProceedWrap">${(savedOutreach||savedInfo)?`<button class="btn-proceed" onclick="navigateTo('p2a4')">Proceed to Agent 4 →</button>`:''}</div>
+  ${buildChecklist('p2a3',[
+    'Outreach messages sent — minimum 6 per week',
+    'Tier 1 and Tier 2 contacts activated first',
+    'Follow-up sequence scheduled for each outreach',
+    'Informational interview request sent to at least 2 contacts',
+    'Informational interview prep brief completed before each conversation',
+    'Follow-up message sent within 24 hours of each informational interview',
+  ])}`;
+}
+
+async function runOutreach(){
+  const contact = document.getElementById('inp_p2a3_contact').value.trim();
+  const context = document.getElementById('inp_p2a3_context').value.trim();
+  const outcome = document.getElementById('inp_p2a3_outcome').value.trim();
+  if (!contact) { showToast('Please enter contact information.'); return; }
+  setInput('p2a3_contact',contact); setInput('p2a3_context',context); setInput('p2a3_outcome',outcome);
+  const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
+  const prompt = `Act as my Professional Outreach & Network Agent for ${STATE.clientName}.
+
+My Career Capital Profile: ${profile.substring(0,600)}
+
+Contact: ${contact}
+Opportunity / context: ${context||'Not specified'}
+Desired outcome: ${outcome||'Professional conversation / referral'}
+
+Write a LinkedIn message AND an email version of the outreach. Both must be:
+— Under 120 words each
+— Credibility-first (lead with something specific about them or their company — not with my needs)
+— Specific to this person and context
+— Include one clear, low-friction ask
+— Written as a competent professional reaching out to a peer — NOT as a job seeker
+
+Do not use phrases like "I hope this finds you well," "I'd love to connect," or "pick your brain."
+
+Format clearly:
+LINKEDIN MESSAGE (under 120 words):
+[message]
+
+EMAIL VERSION (under 120 words):
+Subject: [subject line]
+[message]`;
+
+  const btn = document.getElementById('btnOutreach');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating...';
+  const outEl = document.getElementById('out_p2a3_outreach');
+  outEl.innerHTML='<span class="output-placeholder">Generating...</span>';
+  try{
+    const result = await callClaude(prompt, 1500, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
+    outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
+    setOutput('p2a3_outreach',result);
+    STATE.completedAgents.add('p2a3'); buildNav(); updateProgress();
+    showToast('✓ Outreach messages generated');
+    const pw = document.getElementById('a3ProceedWrap');
+    if(pw) pw.innerHTML = `<button class="btn-proceed" onclick="navigateTo('p2a4')">Proceed to Agent 4 →</button>`;
+  } catch(e){ outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}</div>`; }
+  btn.disabled=false; btn.innerHTML='⚡ Generate Outreach Messages';
+}
+
+async function runInfoPrompt(type){
+  const contact = document.getElementById('inp_p2a3_infocontact').value.trim();
+  if (!contact) { showToast('Please enter the contact information for the informational interview.'); return; }
+  setInput('p2a3_infocontact', contact);
+  const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
+  let prompt = '';
+  if (type === 'request') {
+    prompt = `Act as my Informational Interview Request Agent for ${STATE.clientName}.
+
+My Career Capital Profile summary: ${profile.substring(0,400)}
+Target contact: ${contact}
+
+Write a request message for an informational interview. Requirements:
+— Under 100 words
+— Specific to this person and their background (do not use generic "I'd love to learn from you" language)
+— No mention of job searching or looking for a job — frame as seeking insight and perspective
+— One clear, low-friction ask: a 20-minute conversation
+— Written as a peer, not a supplicant
+— Do not use "pick your brain"
+
+Provide: LinkedIn version AND email version (with subject line).`;
+  } else if (type === 'prep') {
+    prompt = `Act as my Informational Interview Preparation Coach for ${STATE.clientName}.
+
+My Career Capital Profile: ${profile.substring(0,500)}
+Contact I am meeting with: ${contact}
+
+Produce a one-page informational interview prep brief covering:
+1. Research checklist: What to know about this person and their company before the conversation (specific things to research, not generic advice)
+2. Five intelligent questions to ask (that signal genuine curiosity and professional knowledge — not questions a job seeker would ask)
+3. How to introduce myself and my background in 60 seconds (specific to my profile and the context of this conversation)
+4. How to close the conversation toward a next step without seeming transactional
+5. What NOT to do or say in this conversation`;
+  } else {
+    prompt = `Act as my Informational Interview Follow-Up Agent for ${STATE.clientName}.
+
+My Career Capital Profile: ${profile.substring(0,400)}
+Contact I met with: ${contact}
+
+Produce three documents:
+
+1. THANK-YOU MESSAGE (send within 24 hours): Reference something specific from the conversation. Express genuine appreciation. Keep under 100 words. No ask — this is pure relationship building.
+
+2. CONVERSION GUIDANCE: A framework for how and when to ask for a referral or introduction based on how the conversation went. Include the specific language to use if: (a) they offered to help proactively, (b) they seemed positive but did not offer, (c) the conversation was pleasant but no clear opportunity emerged.
+
+3. 30-DAY RECONNECTION MESSAGE: A message to send 30 days later to keep the relationship warm without being transactional. Reference something from the original conversation or a relevant industry development.`;
+  }
+  const outEl = document.getElementById('out_p2a3_info');
+  outEl.innerHTML='<span class="output-placeholder">Generating...</span>';
+  try{
+    const result = await callClaude(prompt, 2000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
+    outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
+    setOutput('p2a3_info', (getOutput('p2a3_info')||'') + '\n\n---\n\n' + result);
+    STATE.completedAgents.add('p2a3'); buildNav(); updateProgress();
+    showToast('✓ Generated');
+  } catch(e){ outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}</div>`; }
+}
+function runInfoRequest(){ runInfoPrompt('request'); }
+function runInfoPrep(){ runInfoPrompt('prep'); }
+function runInfoFollowup(){ runInfoPrompt('followup'); }
+
+function renderAgent4(body){
+  const profile = getOutput('step0_profile');
+  const savedDocs = getOutput('p2a4_docs');
+  body.innerHTML = `
+  <div class="ctx-panel">
+    <div class="ctx-icon">◆</div>
+    <div class="ctx-text"><strong>Agent 4 — Career Toolkit.</strong>
+    One button generates 5 professional documents simultaneously. Then use the individual prompts for on-demand and situational documents.</div>
+  </div>
+  ${profile?`<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div><div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile is feeding this agent automatically.</span></div></div>`:''}
+  <div class="input-section">
+    <div class="input-label">Target company and role <span class="input-req">Required</span></div>
+    <input type="text" id="inp_p2a4_company" placeholder="e.g. Meridian Health Systems — Operations Supervisor" value="${esc(getInput('p2a4_company'))}">
+  </div>
+  <div class="input-section">
+    <div class="input-label">What you know about their business situation</div>
+    <textarea id="inp_p2a4_research" rows="2" placeholder="e.g. Recently expanded to three new locations, implementing new inventory system...">${esc(getInput('p2a4_research'))}</textarea>
+  </div>
+
+  <div style="background:var(--teal-lt);border:1px solid var(--teal-2);border-radius:6px;padding:14px 16px;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:10px">Auto-Generate — 5 Documents Simultaneously</div>
+    <div style="font-size:12px;color:var(--text-2);margin-bottom:12px">Generates in parallel: Recruiter outreach email · LinkedIn outreach message · Professional value proposition · Professional bio · 3-touch follow-up sequence</div>
+    <button class="btn btn-primary" id="btnAutoGen" onclick="runAutoGenerate()">✦ Generate All 5 Documents Now →</button>
+  </div>
+
+  <div class="output-section">
+    <div class="output-header">
+      <div class="output-label">5 Professional Documents</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('p2a4_docs'))">⎘ Copy All</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('p2a4_docs'),'Career_Toolkit_Documents')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_p2a4_docs">${savedDocs?esc(savedDocs):'<span class="output-placeholder">Your 5 documents will stream in here simultaneously.</span>'}</div>
+  </div>
+
+  <div class="divider"></div>
+  <h3 style="font-family:var(--font-d);font-size:17px;color:var(--navy);margin-bottom:12px">On-Demand Documents</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+    <button class="btn-action" onclick="runOnDemand('coverletter')">Cover Letter</button>
+    <button class="btn-action" onclick="runOnDemand('impactbrief')">Impact Brief</button>
+    <button class="btn-action" onclick="runOnDemand('jobfit')">Job Fit Analysis</button>
+    <button class="btn-action" onclick="runOnDemand('thankyou')">Thank-You Message</button>
+    <button class="btn-action" onclick="runOnDemand('906090')">30-60-90 Plan</button>
+    <button class="btn-action" onclick="runOnDemand('leavebehind')">Leave-Behind</button>
+    <button class="btn-action" onclick="runOnDemand('rejection')">Rejection Recovery</button>
+  </div>
+  <div class="output-box" id="out_p2a4_ondemand"><span class="output-placeholder">Select a document above to generate.</span></div>
+  <div id="a4ProceedWrap">${savedDocs?`<button class="btn-proceed" onclick="navigateTo('p2a5')">Proceed to Agent 5 →</button>`:''}</div>
+  ${buildChecklist('p2a4',[
+    'Auto-generate run — all 5 documents reviewed',
+    'Recruiter outreach email ready to send',
+    'LinkedIn message ready to send',
+    'Professional value proposition saved',
+    'Professional bio added to LinkedIn Featured section',
+    'Follow-up sequence scheduled in calendar',
+  ])}`;
+}
+
+async function runAutoGenerate(){
+  const company = document.getElementById('inp_p2a4_company').value.trim();
+  if (!company) { showToast('Please enter the target company and role.'); return; }
+  setInput('p2a4_company', company);
+  const research = document.getElementById('inp_p2a4_research').value.trim();
+  setInput('p2a4_research', research);
+  const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
+  const firstName = STATE.clientName.split(' ')[0];
+
+  const prompt = `Act as the Career Toolkit Auto-Generator for ${STATE.clientName}. Generate all 5 professional documents simultaneously.
+
+Career Capital Profile: ${profile.substring(0,600)}
+Target company and role: ${company}
+Business situation: ${research||'Not specified'}
+
+Produce all 5 documents, clearly separated:
+
+═══════════════════════════════════
+DOCUMENT 1 — RECRUITER OUTREACH EMAIL
+═══════════════════════════════════
+Subject: [subject line]
+[Under 150 words. Lead with something specific about this company or the opportunity. State credentials briefly. One clear ask: a 15-minute call. No desperation language. Written as a professional, not a job seeker.]
+
+═══════════════════════════════════
+DOCUMENT 2 — LINKEDIN OUTREACH MESSAGE
+═══════════════════════════════════
+[Under 100 words. LinkedIn version of the above. Direct, specific, one ask.]
+
+═══════════════════════════════════
+DOCUMENT 3 — PROFESSIONAL VALUE PROPOSITION
+═══════════════════════════════════
+[One page. The problem I solve, my approach, two quantified proof points, closing statement. Written for a hiring manager who has not met me.]
+
+═══════════════════════════════════
+DOCUMENT 4 — PROFESSIONAL BIO
+═══════════════════════════════════
+[150–200 words, third person. For applications, LinkedIn Featured, and introductions. Specific and non-generic.]
+
+═══════════════════════════════════
+DOCUMENT 5 — 3-TOUCH FOLLOW-UP SEQUENCE
+═══════════════════════════════════
+Follow-Up 1 (7 days after outreach): [under 80 words — reference original message, add one new piece of value, restate ask]
+Follow-Up 2 (14 days): [under 60 words — brief, warm, final professional nudge]
+Follow-Up 3 (30 days): [under 60 words — long-game reconnection, no ask, keep door open]
+
+All documents must be specific to ${company} and ${firstName}'s background. No generic language.`;
+
+  const btn = document.getElementById('btnAutoGen');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating all 5 documents...';
+  const outEl = document.getElementById('out_p2a4_docs');
+  outEl.innerHTML='<span class="output-placeholder">Generating 5 documents in parallel...</span>';
+  try{
+    const result = await callClaude(prompt, 4000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
+    outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
+    setOutput('p2a4_docs',result);
+    STATE.completedAgents.add('p2a4'); buildNav(); updateProgress();
+    showToast('✓ All 5 documents generated');
+    const pw = document.getElementById('a4ProceedWrap');
+    if(pw) pw.innerHTML = `<button class="btn-proceed" onclick="navigateTo('p2a5')">Proceed to Agent 5 →</button>`;
+  } catch(e){ outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}</div>`; }
+  btn.disabled=false; btn.innerHTML='✦ Generate All 5 Documents Now →';
+}
+
+async function runOnDemand(type){
+  const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
+  const company = getInput('p2a4_company')||'[target company]';
+  const role = company;
+  const firstName = STATE.clientName.split(' ')[0];
+  const prompts = {
+    coverletter: `Write a role-specific cover letter for ${firstName} applying to ${role}. Career Capital Profile: ${profile.substring(0,500)}. Under 300 words. Three paragraphs: why this company specifically, the most relevant experience, the ask. Specific to this company — not generic.`,
+    impactbrief: `Write a Professional Impact Brief for ${firstName} targeting ${role}. Career Capital Profile: ${profile.substring(0,500)}. One page. Three sections: the problem this role exists to solve, my relevant experience as the solution (two specific proof points with numbers), and a brief closing positioning statement.`,
+    jobfit: `Produce a Job Fit Analysis for ${firstName} targeting ${role}. Career Capital Profile: ${profile.substring(0,500)}. Two sections: (1) Where I am a strong fit — specific matches between my profile and likely requirements. (2) Potential gaps — honest assessment of where my background may not fully match, and how to address each in the application and interview.`,
+    thankyou: `Write post-interview thank-you messages for ${firstName} after interviewing at ${company}. Produce four versions calibrated by interviewer type: (1) HR/Recruiter — brief, warm, process-oriented. (2) Hiring Manager — substantive, reinforces top qualification. (3) Team member/peer — collegial, addresses culture fit. (4) Senior leader — strategic, brief, high-signal. Each under 120 words. Reference a specific moment from a hypothetical conversation.`,
+    '906090': `Write a real-situation 30-60-90 Day Entry Plan for ${firstName} starting at ${company}. Career Capital Profile: ${profile.substring(0,400)}. Each phase: specific actions, relationships to build, risks to manage, and observable outcomes. Not a generic framework — grounded in what someone in this role at this type of company would actually prioritize.`,
+    leavebehind: `Create a one-page interview leave-behind for ${firstName} targeting ${role} at ${company}. Three sections: who I am (one sentence), two key themes that demonstrate fit (each with a brief proof point), and a closing statement about the specific value I would create in this role. Professional enough to share with a panel. Specific to this company.`,
+    rejection: `Write two post-rejection documents for ${firstName} after being rejected for ${role} at ${company}. (1) Gracious rejection response (send within 24 hours): Under 80 words. Thank them for the process. Express continued interest in the company. Leave door open for future opportunities. No bitterness. (2) 60-day silver medalist reconnection: A message to send two months later. Reference something new about the company or industry. Express genuine interest in staying connected. No mention of the rejection.`,
+  };
+  const outEl = document.getElementById('out_p2a4_ondemand');
+  outEl.innerHTML='<span class="output-placeholder">Generating...</span>';
+  try{
+    const result = await callClaude(prompts[type]||'Tell me you need a valid document type.', 2000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
+    outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
+    showToast('✓ Generated');
+  } catch(e){ outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}</div>`; }
+}
+
+function renderAgent5(body){
+  renderGenericAgent(body,'p2a5',
+    '<strong>Agent 5 — Job Application Engine.</strong> Run this before every application. Never submit your master résumé unmodified. Each customization takes approximately 10 minutes and measurably improves ATS pass-through rates.',
+    [
+      {id:'jobposting',label:'Complete job posting',required:true,hint:'Paste the full job description — title, requirements, responsibilities, and any company description included.',rows:8,placeholder:'Paste the complete job posting here...'},
+      {id:'company',label:'Company name and what you know about them',required:true,placeholder:'e.g. Meridian Health Systems — regional healthcare network, recently expanded...'},
+    ],
+    'p2a5_customresume',
+    'Customized Résumé + Change Log',
+    (vals, profile, name) => `Act as a senior résumé strategist and ATS optimization specialist. Customize the résumé for ${name}.
+
+Career Capital Profile: ${profile.substring(0,500)}
+
+Master base résumé: ${getOutput('stepB_resume')?.substring(0,2000)||'[Master résumé not yet generated — using Career Capital Profile as context]'}
+
+Job posting I am targeting: ${vals.jobposting}
+Company: ${vals.company}
+
+Produce a fully customized résumé for this specific posting:
+
+1. Keyword Analysis: Identify the 10–15 most important keywords and phrases in this posting. Flag any missing or underrepresented in the current résumé.
+
+2. Summary Section: Rewrite to mirror the posting's language. Open with the exact title from the posting. Incorporate top 3–5 keywords naturally.
+
+3. Core Competencies: Adjust the skills block to front-load keywords most relevant to this posting.
+
+4. Experience Section: Reorder bullets within each role to surface the most relevant experience first. Rewrite 2–3 bullets per role using the posting's specific language where accurate. Do not fabricate — reframe and reorder only.
+
+5. ATS Compliance: Confirm no ATS-incompatible formatting. Confirm keyword density is strong without being artificial.
+
+Produce the complete customized résumé — ready to submit.
+
+Then:
+CHANGE LOG: What changed, what keywords were added, and why each change was made.`,
+    ['Job description fully reviewed before submitting','Job Application Engine run for this specific posting','Customized résumé downloaded and saved with company name in filename','Change log reviewed — understand what changed and why','ATS keyword match confirmed','Application submitted with customized résumé','Application logged in Search Dashboard'],
+    'p2a6'
+  );
+}
+
+function renderAgent6(body){
+  renderGenericAgent(body,'p2a6',
+    '<strong>Agent 6 — References & Reference Management.</strong> References who are actively prepped and aligned with your positioning are significantly more effective than references who are simply willing.',
+    [
+      {id:'references',label:'Your potential references',required:true,hint:'For each: name, title, company, relationship, how long you worked together, what they managed or observed.',rows:6,placeholder:'Reference 1: [Name, Title, Company, relationship, context]\nReference 2: ...\nReference 3: ...'},
+      {id:'targetrole',label:'Target role you are applying for',required:false,placeholder:'e.g. Operations Supervisor at Meridian Health Systems'},
+    ],
+    'p2a6_references',
+    'Reference Strategy + Prep Briefs + Outreach Messages',
+    (vals, profile, name) => `Act as the Reference Strategy Agent for ${name}.
+
+Career Capital Profile: ${profile.substring(0,500)}
+Target role: ${vals.targetrole||getInput('step0_role')||'Professional/exempt level'}
+
+My potential references:
+${vals.references}
+
+Produce:
+
+1. Reference Tier Assessment: For each reference — how strong are they for my target role, what are they best positioned to speak to, and what potential gaps or risks exist in using them?
+
+2. Individual Prep Brief for each reference (to send to the reference): A 1-page brief covering: what role I am targeting and why it is a great fit, the 3–4 specific strengths I would like them to emphasize, a 2–3 sentence description of our work together (to refresh their memory), any context on the specific company or role if known, and a direct ask.
+
+3. Outreach Message for each reference: A personalized message to send to activate them. Brief, specific, grateful. Includes what I am asking and a timeline.
+
+4. Post-Reference-Check Follow-Up: A brief thank-you message to send after a reference has been checked, whether or not I got the offer.`,
+    ['Reference roster built — minimum 3 strong references identified','Reference tier assessment reviewed — strongest references selected','Outreach messages sent to all references — at least 2 weeks before expected check','Prep briefs sent to each active reference','Confirmation received that each reference is prepared and available','Reference list formatted and ready to provide upon request'],
+    'p2a7'
+  );
+}
+
+function renderAgent7(body){
+  renderGenericAgent(body,'p2a7',
+    '<strong>Agent 7 — Compensation Benchmarking.</strong> Run this before your first interview — not when you receive an offer. Candidates who know their market value before interviewing negotiate from knowledge rather than hope.',
+    [
+      {id:'targetrole',label:'Target role and level',required:true,placeholder:'e.g. Operations Supervisor, manager-level'},
+      {id:'industries',label:'Target industries',required:true,placeholder:'e.g. Healthcare, manufacturing, logistics'},
+      {id:'geography',label:'Target geography',required:true,placeholder:'e.g. Austin TX metro'},
+      {id:'companysize',label:'Company size range',required:false,placeholder:'e.g. 100–1,500 employees, regional or national'},
+      {id:'currentcomp',label:'Your current or most recent total compensation',required:false,hint:'Base, bonus, benefits — as much detail as you have.',rows:2,placeholder:'e.g. Base $58,000, no bonus, standard benefits (health, 401k with 4% match)'},
+    ],
+    'p2a7_benchmark',
+    'Compensation Benchmark + Strategy',
+    (vals, profile, name) => `Act as the Compensation Intelligence Agent for ${name}.
+
+Career Capital Profile: ${profile.substring(0,400)}
+Target role: ${vals.targetrole}
+Target industries: ${vals.industries}
+Target geography: ${vals.geography}
+Company size: ${vals.companysize||'Not specified'}
+Current compensation: ${vals.currentcomp||'Not provided'}
+
+Produce:
+
+1. Market Range Analysis: The realistic base salary range for this role, level, industry, and geography in the current market. Provide low / median / high range with your reasoning.
+
+2. Total Compensation Architecture: What components are typically negotiable at this level? For each component (base, bonus, signing bonus, benefits, flexibility, development allowance, title), what is the typical range and what is realistic to ask for?
+
+3. Industry and Company Size Adjustments: How does compensation vary by industry and company size within the target set? Where should the candidate expect to find the best total compensation?
+
+4. Personal Compensation Targets: Based on this profile and the current market, recommend: (a) walk-away floor, (b) opening ask, and (c) ideal outcome.
+
+5. Salary Conversation Language: The exact language to use when asked "What are your salary expectations?" at each stage: recruiter screen, hiring manager interview, and offer stage.
+
+6. Red Flags: Any compensation patterns in these target roles that would suggest the role is underfunded or the organization undervalues this function.`,
+    ['Compensation Benchmarking run before first interview','Market range documented for target role, level, and geography','Walk-away floor established and committed to','Opening ask and ideal outcome defined','Salary conversation language prepared for recruiter screen','Benchmark saved and referenced throughout the search'],
+    'p2a8'
+  );
+}
+
+function renderAgent8(body){
+  renderGenericAgent(body,'p2a8',
+    '<strong>Agent 8 — Job Search Intelligence.</strong> Board selection by sector, Boolean search strings, job alert configuration, application volume strategy, and live job search. The 24-hour rule: applications submitted within 24 hours of a posting going live receive significantly higher response rates.',
+    [
+      {id:'targetrole',label:'Target role and level',required:true,placeholder:'e.g. Operations Supervisor, Senior Accountant'},
+      {id:'industries',label:'Target industries and sector',required:true,placeholder:'e.g. Healthcare, manufacturing, administrative/operations'},
+      {id:'geography',label:'Target geography and remote preference',required:true,placeholder:'e.g. Austin TX metro, open to hybrid'},
+      {id:'weeklyHours',label:'Weekly time available for active searching',required:false,placeholder:'e.g. 10–15 hours per week'},
+    ],
+    'p2a8_searchintel',
+    'Job Search Intelligence — Board Strategy + Workflow',
+    (vals, profile, name) => `Act as the Job Search Intelligence Agent for ${name}.
+
+Career Capital Profile: ${profile.substring(0,400)}
+Target role: ${vals.targetrole}
+Target industries and sector: ${vals.industries}
+Target geography: ${vals.geography}
+Weekly search time available: ${vals.weeklyHours||'10–15 hours per week'}
+
+SECTION 1 — RECOMMENDED BOARD STACK: Based on the target role, industry, and geography, identify: 3 primary job boards (daily), 2–3 niche or specialty boards (weekly), company career pages to bookmark directly, and which boards to skip and why. For each recommended board: explain why it is right for this background.
+
+SECTION 2 — BOOLEAN SEARCH STRINGS: Write optimized Boolean search strings for LinkedIn Jobs, Indeed, and Google Jobs. For each: target title variants, required keywords, industry terms, location modifiers, and exclusion terms. Format each string ready to paste directly into the search bar.
+
+SECTION 3 — JOB ALERT CONFIGURATION: For each recommended platform: exact search terms for setting up alerts, alert frequency, location and radius settings, and any platform-specific settings that improve alert quality.
+
+SECTION 4 — EASY APPLY VS. DIRECT APPLICATION STRATEGY: Which types of postings are worth using LinkedIn Easy Apply for, when to apply through company career page directly, the 4 things that must be true for Easy Apply to succeed, and the most common Easy Apply mistake.
+
+SECTION 5 — APPLICATION VOLUME AND PACING: How many applications per week for this situation, how to allocate volume across channels, the quality threshold for full customization vs. lighter pass, and how to maintain pace without becoming indiscriminate.
+
+SECTION 6 — HIDDEN MARKET CHANNEL MAP: Professional associations with job boards or member networks, LinkedIn groups where hiring managers in this space are active, staffing firms that specialize in this role and industry, and other non-board channels specific to this situation.
+
+SECTION 7 — WEEKLY SEARCH WORKFLOW: A daily/weekly routine for Monday through Friday. What to do each day, in what order, for how long. Which tasks are daily vs. weekly. How to track applications without tracking becoming a substitute for applying. The one weekly metric that tells whether the search is healthy or stalling.`,
+    ['Job Search Intelligence run — board stack confirmed','3 primary boards selected and bookmarked','Niche boards identified for specific sector','Boolean search strings saved for each platform','Job alerts configured on each platform — daily frequency','Easy Apply vs. direct application strategy confirmed','Weekly application volume target set','Weekly search workflow documented and committed to'],
+    'p3a9'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PHASE 3: AGENTS 9 & 10
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAgent9(body){
+  const profile = getOutput('step0_profile');
+  const savedBrief = getOutput('p3a9_brief');
+  const savedFollowup = getOutput('p3a9_followup');
+
+  body.innerHTML = `
+  <div class="ctx-panel">
+    <div class="ctx-icon">◆</div>
+    <div class="ctx-text"><strong>Agent 9 — Interview Intelligence + Live Mock Interview + Post-Interview Follow-Up.</strong>
+    Step 1 generates your company intelligence brief and interview preparation. Step 2 is the live camera mock interview. Step 3 handles post-interview follow-up, status management, and rejection recovery.</div>
+  </div>
+  ${profile?`<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div><div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile is feeding this agent automatically.</span></div></div>`:''}
+
+  <div class="divider"></div>
+  <h3 style="font-family:var(--font-d);font-size:18px;color:var(--navy);margin-bottom:14px">Step 1 — Interview Intelligence Brief</h3>
+  <div class="input-section">
+    <div class="input-label">Company and role <span class="input-req">Required</span></div>
+    <input type="text" id="inp_p3a9_company" placeholder="e.g. Meridian Health Systems — Operations Supervisor" value="${esc(getInput('p3a9_company'))}">
+  </div>
+  <div class="input-section">
+    <div class="input-label">Job description</div>
+    <textarea id="inp_p3a9_jd" rows="4" placeholder="Paste the job description...">${esc(getInput('p3a9_jd'))}</textarea>
+  </div>
+  <div class="input-section">
+    <div class="input-label">Interviewers (name and title for each, if known)</div>
+    <textarea id="inp_p3a9_interviewers" rows="2" placeholder="e.g. Maria Chen, VP Operations&#10;Tom Reyes, HR Director">${esc(getInput('p3a9_interviewers'))}</textarea>
+  </div>
+  <div class="input-section">
+    <div class="input-label">Interview format</div>
+    <input type="text" id="inp_p3a9_format" placeholder="e.g. 45-minute panel, or two rounds — HR screen then hiring manager" value="${esc(getInput('p3a9_format'))}">
+  </div>
+  <button class="btn btn-primary" id="btnBrief" onclick="runInterviewBrief()">⚡ Generate Intelligence Brief</button>
+  <div class="output-section" style="margin-top:14px">
+    <div class="output-header">
+      <div class="output-label">Interview Intelligence Brief</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('p3a9_brief'))">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('p3a9_brief'),'Interview_Intelligence_Brief')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_p3a9_brief">${savedBrief?esc(savedBrief):'<span class="output-placeholder">Your intelligence brief will appear here.</span>'}</div>
+  </div>
+
+  <div class="divider"></div>
+  <h3 style="font-family:var(--font-d);font-size:18px;color:var(--navy);margin-bottom:8px">Step 2 — Live Mock Interview</h3>
+  <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Camera on, microphone active. The AI interviewer asks questions aloud. Real-time transcription runs underneath. Per-answer scoring and a comprehensive debrief at the end.</p>
+  <a href="https://ginger890.github.io/ExecEdge-AI/live-mock-interview/" target="_blank" class="btn btn-primary" style="text-decoration:none;display:inline-flex">▶ Launch Live Mock Interview →</a>
+  <p style="font-size:11px;color:var(--text-3);margin-top:8px">Opens in a new tab. Use Chrome for full transcription support.</p>
+
+  <div class="divider"></div>
+  <h3 style="font-family:var(--font-d);font-size:18px;color:var(--navy);margin-bottom:14px">Step 3 — Post-Interview Follow-Up</h3>
+  <div class="input-section">
+    <div class="input-label">Interview details <span class="input-req">Required</span></div>
+    <div class="input-hint">What happened, who you met with, how it went, and any specific moments worth referencing.</div>
+    <textarea id="inp_p3a9_debrief" rows="3" placeholder="e.g. Met with Maria Chen (VP Ops) and Tom Reyes (HR). Maria asked extensively about my experience with lean processes. Tom focused on culture fit. Overall went well, felt strong connection on the operations side...">${esc(getInput('p3a9_debrief'))}</textarea>
+  </div>
+  <div class="input-section">
+    <div class="input-label">What type of follow-up do you need?</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn-action" onclick="runFollowup('thankyou')">Thank-You Messages</button>
+      <button class="btn-action" onclick="runFollowup('statuscheck')">Status Check-In</button>
+      <button class="btn-action" onclick="runFollowup('timelineshift')">Timeline Shift Response</button>
+      <button class="btn-action" onclick="runFollowup('rejection')">Rejection Recovery</button>
+    </div>
+  </div>
+  <div class="output-section" style="margin-top:14px">
+    <div class="output-header">
+      <div class="output-label">Post-Interview Follow-Up</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('p3a9_followup'))">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('p3a9_followup'),'Post_Interview_Followup')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_p3a9_followup">${savedFollowup?esc(savedFollowup):'<span class="output-placeholder">Select a follow-up type above.</span>'}</div>
+  </div>
+  <div id="a9ProceedWrap">${(savedBrief||savedFollowup)?`<button class="btn-proceed" onclick="navigateTo('p3a10')">Proceed to Agent 10 →</button>`:''}</div>
+  ${buildChecklist('p3a9',[
+    'Intelligence brief generated and reviewed before the interview',
+    'Predicted questions and coached answers prepared',
+    'Company and interviewer research complete',
+    'Live mock interview practiced at least once before first-round',
+    'Thank-you messages sent within 2 hours of interview',
+    'Status check-in sent if timeline passes without contact',
+  ])}`;
+}
+
+async function runInterviewBrief(){
+  const company = document.getElementById('inp_p3a9_company').value.trim();
+  const jd = document.getElementById('inp_p3a9_jd').value.trim();
+  const interviewers = document.getElementById('inp_p3a9_interviewers').value.trim();
+  const format = document.getElementById('inp_p3a9_format').value.trim();
+  if (!company) { showToast('Please enter the company and role.'); return; }
+  setInput('p3a9_company',company); setInput('p3a9_jd',jd); setInput('p3a9_interviewers',interviewers); setInput('p3a9_format',format);
+  const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
+  const prompt = `Act as my Company & Interview Intelligence Agent for ${STATE.clientName}.
+
+Company and role: ${company}
+Job description: ${jd||'Not provided'}
+Interviewers: ${interviewers||'Not specified'}
+Interview format: ${format||'Not specified'}
+Career Capital Profile: ${profile.substring(0,500)}
+
+Produce a complete interview intelligence brief:
+
+1. Business situation summary: Company context, likely priorities, recent developments, what this role is meant to solve.
+
+2. Strategic priorities analysis: What they are trying to accomplish and why this role exists now.
+
+3. For each named interviewer (or "the interview panel" if none named): background, likely concerns, what they will be evaluating, how to adapt communication approach.
+
+4. 12 predicted interview questions — behavioral, situational, and role-specific — drawn directly from the job description. For each: the question, why they are asking it, and a coached answer framework (what to lead with, what example structure to use, what to quantify).
+
+5. 6 strategic questions to ask that demonstrate preparation and genuine curiosity about this specific role and company.
+
+6. Likely objections to my background and how to address each one directly and confidently.
+
+7. Closing statement template: positioning me as a strong fit for this specific role, ready to adapt in the moment.`;
+
+  const btn = document.getElementById('btnBrief');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating brief...';
+  const outEl = document.getElementById('out_p3a9_brief');
+  outEl.innerHTML='<span class="output-placeholder">Generating your intelligence brief...</span>';
+  try{
+    const result = await callClaude(prompt, 4000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
+    outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
+    setOutput('p3a9_brief',result);
+    STATE.completedAgents.add('p3a9'); buildNav(); updateProgress();
+    showToast('✓ Intelligence brief generated');
+    const pw = document.getElementById('a9ProceedWrap');
+    if(pw) pw.innerHTML = `<button class="btn-proceed" onclick="navigateTo('p3a10')">Proceed to Agent 10 →</button>`;
+  } catch(e){ outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}</div>`; }
+  btn.disabled=false; btn.innerHTML='⚡ Generate Intelligence Brief';
+}
+
+async function runFollowup(type){
+  const company = getInput('p3a9_company')||'the company';
+  const debrief = document.getElementById('inp_p3a9_debrief')?.value.trim()||'';
+  setInput('p3a9_debrief', debrief);
+  const interviewers = getInput('p3a9_interviewers')||'the interview panel';
+  const firstName = STATE.clientName.split(' ')[0];
+  const prompts = {
+    thankyou: `Write post-interview thank-you messages for ${firstName} after interviewing at ${company}.\n\nInterview details: ${debrief||'Recent interview for a professional role'}\nInterviewers: ${interviewers}\n\nProduce individualized thank-you messages for each type of interviewer they likely met with:\n1. HR / Recruiter: Brief, warm, process-oriented. Reference something specific about the conversation.\n2. Hiring Manager: Substantive, reinforces the single strongest qualification. Reference a specific topic discussed.\n3. Team member / Peer: Collegial, addresses culture fit. Personal and warm.\n4. Senior Leader (if applicable): Strategic, brief, high-signal. One sentence reinforcing executive presence.\n\nAll under 120 words. No "thank you for your time" openers. No generic language.`,
+    statuscheck: `Write a status check-in message for ${firstName} following up with ${company} after the expected decision timeline has passed.\n\nInterview context: ${debrief||'Recent interview, timeline has passed without contact'}\n\nProduce:\n1. First check-in (timeline just passed by 1–3 days): Brief, warm, professional. Express continued enthusiasm. One sentence. Not anxious.\n2. Second check-in (10–14 days after first): Slightly more direct. Offer to provide any additional information. Still warm.\n3. Decision: When to stop following up and what that silence likely means.\n\nAlso include: the exact subject line to use for each, and the one mistake that damages relationships most in this stage.`,
+    timelineshift: `Write response messages for ${firstName} after being told the timeline at ${company} has shifted.\n\nContext: ${debrief||'Was told the hiring timeline has been pushed back'}\n\nProduce:\n1. Immediate response to the timeline shift notification: Gracious, professional, keeps interest warm. Under 80 words.\n2. Guidance on reading the signal: How to tell the difference between a genuine timeline shift and a soft rejection. What signals indicate which.\n3. 30-day reactivation message: A message to send one month later to check back in. Warm, not desperate.\n4. What to do during the waiting period: How to keep the pipeline active and maintain negotiating leverage.`,
+    rejection: `Write rejection recovery messages for ${firstName} after being rejected for ${company}.\n\nContext: ${debrief||'Received rejection after interview process'}\n\nProduce:\n1. Gracious rejection response (send within 24 hours): Under 80 words. Thank them for the process. Express continued interest in the company. Leave door open. No bitterness, no requests for more feedback unless they offered.\n2. 60-day silver medalist reconnection: A message to send two months later. Reference something new about the company or industry. No mention of the rejection. Keep door open professionally.\n3. What to do immediately after rejection: Three specific actions to take in the next 24 hours to maintain search momentum.`,
+  };
+  const outEl = document.getElementById('out_p3a9_followup');
+  outEl.innerHTML='<span class="output-placeholder">Generating...</span>';
+  try{
+    const result = await callClaude(prompts[type], 2000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
+    outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
+    setOutput('p3a9_followup', result);
+    showToast('✓ Generated');
+  } catch(e){ outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}</div>`; }
+}
+
+function renderAgent10(body){
+  renderGenericAgent(body,'p3a10',
+    '<strong>Agent 10 — Offer & Negotiation.</strong> Uses your compensation benchmark from Agent 7 as its foundation. Do not accept or decline any offer without running this agent first. 15 minutes here can be worth thousands of dollars.',
+    [
+      {id:'offerdeets',label:'The offer details',required:true,hint:'Base salary, bonus, signing bonus, benefits, flexibility, start date, title.',rows:4,placeholder:'Base salary: $[amount]\nTarget bonus: [% or none]\nSigning bonus: $[amount or none]\nBenefits: [brief description]\nFlexibility: [remote schedule, title, start date]\nSeverance: [terms or not discussed]'},
+      {id:'company',label:'Company profile',required:true,placeholder:'e.g. Meridian Health Systems — regional healthcare, privately held, ~800 employees'},
+      {id:'competing',label:'Competing conversations or offers',required:false,hint:'Even informal conversations matter — describe them.',placeholder:'e.g. In late-stage conversation with one other company, expecting decision next week'},
+    ],
+    'p3a10_offer',
+    'Offer Assessment + Negotiation Strategy + Scripts',
+    (vals, profile, name) => `Act as the Professional Offer & Negotiation Agent for ${name}.
+
+Career Capital Profile: ${profile.substring(0,400)}
+Compensation benchmark from Agent 7: ${getOutput('p2a7_benchmark')?.substring(0,400)||'Not yet generated — derive from market knowledge'}
+
+The offer:
+${vals.offerdeets}
+
+Company: ${vals.company}
+Competing conversations: ${vals.competing||'None active'}
+
+Produce:
+
+1. Offer Assessment Against Benchmark: Is this above, at, or below market? Be direct with specific numbers.
+
+2. Total First-Year Value Calculation: Calculate the actual total first-year value of the offer as presented, including all components.
+
+3. Negotiation Leverage Points: Every component that is negotiable at this level, what each is realistically worth, and which ones are most movable for this type of employer.
+
+4. Counter-Proposal: A specific counter-proposal with exact numbers across all relevant components. Realistic but strong.
+
+5. Negotiation Conversation Scripts: The exact language to use. Include: opening the negotiation, presenting the counter, responding to pushback, and closing.
+
+6. What Not to Concede: The specific things that should not be given up and why.
+
+7. Competing Conversation Strategy: If applicable, how to leverage the competing conversation(s) without burning relationships.`,
+    ['Offer fully evaluated against compensation benchmark','Total first-year value calculated across all components','Negotiation strategy and leverage points identified','Counter-proposal prepared before the negotiation conversation','Negotiation completed — final offer documented','Offer acceptance or decline decision made deliberately'],
+    'p4a11'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PHASE 4: AGENTS 11 & 12
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAgent11(body){
+  renderGenericAgent(body,'p4a11',
+    '<strong>Agent 11 — Execution & Coaching (Weekly Intelligence Core).</strong> Run every Friday or Monday for the full duration of your search. Pipeline health diagnosis, stall identification, and your priority list for the week ahead.',
+    [
+      {id:'pipeline',label:'Current pipeline status',required:true,hint:'List each active opportunity with its current status.',rows:4,placeholder:'Company A (Meridian Health): Applied 2 weeks ago, no response\nCompany B (ABC Corp): Recruiter call completed, waiting for next step\nCompany C (XYZ LLC): First interview scheduled for next week...'},
+      {id:'activity',label:'What happened this week',required:true,rows:3,placeholder:'Outreach sent: [number and type]\nResponses received: [summarize]\nInterviews or calls: [list with outcome]\nNew opportunities: [list]\nDocuments sent: [list]'},
+      {id:'concern',label:'Your primary concern about the search right now',required:false,placeholder:'Be honest — where are you feeling stuck or uncertain?'},
+    ],
+    'p4a11_core',
+    'Weekly Intelligence Core Briefing',
+    (vals, profile, name) => `Act as the CareerLaunch AI™ Intelligence Core for ${name}.
+
+Career Capital Profile context: ${profile.substring(0,300)}
+Target role: ${getInput('step0_role')||'Professional/exempt level'}
+
+Current pipeline:
+${vals.pipeline}
+
+What happened this week:
+${vals.activity}
+
+Primary concern: ${vals.concern||'Not specified'}
+
+Tell me:
+1. What is the health of my search, honestly? (Not just validation — real assessment)
+2. What is stalled and exactly why?
+3. What should I do this week, in priority order? (Specific actions, not general advice)
+4. Which companies deserve deeper attention and what is the right next action for each?
+5. What messaging or positioning is working and what should I change?
+6. What am I not doing that I should be doing?
+7. The one thing most likely to move my search forward in the next 7 days.`,
+    ['Weekly Intelligence Core run — every Friday or Monday','Priority list for the week reviewed and acted on','Stalled opportunities addressed with a specific action','Pipeline updated in Search Dashboard','6–8 outreach messages sent this week','At least one informational interview or interview prep session completed'],
+    'p4a12'
+  );
+}
+
+function renderAgent12(body){
+  renderGenericAgent(body,'p4a12',
+    '<strong>Agent 12 — Onboarding Intelligence.</strong> Activated at offer acceptance. Converts everything the system learned about the company during your search into a structured onboarding strategy. Build this before your first day.',
+    [
+      {id:'rolecompany',label:'Role accepted and company',required:true,placeholder:'e.g. Operations Supervisor at Meridian Health Systems. Start date: [date]'},
+      {id:'challenges',label:'The business challenges you were hired to address',required:true,rows:2,placeholder:'e.g. Inventory accuracy issues, team of 8 needing development, new warehouse system implementation...'},
+      {id:'teaminfo',label:'Team and manager information',required:false,rows:2,placeholder:'e.g. Manager: Maria Chen, VP Operations — collaborative style, data-driven. Team of 8, mixed experience levels...'},
+      {id:'concerns',label:'Any concerns about succeeding in this role',required:false,rows:2,placeholder:'e.g. I have not worked in healthcare before, the team has had high turnover...'},
+    ],
+    'p4a12_onboarding',
+    'Onboarding Intelligence Plan',
+    (vals, profile, name) => `Act as the Onboarding Intelligence Agent for ${name}.
+
+Career Capital Profile: ${profile.substring(0,400)}
+Company intelligence from search: ${getOutput('p3a9_brief')?.substring(0,400)||'Not available — derive from role and challenges described'}
+
+Role accepted: ${vals.rolecompany}
+Business challenges I was hired to address: ${vals.challenges}
+Team and manager: ${vals.teaminfo||'Not specified'}
+Concerns about succeeding: ${vals.concerns||'None identified'}
+
+Produce:
+
+1. Real-Situation 30-60-90 Day Plan: Specific to this company and role — not a generic framework.
+   — Days 1–30: Specific actions, relationships to prioritize, what to learn, what NOT to do yet.
+   — Days 31–60: Where to start contributing, what first deliverable to aim for, how to establish credibility.
+   — Days 61–90: What to own, what relationships to build externally, what first initiative to propose.
+
+2. Stakeholder Map: For each key person identified, what they care about and how to approach the relationship in the first 90 days.
+
+3. Early Failure Modes: The two or three most likely ways someone in this role fails in the first 90 days — and exactly how to avoid each.
+
+4. Quick Win Strategy: The early wins most likely to establish credibility quickly, specific to this role and business context.
+
+5. Six-Month Success Metrics: What success looks like at six months in specific, observable terms that the manager would recognize.`,
+    ['30-60-90 day plan built before first day','Stakeholder map reviewed — key relationships identified','Early failure modes noted and avoidance strategies planned','Quick win strategy confirmed with manager in first week','Success metrics aligned with manager in first two weeks'],
+    'dashboard'
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SEARCH DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+function renderDashboard(body){
+  if (!STATE.searchDashboard) STATE.searchDashboard = { applications:[], recruiters:[], interviews:[] };
+  const dash = STATE.searchDashboard;
+  const total = dash.applications.length;
+  const active = dash.applications.filter(a=>a.status==='active').length;
+  const interviewing = dash.applications.filter(a=>a.status==='interviewing').length;
+  const offers = dash.applications.filter(a=>a.status==='offer').length;
+
+  body.innerHTML = `
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="font-family:var(--font-d);font-size:24px;color:var(--navy);margin-bottom:4px">Search Dashboard</h2>
+      <p style="font-size:13px;color:var(--text-3)">Live pipeline tracking — updated in real time as your search develops.</p>
+    </div>
+    <button class="btn btn-primary" onclick="addApplication()">+ Add Application</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">
+    ${[['Total Applied',total],['Active',active],['Interviewing',interviewing],['Offers',offers]].map(([lbl,val])=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:16px;text-align:center">
+      <div style="font-family:var(--font-d);font-size:32px;font-weight:600;color:var(--teal-mid)">${val}</div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-top:3px">${lbl}</div>
+    </div>`).join('')}
+  </div>
+
+  <div id="appTable">
+    ${total === 0
+      ? `<div style="text-align:center;padding:40px;color:var(--text-3);font-size:13px">No applications logged yet. Click "Add Application" to start tracking your pipeline.</div>`
+      : `<table style="width:100%;border-collapse:collapse;font-size:12.5px">
+        <thead><tr style="background:var(--navy);color:#fff">
+          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Company & Role</th>
+          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Source</th>
+          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Applied</th>
+          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Status</th>
+          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Follow-Up</th>
+          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Action</th>
+        </tr></thead>
+        <tbody>
+        ${dash.applications.map((app,i)=>`
+          <tr style="background:${i%2===0?'var(--surface)':'var(--cream)'};border-bottom:1px solid var(--border)">
+            <td style="padding:9px 12px"><div style="font-weight:500;color:var(--text)">${esc(app.company)}</div><div style="color:var(--text-3);font-size:11px">${esc(app.role)}</div></td>
+            <td style="padding:9px 12px;color:var(--text-2)">${esc(app.source||'—')}</td>
+            <td style="padding:9px 12px;color:var(--text-2)">${esc(app.applied||'—')}</td>
+            <td style="padding:9px 12px"><span style="background:${statusColor(app.status)};color:#fff;font-size:10px;font-weight:600;letter-spacing:.06em;padding:2px 8px;border-radius:10px;text-transform:uppercase">${esc(app.status||'applied')}</span></td>
+            <td style="padding:9px 12px;color:var(--text-2);font-size:11.5px">${esc(app.followup||'—')}</td>
+            <td style="padding:9px 12px"><button class="btn-action" onclick="updateStatus(${i})">Update</button></td>
+          </tr>`).join('')}
+        </tbody></table>`
+    }
+  </div>`;
+}
+
+function statusColor(s){
+  const map = {applied:'var(--text-3)',active:'var(--sky)',interviewing:'var(--teal)',offer:'var(--gold)',closed:'#888',rejected:'var(--danger)'};
+  return map[s]||'var(--text-3)';
+}
+
+function addApplication(){
+  const company = prompt('Company name:'); if (!company) return;
+  const role = prompt('Role / title:'); if (!role) return;
+  const source = prompt('Source (e.g. LinkedIn, Indeed, direct):');
+  const applied = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  if (!STATE.searchDashboard) STATE.searchDashboard = {applications:[],recruiters:[],interviews:[]};
+  STATE.searchDashboard.applications.push({company,role,source:source||'',applied,status:'applied',followup:''});
+  saveLocal();
+  renderDashboard(document.getElementById('agentBody'));
+  showToast('✓ Application added');
+}
+
+function updateStatus(idx){
+  const app = STATE.searchDashboard.applications[idx];
+  const statuses = ['applied','active','interviewing','offer','closed','rejected'];
+  const cur = statuses.indexOf(app.status||'applied');
+  const next = statuses[(cur+1)%statuses.length];
+  app.status = next;
+  const followup = prompt(`Follow-up date or note for ${app.company}:`, app.followup||'');
+  if (followup !== null) app.followup = followup;
+  saveLocal();
+  renderDashboard(document.getElementById('agentBody'));
+  showToast(`✓ Updated to: ${next}`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+async function init(){
+  // 1. Try localStorage first (instant, no network)
+  const localRestored = loadLocal();
+
+  // 2. If we have a client key, try cloud load and merge (richer data)
+  const storedKey = localStorage.getItem('cl_client_key');
+  if (storedKey) {
+    try {
+      const cloudRestored = await loadCloudData(storedKey);
+      if (cloudRestored && STATE.clientName) {
+        // Cloud data loaded — re-sync to localStorage
+        saveLocal();
+        showToast('\u2713 Progress restored from cloud', 2000);
+      }
+    } catch(e){ console.warn('Cloud restore failed, using local:', e); }
+  }
+
+  if (STATE.clientName) {
+    document.getElementById('clientNameDisplay').textContent = STATE.clientName;
+    updatePlanBadge();
+    buildNav();
+    updateProgress();
+    const lastAgent = STATE.currentAgent;
+    if (lastAgent) {
+      navigateTo(lastAgent);
+    } else if (STATE.completedAgents.size > 0) {
+      const navItems = NAV.filter(n=>n.id);
+      const lastDone = [...navItems].reverse().find(n=>STATE.completedAgents.has(n.id));
+      const nextItem = lastDone ? NAV.find(n=>n.id===lastDone.next) : null;
+      navigateTo(nextItem?.id||'step0');
+    }
+  } else {
+    buildNav();
+  }
+}
+
+// Also save to cloud when client first starts the system
+const _origStartSystem = startSystem;
+startSystem = function(){
+  _origStartSystem();
+  // Give state a moment to set, then push to cloud
+  setTimeout(saveToCloud, 1000);
+};
+
+init();
+</script>
+</body>
+</html>
