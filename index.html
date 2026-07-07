@@ -58,14 +58,14 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--teal-dk),var(--teal-mid));border-radius:2px;transition:width .4s ease;width:0%}
 
 .nav{flex:1;padding:14px 0;overflow-y:auto}
-.nav-section{font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:rgba(29,158,117,.4);padding:10px 22px 4px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 22px;cursor:pointer;color:rgba(255,255,255,.5);font-size:12.5px;font-weight:400;transition:all .15s;border-left:2px solid transparent;position:relative}
-.nav-item:hover{background:rgba(29,158,117,.08);color:rgba(255,255,255,.8);border-left-color:rgba(29,158,117,.3)}
-.nav-item.active{background:rgba(29,158,117,.14);color:var(--teal-mid);border-left-color:var(--teal-mid);font-weight:500}
-.nav-item.complete .nav-num{background:rgba(15,110,86,.5);color:#8FDCC4;border-color:rgba(15,110,86,.6)}
+.nav-section{font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);padding:10px 22px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 22px;cursor:pointer;color:rgba(255,255,255,.88);font-size:12.5px;font-weight:400;transition:all .15s;border-left:2px solid transparent;position:relative}
+.nav-item:hover{background:rgba(29,158,117,.14);color:#fff;border-left-color:rgba(29,158,117,.6)}
+.nav-item.active{background:rgba(29,158,117,.22);color:#5DDFB0;border-left-color:#5DDFB0;font-weight:600}
+.nav-item.complete .nav-num{background:rgba(15,110,86,.75);color:#CFFCE8;border-color:rgba(29,158,117,.9)}
 .nav-item.locked{opacity:.3;cursor:not-allowed;pointer-events:none}
-.nav-num{width:19px;height:19px;border-radius:50%;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0;border:1px solid rgba(255,255,255,.1);transition:all .15s}
-.nav-item.active .nav-num{background:var(--teal-mid);color:var(--navy);border-color:var(--teal-mid)}
+.nav-num{width:19px;height:19px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0;border:1px solid rgba(255,255,255,.25);transition:all .15s}
+.nav-item.active .nav-num{background:#5DDFB0;color:var(--navy);border-color:#5DDFB0}
 .nav-badge{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.08em;background:rgba(29,158,117,.2);color:var(--teal-mid);padding:2px 6px;border-radius:10px;border:1px solid rgba(29,158,117,.3)}
 .nav-badge.new{background:rgba(186,138,42,.2);color:#D4A84B;border-color:rgba(186,138,42,.3)}
 
@@ -733,20 +733,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
 const NAV = [
   { section: 'Foundation' },
   { id:'step0',   label:'Career Capital Assessment',    num:'0',   subtitle:'Four psychometric instruments',                 next:'stepA' },
-  { id:'stepA',   label:'Career Capital Options',       num:'A',   subtitle:'Choose your search direction',                 next:'stepB', badge:'New' },
+  { id:'stepA',   label:'Career Capital Options',       num:'A',   subtitle:'Choose your search direction',                 next:'stepB' },
   { id:'stepB',   label:'Résumé Build',                 num:'B',   subtitle:'Master base résumé',                           next:'stepC' },
   { id:'stepC',   label:'LinkedIn Profile Build',       num:'C',   subtitle:'All 9 sections optimized',                     next:'stepD' },
-  { id:'stepD',   label:'Digital Reputation Audit',     num:'D',   subtitle:'Know what the market sees',                    next:'p1a1',  badge:'New' },
+  { id:'stepD',   label:'Digital Reputation Audit',     num:'D',   subtitle:'Know what the market sees',                    next:'p1a1' },
   { section: 'Phase 1 — Market Entry' },
   { id:'p1a1',    label:'Market & Opportunity',         num:'1',   subtitle:'Live opportunity intelligence',                 next:'p1a2' },
   { id:'p1a2',    label:'Positioning & Brand',          num:'2',   subtitle:'Value proposition + bio',                      next:'p2a3' },
   { section: 'Phase 2 — Demand Creation' },
-  { id:'p2a3',    label:'Outreach, Network & Info Interviews', num:'3', subtitle:'Five-tier demand creation',              next:'p2a4',  badge:'New' },
+  { id:'p2a3',    label:'Outreach, Network & Info Interviews', num:'3', subtitle:'Five-tier demand creation',              next:'p2a4' },
   { id:'p2a4',    label:'Career Toolkit',               num:'4',   subtitle:'Auto-generate 5 documents',                    next:'p2a5' },
   { id:'p2a5',    label:'Job Application Engine',       num:'5',   subtitle:'ATS optimization per posting',                 next:'p2a6' },
-  { id:'p2a6',    label:'References',                   num:'6',   subtitle:'Reference alignment system',                   next:'p2a7',  badge:'New' },
-  { id:'p2a7',    label:'Compensation Benchmarking',    num:'7',   subtitle:'Know your value before the interview',         next:'p2a8',  badge:'New' },
-  { id:'p2a8',    label:'Job Search Intelligence',      num:'8',   subtitle:'Board strategy + live search',                 next:'p3a9',  badge:'New' },
+  { id:'p2a6',    label:'References',                   num:'6',   subtitle:'Reference alignment system',                   next:'p2a7' },
+  { id:'p2a7',    label:'Compensation Benchmarking',    num:'7',   subtitle:'Know your value before the interview',         next:'p2a8' },
+  { id:'p2a8',    label:'Job Search Intelligence',      num:'8',   subtitle:'Board strategy + live search',                 next:'p3a9' },
   { section: 'Phase 3 — Compete & Convert' },
   { id:'p3a9',    label:'Interview Intelligence',       num:'9',   subtitle:'Brief + live mock interview',                  next:'p3a10' },
   { id:'p3a10',   label:'Offer & Negotiation',          num:'10',  subtitle:'Close at your true market value',              next:'p4a11' },
@@ -1114,7 +1114,7 @@ function buildNav(){
     html += `<div class="${classes}" id="nav_${item.id}" onclick="navigateTo('${item.id}')">
       <div class="nav-num">${done?'✓':esc(item.num)}</div>
       <span>${esc(item.label)}</span>
-      ${item.badge?`<span class="nav-badge${item.badge==='New'?' new':''}">${item.badge}</span>`:''}
+      
     </div>`;
   });
   navEl.innerHTML = html;
@@ -1206,10 +1206,7 @@ function renderStep0(body){
   body.innerHTML = `
   <div class="ctx-panel">
     <div class="ctx-icon">◆</div>
-    <div class="ctx-text"><strong>Career Capital Assessment — Step 0.</strong>
-    Four instruments across 20 dimensions. Complete all four in sequence.
-    Your scores calculate automatically and auto-populate your Career Capital Profile prompt.
-    Answer based on how you actually behave — not how you aspire to. Accurate scores produce useful guidance.</div>
+    <div class="ctx-text"><strong>Career Capital Assessment — Step 0.</strong> The Career Capital Assessment is the most important step in this system. It is a set of four proprietary psychometric instruments — 100 items across 20 professional dimensions — that measures how you actually work, think, communicate, lead, and relate to others. The results become your Career Capital Profile: a precise, structured document that every subsequent agent uses as its primary input. Without it, every prompt is generic. With it, every output is specific to you.<br><br><strong>What the four instruments measure:</strong> The Skills Capital Inventory measures your functional capabilities — planning, problem-solving, communication, technical proficiency, and collaboration. The Transferable Skills Profiler measures what travels with you across roles — initiative, analytical thinking, adaptability, relationship building, and accountability. The Values and Work Style Inventory surfaces what you genuinely need from an employer — integrity alignment, growth orientation, work style preferences, mission fit, and whether you thrive in stable or dynamic environments. The Professional Presence Inventory measures emotional intelligence — self-awareness, emotional regulation, empathy, resilience, and interpersonal effectiveness.<br><br><strong>Why it matters:</strong> Most professionals cannot articulate their capabilities with the precision that hiring managers and ATS systems require. They write résumés that describe responsibilities rather than strengths, and they interview without a clear framework for what makes them distinctively valuable. This assessment gives you that framework — grounded in 20 specific, scored dimensions that feed directly into your positioning, your résumé, your interview preparation, and your outreach.<br><br><strong>What you need to do:</strong> Complete all four instruments in sequence. Answer every item based on how you actually behave — not how you aspire to behave. Accurate answers produce specific, actionable guidance. Inflated answers produce generic output that will not help you. After all four are complete, review your dimension scores and interpretation guidance. Then fill in your background, target role, and geography to generate your Career Capital Profile. Do not proceed to Step A until that profile is generated, read in full, and saved.</div>
   </div>
 
   <div id="asmt-start-screen">
