@@ -578,9 +578,9 @@ textarea{min-height:86px}
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // CONSTANTS & CONFIG
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 const PROXY = 'https://anthropic-proxy.cssceo.workers.dev';
 const MODEL  = 'claude-sonnet-4-6';
 
@@ -732,9 +732,9 @@ function autoSave(){
   window._autoSaveTimer = setTimeout(saveToCloud, 2000);
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // STATE
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 const STATE = {
   clientName: '',
   plan: null,
@@ -781,9 +781,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // NAVIGATION STRUCTURE
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 const NAV = [
   { section: 'Foundation' },
   { id:'step0',   label:'Career Capital Assessment',    num:'0',   subtitle:'Four psychometric instruments',                 next:'stepA' },
@@ -811,9 +811,9 @@ const NAV = [
   { id:'dashboard', label:'Search Dashboard',           num:'⬡',   subtitle:'Live pipeline tracker',                        next: null },
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // ASSESSMENT DATA — Four instruments
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 const INSTRUMENTS = {
   SCI: {
     id:'SCI', title:'Skills Capital Inventory',
@@ -1041,9 +1041,9 @@ const INSTRUMENTS = {
 const ASMT_ANSWERS = { SCI:{}, TSP:{}, VWSI:{}, PPI:{} };
 const INST_ORDER = ['SCI','TSP','VWSI','PPI'];
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // CLAUDE API — streaming via proxy
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 async function callClaude(content, maxTokens, onChunk) {
   const resp = await fetch(PROXY, {
     method:'POST',
@@ -1084,9 +1084,9 @@ async function callClaude(content, maxTokens, onChunk) {
   return full;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // UTILITY
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 window.__genericAgentInputs = window.__genericAgentInputs || {};
 function safeFileName(s){ return String(s || 'Document').trim().replace(/[^a-z0-9_\-]+/gi,'_').replace(/^_+|_+$/g,'').slice(0,80) || 'Document'; }
@@ -1148,9 +1148,9 @@ function loadLocal(){
 }
 // saveToCloud is defined above in the Supabase config section
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // PROGRESS
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function updateProgress(){
   const agents = NAV.filter(n=>n.id);
   const done = agents.filter(n=>STATE.completedAgents.has(n.id)).length;
@@ -1159,9 +1159,9 @@ function updateProgress(){
   document.getElementById('progressPct').textContent = pct+'%';
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // SIDEBAR NAV BUILD
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function buildNav(){
   const navEl = document.getElementById('navList');
   if(!navEl) return;
@@ -1217,9 +1217,9 @@ function toggleSidebar(){
   document.getElementById('navOverlay').classList.toggle('open');
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // START SYSTEM
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function startSystem(){
   const name = document.getElementById('clientNameInput').value.trim();
   if (!name) { showToast('Please enter your name to begin.'); return; }
@@ -1241,9 +1241,9 @@ function updatePlanBadge(){
   b.className = 'plan-badge ' + STATE.plan;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // RENDER AGENT DISPATCHER
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderAgent(id){
   const body = document.getElementById('agentBody');
   body.innerHTML = '';
@@ -1270,9 +1270,9 @@ function renderAgent(id){
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // STEP 0 — FULL IN-APP ASSESSMENT ENGINE
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderStep0(body){
   body.innerHTML = `
   <div class="ctx-panel">
@@ -1700,9 +1700,9 @@ Format as a professional document ready to paste into any subsequent agent promp
   btn.disabled = false; btn.innerHTML = '⚡ Generate Career Capital Profile';
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // CHECKLIST HELPER
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function buildChecklist(agentId, items){
   const state = STATE.checklistState[agentId]||{};
   let html = `<div class="checklist"><div class="checklist-hdr">Completion Checklist</div>`;
@@ -1727,9 +1727,9 @@ function toggleCheck(agentId, idx, el){
   autoSave();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // GENERIC AGENT RENDERER — for agents not yet fully built
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderGenericAgent(body, agentId, contextMsg, inputs, outputKey, outputLabel, promptBuilder, checklistItems, nextId){
   const profile = getOutput('step0_profile');
   const savedOut = getOutput(outputKey);
@@ -1818,9 +1818,9 @@ async function runGenericAgent(agentId, outputKey, inputs){
   btn.disabled=false; btn.innerHTML='⚡ Generate';
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // STEP A — CAREER CAPITAL OPTIONS ANALYSIS
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderStepA(body){
   renderGenericAgent(body,'stepA',
     '<strong>Step A — Career Capital Options Analysis.</strong> This is the most important decision in your search — and most professionals skip it entirely. They update their résumé before deciding what they are targeting, and end up with a document that does not clearly position them for any specific opportunity. This step uses your Career Capital Profile to evaluate two or three realistic career paths, score each against your background, surface trade-offs honestly, and produce a clear recommended direction with the positioning language you will use throughout the search.<br><br><strong>Why it matters:</strong> Every document you build — your résumé, LinkedIn profile, outreach messages, interview answers — depends on the clarity of your target. A professional who makes an explicit path decision before building documents produces stronger, more specific materials than one who tries to keep all options open. This step takes 20 minutes. The decision it produces shapes every subsequent hour of your search.<br><br><strong>What you need to do:</strong> Paste your work history and describe the paths you are considering. If you are not sure what your options are, describe what you are drawn toward and let the agent suggest paths based on your profile. Read the full output — especially the trade-offs section — before committing to a direction. Once you choose a path, commit to it for the duration of your search.',
@@ -1866,9 +1866,9 @@ IMMEDIATE NEXT STEPS: Three concrete actions to take this week, specific to my r
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // STEP B — RESUME BUILD
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderStepB(body){
   const optionsOut = getOutput('stepA_options');
   renderGenericAgent(body,'stepB',
@@ -1909,9 +1909,9 @@ Produce the complete résumé — fully written, every section filled in. This i
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // STEP C — LINKEDIN BUILD
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderStepC(body){
   renderGenericAgent(body,'stepC',
     '<strong>Step C — LinkedIn Profile Build.</strong> LinkedIn is your most visible professional asset during a search. Recruiters use it to find you before you apply. Hiring managers validate you against it after you apply. Your network uses it to refer you. LinkedIn also determines whether you surface in recruiter searches at all — based on your headline, keyword density, activity, and profile completeness. Most professionals have a LinkedIn profile that contradicts their résumé, uses an outdated headline, or goes silent in the About section. This agent rebuilds all nine sections from scratch.<br><br><strong>Why it matters:</strong> A profile built correctly — keyword-rich headline, strong About section hook visible before &ldquo;see more,&rdquo; achievement-oriented experience entries, 50 skills in priority order — produces inbound recruiter contact even when you are not actively applying. That inbound pipeline costs nothing to build once your profile is optimized. Recruiters will check your LinkedIn within hours of receiving any message from you.<br><br><strong>What you need to do:</strong> Complete Step B first — the résumé feeds this agent. After generating, copy and paste each section directly into LinkedIn. Configure the Open to Work and visibility settings exactly as the output specifies. Do not begin Phase 1 outreach until your profile is live and at 100% completeness (All-Star status).',
@@ -1959,9 +1959,9 @@ Write every section fully — not as a template. Copy-and-paste ready.`,
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // STEP D — DIGITAL REPUTATION AUDIT
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderStepD(body){
   const auditInstructions = `Before running this prompt, complete your manual self-audit:
 1. Open a private/incognito browser window
@@ -2024,9 +2024,9 @@ Produce:
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // PHASE 1: AGENTS 1 & 2
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderAgent1(body){
   renderGenericAgent(body,'p1a1',
     '<strong>Agent 1 — Market &amp; Opportunity.</strong> Most job seekers apply to posted roles and wait. The professionals who find jobs fastest identify where demand is forming before it becomes a posting — and are already in conversation with the right people when roles open. This agent builds your market intelligence foundation: a tiered target company list based on real opportunity signals, a map of the recruiters who place professionals at your level and in your industry, and an analysis of where your background is most likely to find receptive employers right now.<br><br><strong>Why it matters:</strong> Research consistently shows that the majority of professional roles are filled through a recruiter placement, a referral, or a direct employer outreach — often before or alongside a public posting. Candidates who are already in front of the right people get first access to the best opportunities and avoid competing in the high-volume applicant pool for every role.<br><br><strong>What you need to do:</strong> Fill in your target role, industries, geography, and any companies already on your radar. Be specific about company size and type. After generating, work the output actively — contact the recruiters listed, research your Tier 1 companies before reaching out, and use the opportunity signals to personalize your outreach messages in Agent 3.',
@@ -2099,9 +2099,9 @@ Do not use generic language. Every sentence must be specific to this background 
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // PHASE 2: AGENTS 3–8
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderAgent3(body){
   // Multi-prompt agent: Outreach + Informational Interviews
   const profile = getOutput('step0_profile');
@@ -2890,9 +2890,9 @@ SECTION 7 — WEEKLY SEARCH WORKFLOW: A daily/weekly routine for Monday through 
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // PHASE 3: AGENTS 9 & 10
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderAgent9(body){
   const profile = getOutput('step0_profile');
   const savedBrief = getOutput('p3a9_brief');
@@ -2985,46 +2985,111 @@ async function runInterviewBrief(){
   const interviewers = document.getElementById('inp_p3a9_interviewers').value.trim();
   const format = document.getElementById('inp_p3a9_format').value.trim();
   if (!company) { showToast('Please enter the company and role.'); return; }
-  setInput('p3a9_company',company); setInput('p3a9_jd',jd); setInput('p3a9_interviewers',interviewers); setInput('p3a9_format',format);
-  const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
-  const prompt = `Act as my Company & Interview Intelligence Agent for ${STATE.clientName}.
+  setInput('p3a9_company',company); setInput('p3a9_jd',jd);
+  setInput('p3a9_interviewers',interviewers); setInput('p3a9_format',format);
 
-Company and role: ${company}
+  const profile = getOutput('step0_profile')||'Career Capital Profile not yet generated';
+  const ctx = `Company and role: ${company}
 Job description: ${jd ? jd.substring(0,1200) : 'Not provided'}
 Interviewers: ${interviewers||'Not specified'}
 Interview format: ${format||'Not specified'}
-Career Capital Profile: ${profile.substring(0,600)}
-
-Produce a complete interview intelligence brief:
-
-1. Business situation summary: Company context, likely priorities, recent developments, what this role is meant to solve.
-
-2. Strategic priorities analysis: What they are trying to accomplish and why this role exists now.
-
-3. For each named interviewer (or "the interview panel" if none named): background, likely concerns, what they will be evaluating, how to adapt communication approach.
-
-4. 12 predicted interview questions — behavioral, situational, and role-specific — drawn directly from the job description. For each: the question, why they are asking it, and a coached answer framework (what to lead with, what example structure to use, what to quantify).
-
-5. 6 strategic questions to ask that demonstrate preparation and genuine curiosity about this specific role and company.
-
-6. Likely objections to my background and how to address each one directly and confidently.
-
-7. Closing statement template: positioning me as a strong fit for this specific role, ready to adapt in the moment.`;
+Career Capital Profile: ${profile.substring(0,600)}`;
 
   const btn = document.getElementById('btnBrief');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating brief...';
   const outEl = document.getElementById('out_p3a9_brief');
-  outEl.innerHTML='<span class="output-placeholder">Generating your intelligence brief...</span>';
-  try{
-    const result = await callClaude(prompt, 4000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
-    outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
-    setOutput('p3a9_brief',result);
-    STATE.completedAgents.add('p3a9'); buildNav(); updateProgress();
-    showToast('✓ Intelligence brief generated');
-    const pw = document.getElementById('a9ProceedWrap');
-    if(pw) pw.innerHTML = `<button class="btn-proceed" onclick="navigateTo('p3a10')">Proceed to Agent 10 →</button>`;
-  } catch(e){ outEl.innerHTML=`<div class="error-box">Error: ${esc(e.message)}</div>`; }
-  btn.disabled=false; btn.innerHTML='⚡ Generate Intelligence Brief';
+
+  const setBtn = (label) => {
+    btn.disabled = label !== 'ready';
+    btn.innerHTML = label === 'ready'
+      ? '⚡ Generate Intelligence Brief'
+      : `<span class="spinner"></span> ${label}`;
+  };
+
+  // ── PHASE 1: Company intelligence + interviewer analysis ───────────────
+  const prompt1 = `Act as my Interview Intelligence Agent for ${STATE.clientName}.
+
+${ctx}
+
+Produce PART 1 of the intelligence brief — company and interviewer intelligence:
+
+SECTION 1 — BUSINESS SITUATION
+Company context, what this company does, their likely current priorities, any known recent developments (growth, challenges, leadership changes, market pressures), and what business problem this specific role exists to solve right now.
+
+SECTION 2 — STRATEGIC PRIORITIES
+The 3–4 things this company is most focused on accomplishing in the next 12 months, and why filling this role is important to those priorities. Be specific — not generic company goals.
+
+SECTION 3 — INTERVIEWER ANALYSIS
+For each named interviewer (or "the interview panel" if none are named): their likely role in the decision, what they are primarily evaluating, what they most want to hear, what they are most likely to probe on, and how to adapt communication style to engage them effectively.`;
+
+  // ── PHASE 2: Question prep + objections + closing ─────────────────────
+  const prompt2 = `Act as my Interview Intelligence Agent for ${STATE.clientName}.
+
+${ctx}
+
+Produce PART 2 of the intelligence brief — question preparation and interview strategy:
+
+SECTION 4 — 12 PREDICTED INTERVIEW QUESTIONS
+Questions drawn directly from the job description and company context — behavioral, situational, and role-specific. For each question:
+• The question itself
+• Why they are asking it (what they are really evaluating)
+• Coached answer framework: what to lead with, what story structure to use, what to quantify, what to avoid
+
+SECTION 5 — 6 STRATEGIC QUESTIONS TO ASK
+Questions that demonstrate genuine preparation and curiosity. For each: the question and why it signals the right things about the candidate.
+
+SECTION 6 — OBJECTION HANDLING
+The 2–3 most likely objections to this candidate's background for this specific role. For each: the objection, why they might raise it, and the direct, confident response to use.
+
+SECTION 7 — CLOSING STATEMENT TEMPLATE
+A closing statement the candidate can adapt in the moment — positioning them as a strong fit for this specific role, expressing genuine enthusiasm, and making a direct ask for next steps.`;
+
+  setBtn('Generating Part 1 of 2 — company intelligence...');
+  outEl.innerHTML = '<span class="output-placeholder">Generating Part 1 of 2 — company situation and interviewer analysis...</span>';
+
+  let part1 = '', part2 = '';
+
+  try {
+    part1 = await callClaude(prompt1, 3000, text => {
+      outEl.textContent = text;
+      outEl.classList.add('streaming-cursor');
+    });
+    outEl.classList.remove('streaming-cursor');
+  } catch(e) {
+    outEl.innerHTML = `<div class="error-box"><strong>Part 1 generation failed.</strong> ${esc(e.message)}<br><br>This usually means the connection timed out on a long response. Click Generate again — it will retry from the beginning. If it fails twice, try shortening the job description input.</div>`;
+    setBtn('ready');
+    return;
+  }
+
+  // Short pause so the client can see Part 1 before Part 2 starts
+    outEl.textContent = part1 + '\n\nGenerating Part 2 of 2 — question preparation... Please wait.';
+  setBtn('Generating Part 2 of 2 — question preparation...');
+
+  try {
+    part2 = await callClaude(prompt2, 4000, text => {
+            outEl.textContent = part1 + '\n\n' + text;
+      outEl.classList.add('streaming-cursor');
+    });
+    outEl.classList.remove('streaming-cursor');
+  } catch(e) {
+    // Part 1 succeeded — save it and report the partial failure
+    const partial = part1 + '\n\n[Part 2 generation failed: ' + e.message + '. Sections 4–7 did not generate. Click Generate again to retry the full brief.]';
+    outEl.textContent = partial;
+    setOutput('p3a9_brief', partial);
+    outEl.innerHTML += `<div class="error-box" style="margin-top:12px"><strong>Part 2 timed out.</strong> Part 1 (company intelligence) has been saved. Click Generate again to retry the complete brief.</div>`;
+    setBtn('ready');
+    return;
+  }
+
+  // Both parts complete — combine and save
+  const fullBrief = part1 + '\n\n' + '='.repeat(46) + '\n\n' + part2;
+  outEl.textContent = fullBrief;
+  setOutput('p3a9_brief', fullBrief);
+  STATE.completedAgents.add('p3a9');
+  buildNav(); updateProgress();
+  showToast('✓ Intelligence brief complete — both parts generated');
+  const pw = document.getElementById('a9ProceedWrap');
+  if(pw) pw.innerHTML = `<button class="btn-proceed" onclick="navigateTo('p3a10')">Proceed to Agent 10 →</button>`;
+  setBtn('ready');
 }
 
 async function runFollowup(type){
@@ -3090,9 +3155,9 @@ Produce:
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // PHASE 4: AGENTS 11 & 12
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 function renderAgent11(body){
   renderGenericAgent(body,'p4a11',
     '<strong>Agent 11 — Execution &amp; Coaching (Weekly Intelligence Core).</strong> A job search is a project, and like any project it stalls when there is no operating rhythm. Most professionals work hard in the first two weeks, slow down when early outreach does not produce immediate results, and lose momentum before their search gains real traction. The Weekly Intelligence Core prevents that pattern by creating a non-negotiable weekly review that diagnoses the health of your search, identifies exactly what is stalling and why, and produces a specific priority list for the coming week — concrete next actions ranked by likely impact, not general encouragement.<br><br><strong>Why it matters:</strong> Most search stalls are diagnosable and fixable once you know what pattern you are in. No new conversations means outreach volume is too low or messaging is wrong. Conversations but no interviews means positioning is unclear or résumé is weak. Interviews but no offers means interview preparation is insufficient. This agent tells you which pattern you are in and what to do about it, every week, for the full duration of your search.<br><br><strong>What you need to do:</strong> Run this agent every Friday or every Monday — pick one day and treat it as a standing appointment that does not move. Be completely honest about what happened this week. Do not filter, minimize, or round up your activity numbers. The value of this agent is directly proportional to the accuracy of what you put in. Commit to the top three priority actions before closing the app each week.',
@@ -3169,9 +3234,9 @@ Produce:
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // SEARCH DASHBOARD
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 const DOC_LIBRARY = [("step0_profile", "Career Capital Profile", "Step 0"), ("stepA_options", "Career Capital Options Analysis", "Step A"), ("stepB_resume", "Master Base Résumé", "Step B"), ("stepC_linkedin", "LinkedIn Profile — All 9 Sections", "Step C"), ("stepD_reputation", "Digital Reputation Plan", "Step D"), ("p1a1_market", "Market & Opportunity Intelligence", "Agent 1"), ("p1a2_positioning", "Positioning & Brand", "Agent 2"), ("p2a3_outreach", "Outreach Messages", "Agent 3"), ("p2a3_info", "Informational Interview Materials", "Agent 3"), ("p2a4_docs", "Career Toolkit — 5 Documents", "Agent 4"), ("p2a5_customresume", "Customized Résumé + Keyword Map", "Agent 5"), ("p2a5_atsscore", "ATS Score & Gap Analysis", "Agent 5"), ("p2a6_references", "Reference Strategy & Prep Briefs", "Agent 6"), ("p2a7_benchmark", "Compensation Benchmark", "Agent 7"), ("p2a8_searchintel", "Job Search Intelligence", "Agent 8"), ("p3a9_brief", "Interview Intelligence Brief", "Agent 9"), ("p3a9_followup", "Post-Interview Follow-Up", "Agent 9"), ("p3a10_offer", "Offer Assessment & Negotiation", "Agent 10"), ("p4a11_core", "Weekly Intelligence Core", "Agent 11"), ("p4a12_onboarding", "Onboarding Intelligence Plan", "Agent 12")];
 
 function renderDashboard(body){
@@ -3493,13 +3558,13 @@ function printUELog(){
   setTimeout(()=>w.print(), 500);
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 // AUTH — UI FUNCTIONS
-// ═══════════════════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────═════════════════════════
 
 function showView(view){
   ['Login','Register','Forgot','Reset','Confirm'].forEach(v=>{
