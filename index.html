@@ -562,7 +562,11 @@ const APP_URL  = 'https://ginger890.github.io/CareerLaunch-AI';
 let SB = null;
 function initSupabase(){
   if (SB) return;
-  SB = supabase.createClient(SB_URL, SB_KEY, {
+  if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+    console.warn('Supabase library not available — running in local-only mode.');
+    return;
+  }
+  SB = window.supabase.createClient(SB_URL, SB_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
   // Listen for auth state changes (handles email confirmation redirect)
@@ -712,8 +716,10 @@ const STATE = {
 
 function selectPlan(p){
   STATE.plan = p;
-  document.getElementById('cardFree').classList.toggle('selected', p==='free');
-  document.getElementById('cardPro').classList.toggle('selected', p==='pro');
+  const cardFree = document.getElementById('cardFree');
+  const cardPro  = document.getElementById('cardPro');
+  if(cardFree) cardFree.classList.toggle('selected', p==='free');
+  if(cardPro)  cardPro.classList.toggle('selected', p==='pro');
   // Enable start button only if name is also filled
   const name = document.getElementById('clientNameInput').value.trim();
   document.getElementById('btnStart').disabled = !name;
@@ -1048,27 +1054,35 @@ async function callClaude(content, maxTokens, onChunk) {
 // ═══════════════════════════════════════════════════════════════════════════
 // UTILITY
 // ═══════════════════════════════════════════════════════════════════════════
-function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+window.__genericAgentInputs = window.__genericAgentInputs || {};
+function safeFileName(s){ return String(s || 'Document').trim().replace(/[^a-z0-9_\-]+/gi,'_').replace(/^_+|_+$/g,'').slice(0,80) || 'Document'; }
 function showToast(msg, dur) {
   const t = document.getElementById('toast');
+  if(!t) return;
   t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), dur||1800);
 }
 function copyText(text) {
-  navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied to clipboard'));
+  if(!text){ showToast('Nothing to copy yet — generate content first.'); return; }
+  navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied to clipboard')).catch(()=>{
+    showToast('Copy failed — please select the text manually.');
+  });
 }
 function dlDoc(text, filename) {
-  const title = filename.replace(/_/g,' ');
-  const html = `<html><head><meta charset="utf-8"><title>${title}</title></head><body><h2>${title}</h2><pre style="font-family:Calibri,sans-serif;white-space:pre-wrap;font-size:12pt">${text.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</pre></body></html>`;
+  const cleanName = safeFileName(filename);
+  const title = esc(cleanName.replace(/_/g,' '));
+  const bodyText = esc(text || '');
+  const html = `<html><head><meta charset="utf-8"><title>${title}</title></head><body><h2>${title}</h2><pre style="font-family:Calibri,sans-serif;white-space:pre-wrap;font-size:12pt">${bodyText}</pre></body></html>`;
   const blob = new Blob([html],{type:'application/msword'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=filename+'.doc';
+  const a = document.createElement('a'); a.href=url; a.download=cleanName+'.doc';
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 function getOutput(key){ return STATE.savedOutputs[key]||''; }
 function setOutput(key,val){ STATE.savedOutputs[key]=val; autoSave(); }
-function getInput(key){ return STATE.savedInputs[key]||''; }
-function setInput(key,val){ STATE.savedInputs[key]=val; saveLocal(); }
+function getInput(key){ return STATE.savedInputs[key] || window.__genericAgentInputs?.[key] || ''; }
+function setInput(key,val){ STATE.savedInputs[key]=val; window.__genericAgentInputs[key]=val; saveLocal(); }
 function saveLocal(){
   try{ localStorage.setItem('cl_state', JSON.stringify({
     clientName: STATE.clientName,
@@ -1079,7 +1093,7 @@ function saveLocal(){
     assessmentScores: STATE.assessmentScores,
     assessmentComplete: STATE.assessmentComplete,
     checklistState: STATE.checklistState,
-    asmtAnswers: ASMT_ANSWERS,
+    asmtAnswers: ASMT_ANSWERS || {SCI:{},TSP:{},VWSI:{},PPI:{}},
   })); } catch(e){}
 }
 function loadLocal(){
@@ -1117,6 +1131,7 @@ function updateProgress(){
 // ═══════════════════════════════════════════════════════════════════════════
 function buildNav(){
   const navEl = document.getElementById('navList');
+  if(!navEl) return;
   let html = '';
   NAV.forEach(item => {
     if (item.section) {
@@ -1369,6 +1384,7 @@ function renderInstrument(key){
 }
 
 function answerQ(key, idx, val){
+  if(!ASMT_ANSWERS[key]) return;
   ASMT_ANSWERS[key][idx] = val;
   const btn = document.querySelector(`#q_${key}_${idx} .l-btn.sel`);
   if (btn) btn.classList.remove('sel');
@@ -1671,10 +1687,10 @@ function toggleCheck(agentId, idx, el){
   if (!STATE.checklistState[agentId]) STATE.checklistState[agentId]={};
   const cur = STATE.checklistState[agentId][idx];
   STATE.checklistState[agentId][idx] = !cur;
-  const box = el.querySelector('.check-box');
-  const txt = el.querySelector('.check-text');
-  box.classList.toggle('checked');
-  txt.classList.toggle('checked');
+  const box = el && el.querySelector('.check-box');
+  const txt = el && el.querySelector('.check-text');
+  if(box) box.classList.toggle('checked');
+  if(txt) txt.classList.toggle('checked');
   autoSave();
 }
 
@@ -1731,7 +1747,7 @@ async function runGenericAgent(agentId, outputKey, inputs){
   if (missing) { showToast('Please fill in all required fields.'); return; }
   const profile = getOutput('step0_profile')||'[Career Capital Profile not yet generated — complete Step 0 first]';
   const builder = window['promptBuilder_'+agentId];
-  if (!builder) return;
+  if (!builder) { showToast('Agent configuration error — please refresh the page.'); return; }
   const prompt = builder(vals, profile, STATE.clientName);
   const btn = document.getElementById('btnGen_'+agentId);
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating...';
@@ -3109,7 +3125,7 @@ Produce:
 // SEARCH DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════════
 function renderDashboard(body){
-  if (!STATE.searchDashboard) STATE.searchDashboard = { applications:[], recruiters:[], interviews:[] };
+  STATE.searchDashboard = STATE.searchDashboard || { applications:[], recruiters:[], interviews:[] };
   const dash = STATE.searchDashboard;
   const total = dash.applications.length;
   const active = dash.applications.filter(a=>a.status==='active').length;
@@ -3170,7 +3186,7 @@ function addApplication(){
   const role = prompt('Role / title:'); if (!role) return;
   const source = prompt('Source (e.g. LinkedIn, Indeed, direct):');
   const applied = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  if (!STATE.searchDashboard) STATE.searchDashboard = {applications:[],recruiters:[],interviews:[]};
+  STATE.searchDashboard = STATE.searchDashboard || {applications:[],recruiters:[],interviews:[]};
   STATE.searchDashboard.applications.push({company,role,source:source||'',applied,status:'applied',followup:''});
   saveLocal();
   renderDashboard(document.getElementById('agentBody'));
@@ -3178,6 +3194,7 @@ function addApplication(){
 }
 
 function updateStatus(idx){
+  if(!STATE.searchDashboard?.applications?.[idx]) return;
   const app = STATE.searchDashboard.applications[idx];
   const statuses = ['applied','active','interviewing','offer','closed','rejected'];
   const cur = statuses.indexOf(app.status||'applied');
@@ -3378,6 +3395,12 @@ async function init(){
   loadLocal();
   buildNav();
   // Check if already authenticated
+  if (!SB) {
+    hideAuthScreen();
+    launchApp();
+    showToast('Cloud sign-in unavailable — local mode active', 3000);
+    return;
+  }
   const { data: { session } } = await SB.auth.getSession();
   if (session) {
     await onSignedIn(session);
