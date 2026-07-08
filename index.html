@@ -341,6 +341,39 @@ textarea{min-height:86px}
 .od-desc{font-size:12.5px;color:var(--text-2);line-height:1.75;margin-top:12px}
 .od-desc strong{color:var(--navy);font-weight:600}
 
+
+/* ── Search Dashboard tabs ── */
+.dash-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;gap:0}
+.dash-tab{padding:10px 22px;font-family:var(--font-b);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.dash-tab:hover{color:var(--teal);background:var(--teal-lt)}
+.dash-tab.active{color:var(--teal);border-bottom-color:var(--teal);font-weight:600}
+.dash-panel{display:none}
+.dash-panel.active{display:block}
+.dash-stat{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:16px;text-align:center}
+.dash-stat-val{font-family:var(--font-d);font-size:32px;font-weight:600;color:var(--teal-mid)}
+.dash-stat-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-top:3px}
+.dash-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.dash-table th{padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:var(--navy);color:#fff}
+.dash-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.dash-table tr:nth-child(even) td{background:var(--cream)}
+.dash-table tr:nth-child(odd) td{background:var(--surface)}
+.status-pill{font-size:10px;font-weight:600;letter-spacing:.06em;padding:2px 8px;border-radius:10px;text-transform:uppercase;color:#fff}
+.doc-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border);gap:10px}
+.doc-row:last-child{border-bottom:none}
+.doc-row:hover{background:var(--teal-lt)}
+.doc-name{font-size:13px;font-weight:500;color:var(--navy);flex:1}
+.doc-meta{font-size:11px;color:var(--text-3);margin-top:2px}
+.doc-actions{display:flex;gap:6px;flex-shrink:0}
+.ue-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:600px){.ue-form{grid-template-columns:1fr}}
+.ue-field label{display:block;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);margin-bottom:4px}
+.ue-field input,.ue-field select,.ue-field textarea{width:100%;padding:8px 10px;font-family:var(--font-b);font-size:13px;border:1px solid var(--border-str);border-radius:4px;background:var(--surface);color:var(--text)}
+.ue-field textarea{min-height:60px;resize:vertical}
+.ue-week-hdr{background:var(--navy);color:#fff;padding:10px 14px;border-radius:5px 5px 0 0;display:flex;align-items:center;justify-content:space-between;margin-top:18px}
+.ue-week-title{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.ue-entry{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px}
+.ue-print-note{background:var(--gold-lt);border:1px solid rgba(186,138,42,.3);border-radius:5px;padding:11px 14px;font-size:12px;color:var(--text-2);margin-top:14px;line-height:1.65}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -1649,7 +1682,7 @@ Format as a professional document ready to paste into any subsequent agent promp
   const outEl = document.getElementById('out_step0_profile');
   outEl.innerHTML = '<span class="output-placeholder">Generating your Career Capital Profile...</span>';
   try {
-    const result = await callClaude(prompt, 3000, text => {
+    const result = await callClaude(prompt, 4000, text => {
       outEl.textContent = text;
       outEl.classList.add('streaming-cursor');
     });
@@ -1749,12 +1782,27 @@ async function runGenericAgent(agentId, outputKey, inputs){
   const builder = window['promptBuilder_'+agentId];
   if (!builder) { showToast('Agent configuration error — please refresh the page.'); return; }
   const prompt = builder(vals, profile, STATE.clientName);
+  // Per-agent token budgets — some agents need more output space than others
+  const TOKEN_BUDGETS = {
+    stepC: 6000,   // LinkedIn 9 sections needs ~3500 output tokens
+    stepB: 5000,   // Full résumé rebuild
+    stepA: 4000,   // Options analysis
+    p1a1:  5000,   // Market intelligence — large output
+    p1a2:  3000,   // Positioning docs
+    p2a6:  4000,   // References
+    p2a7:  3000,   // Compensation
+    p2a8:  5000,   // Job search intelligence — 7 sections
+    p3a10: 4000,   // Offer negotiation
+    p4a11: 3000,   // Weekly core
+    p4a12: 4000,   // Onboarding
+  };
+  const maxTok = TOKEN_BUDGETS[agentId] || 4000;
   const btn = document.getElementById('btnGen_'+agentId);
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating...';
   const outEl = document.getElementById('out_'+agentId);
   outEl.innerHTML='<span class="output-placeholder">Generating...</span>';
   try{
-    const result = await callClaude(prompt, 4000, text=>{
+    const result = await callClaude(prompt, maxTok, text=>{
       outEl.textContent=text; outEl.classList.add('streaming-cursor');
     });
     outEl.classList.remove('streaming-cursor');
@@ -1786,7 +1834,7 @@ function renderStepA(body){
     (vals, profile, name) => `Act as my Career Capital Options Analyst for ${name}.
 
 Here is my Career Capital Profile:
-${profile}
+${profile.substring(0,1400)}
 
 My current work history:
 ${vals.currentbg}
@@ -1835,7 +1883,7 @@ function renderStepB(body){
     (vals, profile, name) => `Act as a senior résumé strategist and ATS optimization specialist. Build the master base résumé for ${name}.
 
 Career Capital Profile:
-${profile}
+${profile.substring(0,1200)}
 
 ${optionsOut?`Chosen path from Options Analysis:\n${optionsOut.substring(0,800)}\n\n`:''}Current résumé:
 ${vals.existingresume}
@@ -1876,10 +1924,10 @@ function renderStepC(body){
     'LinkedIn Profile — All 9 Sections',
     (vals, profile, name) => `Act as a LinkedIn profile strategist and personal branding specialist. Build the complete LinkedIn profile for ${name}.
 
-Career Capital Profile:
-${profile}
+Career Capital Profile (key strengths and positioning):
+${profile.substring(0,1200)}
 
-Master résumé context: ${getOutput('stepB_resume')?.substring(0,600)||'Not yet generated — using Career Capital Profile'}
+Master résumé context: ${getOutput('stepB_resume')?.substring(0,800)||'Not yet generated — using Career Capital Profile'}
 
 Target role: ${vals.targetrole}
 Target geography and work preference: ${vals.geography}
@@ -1993,7 +2041,7 @@ function renderAgent1(body){
     (vals, profile, name) => `Act as the Market & Opportunity Intelligence Agent for ${name}.
 
 Career Capital Profile:
-${profile}
+${profile.substring(0,1000)}
 
 Target role: ${vals.targetrole}
 Target industries: ${vals.industries}
@@ -2028,7 +2076,7 @@ function renderAgent2(body){
     (vals, profile, name) => `Act as the Professional Positioning & Brand Agent for ${name}.
 
 Career Capital Profile:
-${profile}
+${profile.substring(0,1000)}
 
 Market intelligence context: ${getOutput('p1a1_market')?.substring(0,400)||'Not yet generated'}
 
@@ -2467,7 +2515,7 @@ All documents must be specific to ${company} and ${firstName}'s background. No g
   const outEl = document.getElementById('out_p2a4_docs');
   outEl.innerHTML='<span class="output-placeholder">Generating 5 documents in parallel...</span>';
   try{
-    const result = await callClaude(prompt, 4000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
+    const result = await callClaude(prompt, 6000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
     outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
     setOutput('p2a4_docs',result);
     STATE.completedAgents.add('p2a4'); buildNav(); updateProgress();
@@ -2942,10 +2990,10 @@ async function runInterviewBrief(){
   const prompt = `Act as my Company & Interview Intelligence Agent for ${STATE.clientName}.
 
 Company and role: ${company}
-Job description: ${jd||'Not provided'}
+Job description: ${jd ? jd.substring(0,1200) : 'Not provided'}
 Interviewers: ${interviewers||'Not specified'}
 Interview format: ${format||'Not specified'}
-Career Capital Profile: ${profile.substring(0,500)}
+Career Capital Profile: ${profile.substring(0,600)}
 
 Produce a complete interview intelligence brief:
 
@@ -3124,56 +3172,167 @@ Produce:
 // ═══════════════════════════════════════════════════════════════════════════
 // SEARCH DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════════
+const DOC_LIBRARY = [("step0_profile", "Career Capital Profile", "Step 0"), ("stepA_options", "Career Capital Options Analysis", "Step A"), ("stepB_resume", "Master Base Résumé", "Step B"), ("stepC_linkedin", "LinkedIn Profile — All 9 Sections", "Step C"), ("stepD_reputation", "Digital Reputation Plan", "Step D"), ("p1a1_market", "Market & Opportunity Intelligence", "Agent 1"), ("p1a2_positioning", "Positioning & Brand", "Agent 2"), ("p2a3_outreach", "Outreach Messages", "Agent 3"), ("p2a3_info", "Informational Interview Materials", "Agent 3"), ("p2a4_docs", "Career Toolkit — 5 Documents", "Agent 4"), ("p2a5_customresume", "Customized Résumé + Keyword Map", "Agent 5"), ("p2a5_atsscore", "ATS Score & Gap Analysis", "Agent 5"), ("p2a6_references", "Reference Strategy & Prep Briefs", "Agent 6"), ("p2a7_benchmark", "Compensation Benchmark", "Agent 7"), ("p2a8_searchintel", "Job Search Intelligence", "Agent 8"), ("p3a9_brief", "Interview Intelligence Brief", "Agent 9"), ("p3a9_followup", "Post-Interview Follow-Up", "Agent 9"), ("p3a10_offer", "Offer Assessment & Negotiation", "Agent 10"), ("p4a11_core", "Weekly Intelligence Core", "Agent 11"), ("p4a12_onboarding", "Onboarding Intelligence Plan", "Agent 12")];
+
 function renderDashboard(body){
-  STATE.searchDashboard = STATE.searchDashboard || { applications:[], recruiters:[], interviews:[] };
+  STATE.searchDashboard = STATE.searchDashboard || { applications:[], recruiters:[], interviews:[], ueLog:[] };
   const dash = STATE.searchDashboard;
+
+  // Which tab is active
+  const activeTab = dash._activeTab || 'pipeline';
+
   const total = dash.applications.length;
   const active = dash.applications.filter(a=>a.status==='active').length;
   const interviewing = dash.applications.filter(a=>a.status==='interviewing').length;
   const offers = dash.applications.filter(a=>a.status==='offer').length;
 
   body.innerHTML = `
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:12px">
     <div>
-      <h2 style="font-family:var(--font-d);font-size:24px;color:var(--navy);margin-bottom:4px">Search Dashboard</h2>
-      <p style="font-size:13px;color:var(--text-3)">Live pipeline tracking — updated in real time as your search develops.</p>
+      <h2 style="font-family:var(--font-d);font-size:24px;color:var(--navy);margin-bottom:2px">Search Dashboard</h2>
+      <p style="font-size:13px;color:var(--text-3)">Your complete search management center — pipeline, documents, and unemployment log.</p>
     </div>
-    <button class="btn btn-primary" onclick="addApplication()">+ Add Application</button>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">
-    ${[['Total Applied',total],['Active',active],['Interviewing',interviewing],['Offers',offers]].map(([lbl,val])=>`
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:16px;text-align:center">
-      <div style="font-family:var(--font-d);font-size:32px;font-weight:600;color:var(--teal-mid)">${val}</div>
-      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-top:3px">${lbl}</div>
-    </div>`).join('')}
+  <div class="dash-tabs">
+    <button class="dash-tab ${activeTab==='pipeline'?'active':''}" onclick="switchDashTab('pipeline')">📋 Application Pipeline</button>
+    <button class="dash-tab ${activeTab==='documents'?'active':''}" onclick="switchDashTab('documents')">📁 My Documents</button>
+    <button class="dash-tab ${activeTab==='unemployment'?'active':''}" onclick="switchDashTab('unemployment')">📄 Unemployment Log</button>
   </div>
 
-  <div id="appTable">
-    ${total === 0
-      ? `<div style="text-align:center;padding:40px;color:var(--text-3);font-size:13px">No applications logged yet. Click "Add Application" to start tracking your pipeline.</div>`
-      : `<table style="width:100%;border-collapse:collapse;font-size:12.5px">
-        <thead><tr style="background:var(--navy);color:#fff">
-          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Company & Role</th>
-          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Source</th>
-          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Applied</th>
-          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Status</th>
-          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Follow-Up</th>
-          <th style="padding:9px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Action</th>
+  <!-- ── TAB 1: APPLICATION PIPELINE ── -->
+  <div class="dash-panel ${activeTab==='pipeline'?'active':''}" id="tabPipeline">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      ${[['Total Applied',total],['Active',active],['Interviewing',interviewing],['Offers',offers]].map(([lbl,val])=>
+        `<div class="dash-stat"><div class="dash-stat-val">${val}</div><div class="dash-stat-lbl">${lbl}</div></div>`
+      ).join('')}
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-primary" onclick="addApplication()">+ Add Application</button>
+    </div>
+    <div id="appTable">
+      ${total === 0
+        ? `<div style="text-align:center;padding:40px;color:var(--text-3);font-size:13px">No applications logged yet. Click "Add Application" to begin tracking your pipeline.</div>`
+        : `<table class="dash-table">
+          <thead><tr>
+            <th>Company & Role</th><th>Source</th><th>Applied</th>
+            <th>Recruiter</th><th>Status</th><th>Follow-Up</th><th>Action</th>
+          </tr></thead>
+          <tbody>
+          ${dash.applications.map((app,i)=>`
+            <tr>
+              <td><div style="font-weight:500;color:var(--text)">${esc(app.company)}</div><div style="color:var(--text-3);font-size:11px">${esc(app.role)}</div></td>
+              <td style="color:var(--text-2)">${esc(app.source||'—')}</td>
+              <td style="color:var(--text-2);white-space:nowrap">${esc(app.applied||'—')}</td>
+              <td style="color:var(--text-2);font-size:11.5px">${esc(app.recruiter||'—')}</td>
+              <td><span class="status-pill" style="background:${statusColor(app.status)}">${esc(app.status||'applied')}</span></td>
+              <td style="color:var(--text-2);font-size:11.5px">${esc(app.followup||'—')}</td>
+              <td style="white-space:nowrap">
+                <button class="btn-action" onclick="editApplication(${i})" style="margin-bottom:3px">Edit</button>
+                <button class="btn-action" onclick="removeApplication(${i})" style="color:var(--danger);border-color:rgba(193,68,14,.3)">Remove</button>
+              </td>
+            </tr>`).join('')}
+          </tbody></table>`
+      }
+    </div>
+  </div>
+
+  <!-- ── TAB 2: DOCUMENT LIBRARY ── -->
+  <div class="dash-panel ${activeTab==='documents'?'active':''}" id="tabDocuments">
+    <div style="background:var(--navy);border-radius:6px;padding:13px 16px;margin-bottom:18px;display:flex;gap:10px">
+      <div style="color:#7EEFD4;font-size:13px;flex-shrink:0">◆</div>
+      <div style="font-size:12px;color:rgba(232,248,244,.92);line-height:1.7">
+        Every document generated in CareerLaunch AI™ is stored here. Click <strong style="color:#7EEFD4">Copy</strong> to copy to clipboard or <strong style="color:#7EEFD4">Download</strong> to save as a Word document. Documents appear here as soon as they are generated in their respective agents.
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden">
+      <div style="background:var(--cream-dk);padding:9px 14px;display:grid;grid-template-columns:80px 1fr auto;gap:12px;border-bottom:1px solid var(--border)">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--navy)">Agent</div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--navy)">Document</div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--navy)">Actions</div>
+      </div>
+      ${DOC_LIBRARY.map(([key, name, agent]) => {
+        const hasDoc = !!getOutput(key);
+        return `<div class="doc-row" style="${!hasDoc?'opacity:.45':''}">
+          <div style="font-size:11px;font-weight:600;color:var(--teal);min-width:70px;flex-shrink:0">${esc(agent)}</div>
+          <div style="flex:1">
+            <div class="doc-name">${esc(name)}</div>
+            <div class="doc-meta">${hasDoc ? '✓ Generated — ready to copy or download' : 'Not yet generated — run this agent to create it'}</div>
+          </div>
+          <div class="doc-actions">
+            ${hasDoc
+              ? `<button class="btn-action" onclick="copyText(getOutput('${key}'))">⎘ Copy</button>
+                 <button class="btn-action" onclick="dlDoc(getOutput('${key}'),'${key.replace(/_/g,'_')}')">↓ Download</button>`
+              : `<button class="btn-action" style="opacity:.4;cursor:not-allowed" disabled>⎘ Copy</button>`
+            }
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--text-3);text-align:center">
+      ${DOC_LIBRARY.filter(([k])=>!!getOutput(k)).length} of ${DOC_LIBRARY.length} documents generated
+    </div>
+  </div>
+
+  <!-- ── TAB 3: UNEMPLOYMENT LOG ── -->
+  <div class="dash-panel ${activeTab==='unemployment'?'active':''}" id="tabUnemployment">
+    <div style="background:var(--navy);border-radius:6px;padding:13px 16px;margin-bottom:18px;display:flex;gap:10px">
+      <div style="color:#7EEFD4;font-size:13px;flex-shrink:0">◆</div>
+      <div style="font-size:12px;color:rgba(232,248,244,.92);line-height:1.7">
+        <strong style="color:#7EEFD4">Texas Workforce Commission (TWC) Job Search Log.</strong>
+        Log every job search contact here. TWC requires documenting at least 3 work search activities per week for most claimants. This log captures all required fields for your weekly certification. Add a new entry each time you apply, contact an employer, or make a networking contact. Use the Print / Export button to generate your weekly summary.
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:13px;color:var(--text-2)">
+        This week: <strong style="color:var(--teal)">${getThisWeekUECount(dash.ueLog||[])}</strong> activities logged
+        &nbsp;·&nbsp; Total: <strong>${(dash.ueLog||[]).length}</strong>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="addUEEntry()">+ Log Activity</button>
+        <button class="btn-action" onclick="printUELog()">🖨 Print / Export Week</button>
+      </div>
+    </div>
+
+    ${(dash.ueLog||[]).length === 0
+      ? `<div style="text-align:center;padding:40px;color:var(--text-3);font-size:13px">
+          No activities logged yet. Click "Log Activity" to record your first job search contact.<br>
+          <span style="font-size:11px;margin-top:8px;display:block">TWC requires a minimum of 3 work search activities per week for most claimants.</span>
+        </div>`
+      : `<table class="dash-table">
+        <thead><tr>
+          <th>Date</th><th>Employer</th><th>Position</th><th>Method</th>
+          <th>Contact</th><th>Result / Response</th><th>Action</th>
         </tr></thead>
         <tbody>
-        ${dash.applications.map((app,i)=>`
-          <tr style="background:${i%2===0?'var(--surface)':'var(--cream)'};border-bottom:1px solid var(--border)">
-            <td style="padding:9px 12px"><div style="font-weight:500;color:var(--text)">${esc(app.company)}</div><div style="color:var(--text-3);font-size:11px">${esc(app.role)}</div></td>
-            <td style="padding:9px 12px;color:var(--text-2)">${esc(app.source||'—')}</td>
-            <td style="padding:9px 12px;color:var(--text-2)">${esc(app.applied||'—')}</td>
-            <td style="padding:9px 12px"><span style="background:${statusColor(app.status)};color:#fff;font-size:10px;font-weight:600;letter-spacing:.06em;padding:2px 8px;border-radius:10px;text-transform:uppercase">${esc(app.status||'applied')}</span></td>
-            <td style="padding:9px 12px;color:var(--text-2);font-size:11.5px">${esc(app.followup||'—')}</td>
-            <td style="padding:9px 12px"><button class="btn-action" onclick="updateStatus(${i})">Update</button></td>
-          </tr>`).join('')}
+        ${(dash.ueLog||[]).slice().reverse().map((entry,ri)=>{
+          const i = (dash.ueLog.length - 1) - ri;
+          return `<tr>
+            <td style="white-space:nowrap;color:var(--text-2)">${esc(entry.date||'—')}</td>
+            <td><div style="font-weight:500">${esc(entry.employer||'—')}</div><div style="font-size:11px;color:var(--text-3)">${esc(entry.address||'')}</div></td>
+            <td style="color:var(--text-2)">${esc(entry.position||'—')}</td>
+            <td style="color:var(--text-2)">${esc(entry.method||'—')}</td>
+            <td style="color:var(--text-2);font-size:11.5px">${esc(entry.contact||'—')}</td>
+            <td style="color:var(--text-2);font-size:11.5px">${esc(entry.result||'—')}</td>
+            <td style="white-space:nowrap">
+              <button class="btn-action" onclick="removeUEEntry(${i})" style="color:var(--danger);border-color:rgba(193,68,14,.3)">Remove</button>
+            </td>
+          </tr>`;
+        }).join('')}
         </tbody></table>`
     }
+
+    <div class="ue-print-note">
+      <strong>TWC Weekly Certification reminder:</strong> Log all required activities — applying for jobs, employer contacts, attending job fairs, visiting the Workforce Solutions office, and completing approved reemployment activities. Keep this log as your record. When completing your weekly certification online at <strong>ui.texasworkforce.org</strong>, refer to the entries above to accurately report your work search activities.
+    </div>
   </div>`;
+}
+
+function switchDashTab(tab){
+  STATE.searchDashboard = STATE.searchDashboard || {applications:[],recruiters:[],interviews:[],ueLog:[]};
+  STATE.searchDashboard._activeTab = tab;
+  renderDashboard(document.getElementById('agentBody'));
 }
 
 function statusColor(s){
@@ -3181,30 +3340,157 @@ function statusColor(s){
   return map[s]||'var(--text-3)';
 }
 
+// ── APPLICATION PIPELINE ────────────────────────────────────────────────
 function addApplication(){
   const company = prompt('Company name:'); if (!company) return;
   const role = prompt('Role / title:'); if (!role) return;
-  const source = prompt('Source (e.g. LinkedIn, Indeed, direct):');
-  const applied = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  STATE.searchDashboard = STATE.searchDashboard || {applications:[],recruiters:[],interviews:[]};
-  STATE.searchDashboard.applications.push({company,role,source:source||'',applied,status:'applied',followup:''});
-  saveLocal();
+  const source = prompt('Source (e.g. LinkedIn, Indeed, direct):') || '';
+  const recruiter = prompt('Recruiter name and contact (optional):') || '';
+  const applied = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  STATE.searchDashboard = STATE.searchDashboard || {applications:[],recruiters:[],interviews:[],ueLog:[]};
+  STATE.searchDashboard.applications.push({company,role,source,recruiter,applied,status:'applied',followup:''});
+  autoSave();
   renderDashboard(document.getElementById('agentBody'));
   showToast('✓ Application added');
 }
 
-function updateStatus(idx){
+function editApplication(idx){
   if(!STATE.searchDashboard?.applications?.[idx]) return;
   const app = STATE.searchDashboard.applications[idx];
   const statuses = ['applied','active','interviewing','offer','closed','rejected'];
   const cur = statuses.indexOf(app.status||'applied');
-  const next = statuses[(cur+1)%statuses.length];
-  app.status = next;
-  const followup = prompt(`Follow-up date or note for ${app.company}:`, app.followup||'');
-  if (followup !== null) app.followup = followup;
-  saveLocal();
+  const next = prompt(
+    `Update status for ${app.company}\nCurrent: ${app.status}\nEnter new status (applied/active/interviewing/offer/closed/rejected):`,
+    app.status
+  );
+  if(next && statuses.includes(next.toLowerCase().trim())) app.status = next.toLowerCase().trim();
+  const recruiter = prompt('Recruiter name and contact:', app.recruiter||'');
+  if(recruiter !== null) app.recruiter = recruiter;
+  const followup = prompt('Follow-up date or note:', app.followup||'');
+  if(followup !== null) app.followup = followup;
+  autoSave();
   renderDashboard(document.getElementById('agentBody'));
-  showToast(`✓ Updated to: ${next}`);
+  showToast('✓ Application updated');
+}
+
+function removeApplication(idx){
+  if(!STATE.searchDashboard?.applications?.[idx]) return;
+  const app = STATE.searchDashboard.applications[idx];
+  if(!confirm(`Remove ${app.company} — ${app.role} from your pipeline?`)) return;
+  STATE.searchDashboard.applications.splice(idx,1);
+  autoSave();
+  renderDashboard(document.getElementById('agentBody'));
+  showToast('✓ Removed');
+}
+
+function updateStatus(idx){
+  if(!STATE.searchDashboard?.applications?.[idx]) return;
+  editApplication(idx);
+}
+
+// ── UNEMPLOYMENT LOG ─────────────────────────────────────────────────────
+function getThisWeekUECount(log){
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sun
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - dayOfWeek);
+  weekStart.setHours(0,0,0,0);
+  return log.filter(e=>{
+    const d = new Date(e._ts||0);
+    return d >= weekStart;
+  }).length;
+}
+
+function addUEEntry(){
+  const date = prompt('Date of contact (e.g. Jul 8, 2026):', new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}));
+  if(!date) return;
+  const employer = prompt('Employer name:');
+  if(!employer) return;
+  const address = prompt('Employer address or website (optional):') || '';
+  const position = prompt('Position applied for or type of contact:');
+  if(!position) return;
+  const method = prompt('Method of contact:\n(online application / email / phone / in-person / job fair / networking / TWC referral):') || '';
+  const contact = prompt('Contact person name and phone/email (if known):') || '';
+  const result = prompt('Result or response received (e.g. No response, Scheduled interview, Rejected):') || 'Pending';
+
+  STATE.searchDashboard = STATE.searchDashboard || {applications:[],recruiters:[],interviews:[],ueLog:[]};
+  if(!STATE.searchDashboard.ueLog) STATE.searchDashboard.ueLog = [];
+  STATE.searchDashboard.ueLog.push({
+    date, employer, address, position, method, contact, result,
+    _ts: Date.now()
+  });
+  autoSave();
+  renderDashboard(document.getElementById('agentBody'));
+  showToast('✓ Activity logged');
+}
+
+function removeUEEntry(idx){
+  if(!STATE.searchDashboard?.ueLog?.[idx]) return;
+  if(!confirm('Remove this entry from your unemployment log?')) return;
+  STATE.searchDashboard.ueLog.splice(idx,1);
+  autoSave();
+  renderDashboard(document.getElementById('agentBody'));
+  showToast('✓ Entry removed');
+}
+
+function printUELog(){
+  const log = STATE.searchDashboard?.ueLog||[];
+  if(log.length === 0){ showToast('No entries to print yet.'); return; }
+
+  // Build this week and last week entries for the report
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const weekStart = new Date(now); weekStart.setDate(now.getDate()-dayOfWeek); weekStart.setHours(0,0,0,0);
+  const prevWeekStart = new Date(weekStart); prevWeekStart.setDate(weekStart.getDate()-7);
+
+  const thisWeek = log.filter(e=>new Date(e._ts||0)>=weekStart);
+  const lastWeek = log.filter(e=>{const d=new Date(e._ts||0); return d>=prevWeekStart && d<weekStart;});
+  const displayEntries = thisWeek.length > 0 ? thisWeek : lastWeek;
+  const weekLabel = thisWeek.length > 0 ? 'Current Week' : 'Previous Week';
+
+  const rows = displayEntries.map(e=>`
+    <tr>
+      <td>${esc(e.date||'')}</td>
+      <td>${esc(e.employer||'')}${e.address?'<br><small style="color:#666">'+esc(e.address)+'</small>':''}</td>
+      <td>${esc(e.position||'')}</td>
+      <td>${esc(e.method||'')}</td>
+      <td>${esc(e.contact||'')}</td>
+      <td>${esc(e.result||'')}</td>
+    </tr>`).join('');
+
+  const html = `<html><head><meta charset="utf-8"><title>TWC Work Search Log — ${STATE.clientName}</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:11pt;margin:0.75in}
+    h1{font-size:14pt;color:#0E1A2B;margin-bottom:4px}
+    .sub{font-size:10pt;color:#666;margin-bottom:18px}
+    table{width:100%;border-collapse:collapse;font-size:9.5pt}
+    th{background:#0E1A2B;color:#fff;padding:6px 8px;text-align:left;font-size:8.5pt;text-transform:uppercase;letter-spacing:.06em}
+    td{padding:6px 8px;border-bottom:1px solid #ddd;vertical-align:top}
+    tr:nth-child(even) td{background:#f5f8f7}
+    .footer{margin-top:24px;font-size:9pt;color:#666;border-top:1px solid #ccc;padding-top:12px}
+    .req{background:#E1F5EE;border:1px solid #A8D5C8;padding:10px 12px;margin-bottom:16px;font-size:9.5pt;border-radius:4px}
+  </style></head><body>
+  <h1>Texas Workforce Commission — Work Search Record</h1>
+  <div class="sub">Claimant: <strong>${esc(STATE.clientName)}</strong> &nbsp;·&nbsp; ${weekLabel} &nbsp;·&nbsp; Printed: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+  <div class="req"><strong>TWC Requirement:</strong> You must make at least 3 work search contacts per week and keep a record of each contact. This log satisfies that requirement. Keep a copy for your records.</div>
+  <table>
+    <thead><tr>
+      <th>Date</th><th>Employer Name & Address</th><th>Position / Type of Contact</th>
+      <th>Method</th><th>Contact Person</th><th>Result / Response</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">
+    Total activities this period: <strong>${displayEntries.length}</strong> &nbsp;·&nbsp;
+    Minimum required: <strong>3 per week</strong> &nbsp;·&nbsp;
+    Complete your weekly certification at <strong>ui.texasworkforce.org</strong>
+  </div>
+  </body></html>`;
+
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(), 500);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
