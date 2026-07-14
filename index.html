@@ -1786,7 +1786,7 @@ async function runGenericAgent(agentId, outputKey, inputs){
   const TOKEN_BUDGETS = {
     stepC: 6000,   // LinkedIn 9 sections needs ~3500 output tokens
     stepB: 5000,   // Full résumé rebuild
-    stepA: 4000,   // Options analysis
+    stepA: 6000,   // Options analysis — 2-3 paths × 6 sections = 3500-5000 tokens output
     p1a1:  5000,   // Market intelligence — large output
     p1a2:  3000,   // Positioning docs
     p2a6:  4000,   // References
@@ -1831,36 +1831,48 @@ function renderStepA(body){
     ],
     'stepA_options',
     'Career Capital Options Analysis',
-    (vals, profile, name) => `Act as my Career Capital Options Analyst for ${name}.
+    (vals, profile, name) => `You are my Career Capital Options Analyst. Produce a complete analysis for ${name}.
 
-Here is my Career Capital Profile:
-${profile.substring(0,1400)}
+CAREER CAPITAL PROFILE:
+${profile.substring(0,1200)}
 
-My current work history:
-${vals.currentbg}
+WORK HISTORY:
+${vals.currentbg.substring(0,1500)}
 
-Career paths to evaluate:
+PATHS TO EVALUATE:
 ${vals.paths}
 
-Constraints: ${vals.constraints||'None specified'}
+CONSTRAINTS: ${vals.constraints||'None'}
 
-Evaluate each path and produce:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATH-BY-PATH ANALYSIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For EACH path listed above, produce all six sections. Do not truncate or skip any path.
 
-For each path:
-1. Match Score (0–100%): How well does my Career Capital Profile align with what this path requires? Score against: functional skills match, transferable skills relevance, values-environment fit, and market demand.
-2. Realistic Timeline to First Interview: Given the market and my background.
-3. Compensation Range: Realistic market range for this path at my level.
-4. Key Strengths I Bring: What from my profile positions me well.
-5. Key Gaps: What is missing and how significant.
-6. Trade-offs: What choosing this path means for my next role, three-year trajectory, and daily work life.
+PATH [name]:
+1. MATCH SCORE (0-100%): Score against functional skills, transferable skills, values fit, and market demand. Show the score prominently.
+2. TIMELINE TO FIRST INTERVIEW: Realistic estimate given background and market.
+3. COMPENSATION RANGE: Realistic market range at this level and geography.
+4. STRENGTHS: What from this profile positions them well for this path. Be specific.
+5. GAPS: What is missing and how significant each gap is. Be honest.
+6. TRADE-OFFS: What choosing this path means for the next role, the three-year trajectory, and day-to-day work life.
 
-Then produce:
+[Repeat the full six-section analysis for every path listed. Complete all paths before moving on.]
 
-RECOMMENDED PATH: Name the single path that offers the best combination of market demand, profile fit, timeline, and compensation. Explain why in 3–4 sentences. Be direct.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECOMMENDED PATH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Name the single best path. Explain why in 3-4 direct sentences covering market demand, profile fit, timeline, and compensation.
 
-POSITIONING LANGUAGE FOR RECOMMENDED PATH: The specific job titles I should use in my search, the industries to prioritize, and 2–3 sentences I can use in outreach and interviews to describe what I am seeking and why I am qualified.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+POSITIONING LANGUAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For the recommended path: (1) Specific job titles to use in the search. (2) Industries to prioritize. (3) 2-3 sentences to use verbally in recruiter calls and networking conversations.
 
-IMMEDIATE NEXT STEPS: Three concrete actions to take this week, specific to my recommended path.`,
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMMEDIATE NEXT STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Three concrete actions to take this week, specific to the recommended path.`,
     ['Career Capital Options Analysis read in full','Recommended path identified and honestly considered','Trade-offs for chosen path acknowledged','Target title and industries confirmed','Positioning language noted for use in all subsequent steps','Immediate next steps calendared'],
     'stepB'
   );
