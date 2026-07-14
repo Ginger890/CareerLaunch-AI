@@ -1044,44 +1044,72 @@ const INST_ORDER = ['SCI','TSP','VWSI','PPI'];
 // ──────────────────────────────────────────────────═════════════════════════
 // CLAUDE API — streaming via proxy
 // ──────────────────────────────────────────────────═════════════════════════
-async function callClaude(content, maxTokens, onChunk) {
-  const resp = await fetch(PROXY, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: maxTokens || 4000,
-      stream: true,
-      messages:[{ role:'user', content }]
-    })
-  });
-  if (!resp.ok) {
-    const err = await resp.json().catch(()=>({}));
-    throw new Error((err.error && err.error.message) || 'HTTP ' + resp.status);
-  }
-  const reader = resp.body.getReader();
-  const dec = new TextDecoder();
-  let buf = '', full = '';
-  while (true) {
-    const {done, value} = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, {stream:true});
-    const lines = buf.split('\n');
-    buf = lines.pop();
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const data = line.slice(6);
-      if (data === '[DONE]') break;
-      try {
-        const p = JSON.parse(data);
-        if (p.type === 'content_block_delta' && p.delta?.text) {
-          full += p.delta.text;
-          if (onChunk) onChunk(full);
-        }
-      } catch(e) {}
+async function callClaude(content, maxTokens, onChunk, agentId) {
+  // Per-agent timeout budgets (milliseconds)
+  // Streaming keeps the connection alive, so these are wall-clock limits
+  const TIMEOUTS = {
+    step0:  180000, // Career Capital Profile — large 7-section output
+    stepA:  240000, // Options analysis — 3 paths × 6 sections
+    stepB:  240000, // Resume rebuild — complete master document
+    stepC:  240000, // LinkedIn — 9 full sections
+    p1a1:   180000, // Market intelligence
+    p2a4:   180000, // Auto-generate 5 docs
+    p2a5s1: 180000, // ATS Stage 1
+    p3a9p1: 180000, // Interview brief Phase 1
+    p3a9p2: 180000, // Interview brief Phase 2
+  };
+  const timeoutMs = TIMEOUTS[agentId] || 120000; // default 2 minutes
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+
+  try {
+    const resp = await fetch(PROXY, {
+      method:'POST',
+      signal: ctrl.signal,
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: maxTokens || 4000,
+        stream: true,
+        messages:[{ role:'user', content }]
+      })
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(()=>({}));
+      throw new Error((err.error && err.error.message) || 'HTTP ' + resp.status);
     }
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '', full = '';
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream:true});
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6);
+        if (data === '[DONE]') break;
+        try {
+          const p = JSON.parse(data);
+          if (p.type === 'content_block_delta' && p.delta?.text) {
+            full += p.delta.text;
+            if (onChunk) onChunk(full);
+          }
+        } catch(e) {}
+      }
+    }
+    return full;
+  } catch(e) {
+    if (e.name === 'AbortError') {
+      throw new Error('Generation timed out. Click Generate again — a second attempt usually succeeds. If it times out repeatedly, try shortening your résumé or work history input.');
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
   }
-  return full;
 }
 
 // ──────────────────────────────────────────────────═════════════════════════
@@ -1685,7 +1713,7 @@ Format as a professional document ready to paste into any subsequent agent promp
     const result = await callClaude(prompt, 4000, text => {
       outEl.textContent = text;
       outEl.classList.add('streaming-cursor');
-    });
+    }, 'step0');
     outEl.classList.remove('streaming-cursor');
     outEl.textContent = result;
     setOutput('step0_profile', result);
@@ -1804,7 +1832,7 @@ async function runGenericAgent(agentId, outputKey, inputs){
   try{
     const result = await callClaude(prompt, maxTok, text=>{
       outEl.textContent=text; outEl.classList.add('streaming-cursor');
-    });
+    }, agentId);
     outEl.classList.remove('streaming-cursor');
     outEl.textContent=result;
     setOutput(outputKey,result);
@@ -2529,7 +2557,7 @@ All documents must be specific to ${company} and ${firstName}'s background. No g
   const outEl = document.getElementById('out_p2a4_docs');
   outEl.innerHTML='<span class="output-placeholder">Generating 5 documents in parallel...</span>';
   try{
-    const result = await callClaude(prompt, 6000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');});
+    const result = await callClaude(prompt, 6000, text=>{outEl.textContent=text; outEl.classList.add('streaming-cursor');}, 'p2a4');
     outEl.classList.remove('streaming-cursor'); outEl.textContent=result;
     setOutput('p2a4_docs',result);
     STATE.completedAgents.add('p2a4'); buildNav(); updateProgress();
@@ -2718,7 +2746,7 @@ PRODUCE THE COMPLETE RÉSUMÉ FIRST. Then the keyword placement map. Then the ch
   try{
     const result = await callClaude(prompt, 5000, text=>{
       outEl.textContent=text; outEl.classList.add('streaming-cursor');
-    });
+    }, 'p2a5s1');
     outEl.classList.remove('streaming-cursor');
     outEl.textContent=result;
     setOutput('p2a5_customresume', result);
@@ -2786,7 +2814,7 @@ Is this résumé ready to submit? If score is 85%+: Ready — submit with confid
   try{
     const result = await callClaude(prompt, 3000, text=>{
       outEl.textContent=text; outEl.classList.add('streaming-cursor');
-    });
+    }, 'p2a5s2');
     outEl.classList.remove('streaming-cursor');
     outEl.textContent=result;
     setOutput('p2a5_atsscore', result);
@@ -3067,7 +3095,7 @@ A closing statement the candidate can adapt in the moment — positioning them a
     part1 = await callClaude(prompt1, 3000, text => {
       outEl.textContent = text;
       outEl.classList.add('streaming-cursor');
-    });
+    }, 'p3a9p1');
     outEl.classList.remove('streaming-cursor');
   } catch(e) {
     outEl.innerHTML = `<div class="error-box"><strong>Part 1 generation failed.</strong> ${esc(e.message)}<br><br>This usually means the connection timed out on a long response. Click Generate again — it will retry from the beginning. If it fails twice, try shortening the job description input.</div>`;
