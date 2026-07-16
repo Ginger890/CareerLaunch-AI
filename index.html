@@ -1850,65 +1850,180 @@ async function runGenericAgent(agentId, outputKey, inputs){
 // STEP A — CAREER CAPITAL OPTIONS ANALYSIS
 // ──────────────────────────────────────────────────═════════════════════════
 function renderStepA(body){
-  renderGenericAgent(body,'stepA',
-    '<strong>Step A — Career Capital Options Analysis.</strong> This is the most important decision in your search — and most professionals skip it entirely. They update their résumé before deciding what they are targeting, and end up with a document that does not clearly position them for any specific opportunity. This step uses your Career Capital Profile to evaluate two or three realistic career paths, score each against your background, surface trade-offs honestly, and produce a clear recommended direction with the positioning language you will use throughout the search.<br><br><strong>Why it matters:</strong> Every document you build — your résumé, LinkedIn profile, outreach messages, interview answers — depends on the clarity of your target. A professional who makes an explicit path decision before building documents produces stronger, more specific materials than one who tries to keep all options open. This step takes 20 minutes. The decision it produces shapes every subsequent hour of your search.<br><br><strong>What you need to do:</strong> Paste your work history and describe the paths you are considering. If you are not sure what your options are, describe what you are drawn toward and let the agent suggest paths based on your profile. Read the full output — especially the trade-offs section — before committing to a direction. Once you choose a path, commit to it for the duration of your search.',
-    [
-      {id:'currentbg',label:'Current work history / résumé',required:true,hint:'Paste your résumé or a brief work history summary.',rows:5,placeholder:'e.g. 8 years in operations and inventory management...'},
-      {id:'paths',label:'Career paths to evaluate',required:true,hint:'List 2–3 paths you are considering. If unsure, describe what you are drawn toward.',rows:3,placeholder:'Path 1: Stay in current function, go deeper (e.g. Operations Coordinator → Operations Manager)\nPath 2: Lateral pivot to adjacent function\nPath 3: Industry change within same function'},
-      {id:'constraints',label:'Geographic and compensation constraints',required:false,hint:'Location, remote/hybrid preference, and minimum compensation.',placeholder:'e.g. Austin TX metro, hybrid preferred, minimum $65,000 base'},
-    ],
-    'stepA_options',
-    'Career Capital Options Analysis',
-    (vals, profile, name) => `You are my Career Capital Options Analyst. Produce a complete analysis for ${name}.
+  const profile  = getOutput('step0_profile');
+  const savedOut = getOutput('stepA_options');
+  body.innerHTML = `
+  <div class="ctx-panel">
+    <div class="ctx-icon">◆</div>
+    <div class="ctx-text"><strong>Step A — Career Capital Options Analysis.</strong> This is the most important decision in your search — and most professionals skip it entirely. They update their résumé before deciding what they are targeting, and end up with a document that does not clearly position them for any specific opportunity. This step uses your Career Capital Profile to evaluate two or three realistic career paths, score each against your background, surface trade-offs honestly, and produce a clear recommended direction with the positioning language you will use throughout the search.<br><br><strong>Why it matters:</strong> Every document you build — your résumé, LinkedIn profile, outreach messages, interview answers — depends on the clarity of your target. A professional who makes an explicit path decision before building documents produces stronger, more specific materials than one who tries to keep all options open. This step takes 20 minutes. The decision it produces shapes every subsequent hour of your search.<br><br><strong>What you need to do:</strong> Paste your work history and describe the paths you are considering. If you are not sure what your options are, describe what you are drawn toward and let the agent suggest paths based on your profile. Read the full output — especially the trade-offs section — before committing to a direction. Once you choose a path, commit to it for the duration of your search.</div>
+  </div>
+  ${profile ? '<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div><div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile is feeding this agent automatically.</span></div></div>' : ''}
+  <div class="input-section">
+    <div class="input-label">Current work history / résumé <span class="input-req">Required</span></div>
+    <div class="input-hint">Paste your résumé or a brief work history summary.</div>
+    <textarea id="inp_stepA_currentbg" rows="5" placeholder="e.g. 8 years in operations and inventory management...">${esc(getInput('stepA_currentbg'))}</textarea>
+  </div>
+  <div class="input-section">
+    <div class="input-label">Career paths to evaluate <span class="input-req">Required</span></div>
+    <div class="input-hint">List 2–3 paths you are considering. If unsure, describe what you are drawn toward.</div>
+    <textarea id="inp_stepA_paths" rows="3" placeholder="Path 1: Stay in current function, go deeper&#10;Path 2: Lateral pivot to adjacent function&#10;Path 3: Industry change within same function">${esc(getInput('stepA_paths'))}</textarea>
+  </div>
+  <div class="input-section">
+    <div class="input-label">Geographic and compensation constraints</div>
+    <div class="input-hint">Location, remote/hybrid preference, and minimum compensation.</div>
+    <input type="text" id="inp_stepA_constraints" placeholder="e.g. Austin TX metro, hybrid preferred, minimum $65,000 base" value="${esc(getInput('stepA_constraints'))}">
+  </div>
 
-CAREER CAPITAL PROFILE:
-${profile.substring(0,1200)}
+  <div style="background:var(--navy);border-radius:6px;padding:16px 18px;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#7EEFD4;margin-bottom:8px">Two-Phase Generation</div>
+    <div style="font-size:12px;color:rgba(232,248,244,.85);margin-bottom:14px;line-height:1.65">This analysis generates in two phases to ensure the complete report is delivered. Phase 1 scores and analyzes each path. Phase 2 produces your recommended path, positioning language, and next steps. Both phases run automatically when you click Generate.</div>
+    <button class="btn btn-primary" id="btnStepA" onclick="runStepA()">⚡ Generate Options Analysis</button>
+  </div>
 
-WORK HISTORY:
-${vals.currentbg.substring(0,1500)}
+  <div class="output-section">
+    <div class="output-header">
+      <div class="output-label">Phase 1 — Path-by-Path Analysis</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('stepA_phase1'))">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('stepA_phase1'),'Career_Capital_Options_Phase1')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_stepA_phase1">${getOutput('stepA_phase1') ? esc(getOutput('stepA_phase1')) : '<span class="output-placeholder">Phase 1 output will appear here.</span>'}</div>
+  </div>
 
-PATHS TO EVALUATE:
-${vals.paths}
+  <div class="output-section" style="margin-top:14px">
+    <div class="output-header">
+      <div class="output-label">Phase 2 — Recommendation, Positioning &amp; Next Steps</div>
+      <div class="output-actions">
+        <button class="btn-action" onclick="copyText(getOutput('stepA_options'))">⎘ Copy</button>
+        <button class="btn-action" onclick="dlDoc(getOutput('stepA_options'),'Career_Capital_Options_Complete')">↓ Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="out_stepA_options">${savedOut ? esc(savedOut) : '<span class="output-placeholder">Phase 2 output will appear here after Phase 1 completes.</span>'}</div>
+  </div>
 
-CONSTRAINTS: ${vals.constraints||'None'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PATH-BY-PATH ANALYSIS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-For EACH path listed above, produce all six sections. Do not truncate or skip any path.
-
-PATH [name]:
-1. MATCH SCORE (0-100%): Score against functional skills, transferable skills, values fit, and market demand. Show the score prominently.
-2. TIMELINE TO FIRST INTERVIEW: Realistic estimate given background and market.
-3. COMPENSATION RANGE: Realistic market range at this level and geography.
-4. STRENGTHS: What from this profile positions them well for this path. Be specific.
-5. GAPS: What is missing and how significant each gap is. Be honest.
-6. TRADE-OFFS: What choosing this path means for the next role, the three-year trajectory, and day-to-day work life.
-
-[Repeat the full six-section analysis for every path listed. Complete all paths before moving on.]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RECOMMENDED PATH
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Name the single best path. Explain why in 3-4 direct sentences covering market demand, profile fit, timeline, and compensation.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-POSITIONING LANGUAGE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-For the recommended path: (1) Specific job titles to use in the search. (2) Industries to prioritize. (3) 2-3 sentences to use verbally in recruiter calls and networking conversations.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-IMMEDIATE NEXT STEPS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Three concrete actions to take this week, specific to the recommended path.`,
-    ['Career Capital Options Analysis read in full','Recommended path identified and honestly considered','Trade-offs for chosen path acknowledged','Target title and industries confirmed','Positioning language noted for use in all subsequent steps','Immediate next steps calendared'],
-    'stepB'
-  );
+  ${buildChecklist('stepA',['Career Capital Options Analysis read in full','Recommended path identified and honestly considered','Trade-offs for chosen path acknowledged','Target title and industries confirmed','Positioning language noted for use in all subsequent steps','Immediate next steps calendared'])}
+  <button class="btn-proceed" onclick="navigateTo(\'stepB\')">Proceed to Step B →</button>`;
 }
 
-// ──────────────────────────────────────────────────═════════════════════════
-// STEP B — RESUME BUILD
-// ──────────────────────────────────────────────────═════════════════════════
+async function runStepA(){
+  const bg          = document.getElementById('inp_stepA_currentbg').value.trim();
+  const paths       = document.getElementById('inp_stepA_paths').value.trim();
+  const constraints = document.getElementById('inp_stepA_constraints').value.trim();
+  if (!bg)    { showToast('Please paste your work history.'); return; }
+  if (!paths) { showToast('Please describe the paths you want to evaluate.'); return; }
+  setInput('stepA_currentbg',   bg);
+  setInput('stepA_paths',       paths);
+  setInput('stepA_constraints', constraints);
+
+  const profile = getOutput('step0_profile') || 'Career Capital Profile not yet generated — use work history for analysis';
+  const name    = STATE.clientName;
+
+  const btn    = document.getElementById('btnStepA');
+  const out1   = document.getElementById('out_stepA_phase1');
+  const out2   = document.getElementById('out_stepA_options');
+
+  const setBtn = (label) => {
+    btn.disabled = label === 'ready' ? false : true;
+    btn.innerHTML = label === 'ready' ? '⚡ Generate Options Analysis'
+      : '<span class="spinner"></span> ' + label;
+  };
+
+  // ── PHASE 1: Score and analyze each path ─────────────────────────────
+  const prompt1 = `You are a Career Options Analyst. Produce the PATH-BY-PATH ANALYSIS section for ${name}.
+
+CAREER CAPITAL PROFILE:
+${profile.substring(0,1000)}
+
+WORK HISTORY:
+${bg.substring(0,1200)}
+
+PATHS TO EVALUATE:
+${paths.substring(0,600)}
+
+CONSTRAINTS: ${constraints || 'None specified'}
+
+INSTRUCTIONS: For EACH path listed above, produce all six sections completely. Do not skip or shorten any path. Do not stop until every path has been analyzed.
+
+For each path, use this exact format:
+
+PATH: [path name or description]
+1. MATCH SCORE: [0-100%] — Brief explanation of the score.
+2. TIMELINE TO FIRST INTERVIEW: Realistic timeframe given this background and market.
+3. COMPENSATION RANGE: Market range for this path at this level and in this geography.
+4. STRENGTHS: What from this background positions them well. Be specific — name actual experiences and skills.
+5. GAPS: What is missing and how significant. Be honest.
+6. TRADE-OFFS: What choosing this path means for the next role, the three-year trajectory, and day-to-day work life.
+
+Complete all paths fully before stopping.`;
+
+  setBtn('Analyzing paths — Phase 1 of 2...');
+  out1.innerHTML = '<span class="output-placeholder">Scoring and analyzing each path...</span>';
+  out2.innerHTML = '<span class="output-placeholder">Phase 2 will run after Phase 1 completes.</span>';
+
+  let phase1 = '';
+  try {
+    phase1 = await callClaude(prompt1, 3500, text => {
+      out1.textContent = text;
+      out1.classList.add('streaming-cursor');
+    }, 'stepA');
+    out1.classList.remove('streaming-cursor');
+    out1.textContent = phase1;
+    setOutput('stepA_phase1', phase1);
+    showToast('Phase 1 complete — generating recommendation...');
+  } catch(e) {
+    out1.classList.remove('streaming-cursor');
+    out1.innerHTML = '<div class="error-box"><strong>Phase 1 failed.</strong> ' + esc(e.message) + '<br><br>Click Generate again to retry.</div>';
+    setBtn('ready');
+    return;
+  }
+
+  // ── PHASE 2: Recommendation, positioning, next steps ──────────────────
+  const prompt2 = `You are a Career Options Analyst completing an analysis for ${name}.
+
+The path-by-path analysis has already been completed. Here it is:
+
+${phase1.substring(0,2000)}
+
+PATHS EVALUATED:
+${paths.substring(0,400)}
+
+CONSTRAINTS: ${constraints || 'None specified'}
+
+Now produce the following three sections. Be direct and specific.
+
+RECOMMENDED PATH
+Name the single best path for this candidate. Explain why in 3-4 direct sentences covering market demand, profile fit, realistic timeline, and compensation. Do not hedge — make a clear recommendation.
+
+POSITIONING LANGUAGE FOR THE RECOMMENDED PATH
+(1) Job titles: The specific titles this candidate should use in their search.
+(2) Industries to prioritize: The 2-3 sectors most likely to hire them.
+(3) Verbal summary: 2-3 sentences they can say in recruiter calls and networking conversations to describe what they are seeking and why they are qualified.
+
+IMMEDIATE NEXT STEPS
+Three concrete actions to take this week, specific to the recommended path. Not general advice — specific tasks with clear outcomes.`;
+
+  setBtn('Generating recommendation — Phase 2 of 2...');
+  out2.innerHTML = '<span class="output-placeholder">Generating recommendation, positioning, and next steps...</span>';
+
+  let phase2 = '';
+  try {
+    phase2 = await callClaude(prompt2, 2000, text => {
+      out2.textContent = text;
+      out2.classList.add('streaming-cursor');
+    }, 'stepA');
+    out2.classList.remove('streaming-cursor');
+    out2.textContent = phase2;
+    setOutput('stepA_options', phase2);
+    STATE.completedAgents.add('stepA');
+    buildNav(); updateProgress();
+    showToast('✓ Options Analysis complete');
+  } catch(e) {
+    out2.classList.remove('streaming-cursor');
+    out2.innerHTML = '<div class="error-box"><strong>Phase 2 failed.</strong> ' + esc(e.message) + '<br><br>Phase 1 is saved. Click Generate again to retry the full analysis.</div>';
+  }
+  setBtn('ready');
+}
 function renderStepB(body){
   const optionsOut = getOutput('stepA_options');
   renderGenericAgent(body,'stepB',
