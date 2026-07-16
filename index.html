@@ -1062,6 +1062,7 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  let full = '', sawMessageStop = false;
 
   try {
     const resp = await fetch(PROXY, {
@@ -1081,7 +1082,7 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
     }
     const reader = resp.body.getReader();
     const dec = new TextDecoder();
-    let buf = '', full = '';
+    let buf = '';
     while (true) {
       const {done, value} = await reader.read();
       if (done) break;
@@ -1091,21 +1092,40 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const data = line.slice(6);
-        if (data === '[DONE]') break;
         try {
           const p = JSON.parse(data);
           if (p.type === 'content_block_delta' && p.delta?.text) {
             full += p.delta.text;
             if (onChunk) onChunk(full);
+          } else if (p.type === 'message_stop') {
+            sawMessageStop = true;
+          } else if (p.type === 'error') {
+            throw new Error((p.error && p.error.message) || 'The model reported an error mid-stream.');
           }
-        } catch(e) {}
+        } catch(e) {
+          if (e instanceof SyntaxError) { /* incomplete JSON chunk boundary — ignore, wait for more data */ }
+          else throw e;
+        }
       }
+    }
+    if (!sawMessageStop) {
+      // The HTTP stream closed without Anthropic's own completion event ever
+      // arriving — the connection was cut short somewhere between here and
+      // Anthropic (network blip, proxy hiccup, backgrounded tab, etc.).
+      // 'full' at this point is genuinely partial and must NOT be treated
+      // as a finished response, even though no exception was thrown.
+      const err = new Error('The connection was interrupted before the response finished generating. Click Generate again — a second attempt usually succeeds.');
+      err.partialText = full;
+      throw err;
     }
     return full;
   } catch(e) {
     if (e.name === 'AbortError') {
-      throw new Error('Generation timed out. Click Generate again — a second attempt usually succeeds. If it times out repeatedly, try shortening your résumé or work history input.');
+      const err = new Error('Generation timed out. Click Generate again — a second attempt usually succeeds. If it times out repeatedly, try shortening your résumé or work history input.');
+      err.partialText = full;
+      throw err;
     }
+    if (!e.partialText) e.partialText = full;
     throw e;
   } finally {
     clearTimeout(timer);
@@ -1973,7 +1993,8 @@ Complete all paths fully before stopping.`;
     showToast('Phase 1 complete — generating recommendation...');
   } catch(e) {
     out1.classList.remove('streaming-cursor');
-    out1.innerHTML = '<div class="error-box"><strong>Phase 1 failed.</strong> ' + esc(e.message) + '<br><br>Click Generate again to retry.</div>';
+    const partial = e.partialText ? '<br><br><strong>What was received before the interruption:</strong><div class="output-box" style="margin-top:8px">' + esc(e.partialText) + '</div>' : '';
+    out1.innerHTML = '<div class="error-box"><strong>Phase 1 was interrupted.</strong> ' + esc(e.message) + partial + '</div>';
     setBtn('ready');
     return;
   }
@@ -2020,7 +2041,64 @@ Three concrete actions to take this week, specific to the recommended path. Not 
     showToast('✓ Options Analysis complete');
   } catch(e) {
     out2.classList.remove('streaming-cursor');
-    out2.innerHTML = '<div class="error-box"><strong>Phase 2 failed.</strong> ' + esc(e.message) + '<br><br>Phase 1 is saved. Click Generate again to retry the full analysis.</div>';
+    const partial = e.partialText ? '<br><br><strong>What was received before the interruption:</strong><div class="output-box" style="margin-top:8px">' + esc(e.partialText) + '</div>' : '';
+    out2.innerHTML = '<div class="error-box"><strong>Phase 2 was interrupted.</strong> ' + esc(e.message) + '<br><br>Your Phase 1 path analysis is saved and was not lost.' + partial + '<br><br><button class="btn-action" onclick="runStepAPhase2Only()">↻ Retry Phase 2 Only</button></div>';
+  }
+  setBtn('ready');
+}
+async function runStepAPhase2Only(){
+  const phase1 = getOutput('stepA_phase1');
+  if (!phase1) { showToast('Phase 1 output not found — click Generate to run the full analysis.'); return; }
+  const paths       = document.getElementById('inp_stepA_paths')?.value.trim() || getInput('stepA_paths');
+  const constraints = document.getElementById('inp_stepA_constraints')?.value.trim() || getInput('stepA_constraints');
+  const name = STATE.clientName;
+  const btn  = document.getElementById('btnStepA');
+  const out2 = document.getElementById('out_stepA_options');
+  const setBtn = (label) => {
+    btn.disabled = label === 'ready' ? false : true;
+    btn.innerHTML = label === 'ready' ? '⚡ Generate Options Analysis' : '<span class="spinner"></span> ' + label;
+  };
+  const prompt2 = `You are a Career Options Analyst completing an analysis for ${name}.
+
+The path-by-path analysis has already been completed. Here it is:
+
+${phase1.substring(0,2000)}
+
+PATHS EVALUATED:
+${paths.substring(0,400)}
+
+CONSTRAINTS: ${constraints || 'None specified'}
+
+Now produce the following three sections. Be direct and specific.
+
+RECOMMENDED PATH
+Name the single best path for this candidate. Explain why in 3-4 direct sentences covering market demand, profile fit, realistic timeline, and compensation. Do not hedge — make a clear recommendation.
+
+POSITIONING LANGUAGE FOR THE RECOMMENDED PATH
+(1) Job titles: The specific titles this candidate should use in their search.
+(2) Industries to prioritize: The 2-3 sectors most likely to hire them.
+(3) Verbal summary: 2-3 sentences they can say in recruiter calls and networking conversations to describe what they are seeking and why they are qualified.
+
+IMMEDIATE NEXT STEPS
+Three concrete actions to take this week, specific to the recommended path. Not general advice — specific tasks with clear outcomes.`;
+
+  setBtn('Generating recommendation — Phase 2 of 2...');
+  out2.innerHTML = '<span class="output-placeholder">Generating recommendation, positioning, and next steps...</span>';
+  try {
+    const phase2 = await callClaude(prompt2, 2000, text => {
+      out2.textContent = text;
+      out2.classList.add('streaming-cursor');
+    }, 'stepA');
+    out2.classList.remove('streaming-cursor');
+    out2.textContent = phase2;
+    setOutput('stepA_options', phase2);
+    STATE.completedAgents.add('stepA');
+    buildNav(); updateProgress();
+    showToast('✓ Options Analysis complete');
+  } catch(e) {
+    out2.classList.remove('streaming-cursor');
+    const partial = e.partialText ? '<br><br><strong>What was received before the interruption:</strong><div class="output-box" style="margin-top:8px">' + esc(e.partialText) + '</div>' : '';
+    out2.innerHTML = '<div class="error-box"><strong>Phase 2 was interrupted again.</strong> ' + esc(e.message) + partial + '<br><br><button class="btn-action" onclick="runStepAPhase2Only()">↻ Retry Phase 2 Only</button></div>';
   }
   setBtn('ready');
 }
