@@ -270,7 +270,7 @@ textarea{min-height:86px}
 @media(max-width:800px){
   .hamburger{display:flex}
   .shell{grid-template-columns:1fr}
-  .sidebar{position:fixed;top:0;left:0;height:100vh;width:268px;transform:translateX(-100%);transition:transform .25s;z-index:200}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;height:100dvh;width:268px;transform:translateX(-100%);transition:transform .25s;z-index:200}
   .sidebar.open{transform:translateX(0)}
   .nav-overlay.open{display:block}
   .agent-header{padding:72px 20px 16px}
@@ -1115,7 +1115,7 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
     });
     if (!resp.ok) {
       const err = await resp.json().catch(()=>({}));
-      throw new Error((err.error && err.error.message) || 'HTTP ' + resp.status);
+      throw new Error(friendlyApiError(resp.status, err));
     }
     const reader = resp.body.getReader();
     const dec = new TextDecoder();
@@ -1173,6 +1173,22 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
 // UTILITY
 // ──────────────────────────────────────────────────═════════════════════════
 function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Translates a raw HTTP status / Anthropic error body into a message a
+// non-technical client can actually act on. 429 (rate_limit_error) means
+// this shared account has hit its own usage ceiling for the moment — not
+// something the client did wrong. 529/503 (overloaded_error) means
+// Anthropic's servers are busy account-wide, unrelated to this account at
+// all. Both are genuinely temporary and just need a short wait, but a raw
+// "HTTP 429" or a technical rate-limit-error JSON blob reads as broken to
+// someone who isn't a developer.
+function friendlyApiError(status, errBody){
+  if (status === 429) return 'CareerLaunch AI is experiencing high demand right now. Please wait a minute and click Generate again.';
+  if (status === 529 || status === 503) return "Claude\u2019s servers are temporarily busy. This isn\u2019t specific to your account — please wait a moment and try again.";
+  if (status === 500) return 'Anthropic reported a temporary internal error. Please try again in a moment.';
+  const raw = errBody && errBody.error && errBody.error.message;
+  return raw || ('HTTP ' + status);
+}
 window.__genericAgentInputs = window.__genericAgentInputs || {};
 function safeFileName(s){ return String(s || 'Document').trim().replace(/[^a-z0-9_\-]+/gi,'_').replace(/^_+|_+$/g,'').slice(0,80) || 'Document'; }
 function showToast(msg, dur) {
