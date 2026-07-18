@@ -1115,7 +1115,16 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
 // ──────────────────────────────────────────────────═════════════════════════
 // UTILITY
 // ──────────────────────────────────────────────────═════════════════════════
-function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function escJs(s){
+  // Escape for values embedded inside single-quoted JS strings in onclick attributes.
+  // escHtml/esc alone is insufficient: browsers decode HTML entities before JS parses them.
+  return String(s == null ? '' : s)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\\\'")  
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
+}
 window.__genericAgentInputs = window.__genericAgentInputs || {};
 function safeFileName(s){ return String(s || 'Document').trim().replace(/[^a-z0-9_\-]+/gi,'_').replace(/^_+|_+$/g,'').slice(0,80) || 'Document'; }
 function showToast(msg, dur) {
