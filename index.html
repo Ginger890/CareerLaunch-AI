@@ -256,11 +256,6 @@ textarea{min-height:86px}
 /* Toast */
 .toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:10px 18px;border-radius:6px;font-size:12.5px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:99}
 .toast.show{opacity:1}
-.update-banner{position:fixed;top:0;left:0;right:0;background:var(--navy);color:#fff;padding:10px 20px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:16px;z-index:9999;transform:translateY(-100%);transition:transform .3s ease;box-shadow:0 2px 10px rgba(0,0,0,.2)}
-.update-banner.show{transform:translateY(0)}
-.update-banner button{background:var(--gold);color:var(--navy);border:none;padding:6px 16px;border-radius:5px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
-.update-banner button:hover{opacity:.9}
-.update-banner .dismiss{background:transparent;color:#fff;opacity:.7;padding:4px 8px;font-weight:400}
 
 /* Hamburger mobile */
 .hamburger{display:none;position:fixed;top:12px;left:12px;z-index:400;background:var(--navy-mid);border:1px solid var(--border);border-radius:5px;padding:8px 10px;cursor:pointer;flex-direction:column;gap:4px;align-items:center}
@@ -581,11 +576,6 @@ textarea{min-height:86px}
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="update-banner" id="updateBanner">
-  <span>A newer version of CareerLaunch AI is available.</span>
-  <button onclick="applyAppUpdate()">Refresh Now</button>
-  <button class="dismiss" onclick="dismissUpdateBanner()">Remind me later</button>
-</div>
 
 <script>
 // ──────────────────────────────────────────────────═════════════════════════
@@ -593,14 +583,6 @@ textarea{min-height:86px}
 // ──────────────────────────────────────────────────═════════════════════════
 const PROXY = 'https://anthropic-proxy.cssceo.workers.dev';
 const MODEL  = 'claude-sonnet-4-6';
-
-// Bump this string every time you push a new deploy — e.g. '2026-07-17-01',
-// then '2026-07-17-02' for a same-day second push, etc. This is what the
-// auto-update checker below compares against to detect a stale cached copy.
-// GitHub Pages does not support custom cache-control headers, so this
-// self-check is the mechanism that actually solves the "client stuck on an
-// old cached version" problem — not a _headers file (that's Netlify-only).
-const APP_VERSION = '2026-07-17-01';
 
 // ── Supabase config ──────────────────────────────────────────────────────
 const SB_URL   = 'https://vkrhjirkqziuwboovbgf.supabase.co';
@@ -1080,7 +1062,6 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-  let full = '', sawMessageStop = false;
 
   try {
     const resp = await fetch(PROXY, {
@@ -1100,7 +1081,7 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
     }
     const reader = resp.body.getReader();
     const dec = new TextDecoder();
-    let buf = '';
+    let buf = '', full = '';
     while (true) {
       const {done, value} = await reader.read();
       if (done) break;
@@ -1110,40 +1091,21 @@ async function callClaude(content, maxTokens, onChunk, agentId) {
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const data = line.slice(6);
+        if (data === '[DONE]') break;
         try {
           const p = JSON.parse(data);
           if (p.type === 'content_block_delta' && p.delta?.text) {
             full += p.delta.text;
             if (onChunk) onChunk(full);
-          } else if (p.type === 'message_stop') {
-            sawMessageStop = true;
-          } else if (p.type === 'error') {
-            throw new Error((p.error && p.error.message) || 'The model reported an error mid-stream.');
           }
-        } catch(e) {
-          if (e instanceof SyntaxError) { /* incomplete JSON chunk boundary — ignore, wait for more data */ }
-          else throw e;
-        }
+        } catch(e) {}
       }
-    }
-    if (!sawMessageStop) {
-      // The HTTP stream closed without Anthropic's own completion event ever
-      // arriving — the connection was cut short somewhere between here and
-      // Anthropic (network blip, proxy hiccup, backgrounded tab, etc.).
-      // 'full' at this point is genuinely partial and must NOT be treated
-      // as a finished response, even though no exception was thrown.
-      const err = new Error('The connection was interrupted before the response finished generating. Click Generate again — a second attempt usually succeeds.');
-      err.partialText = full;
-      throw err;
     }
     return full;
   } catch(e) {
     if (e.name === 'AbortError') {
-      const err = new Error('Generation timed out. Click Generate again — a second attempt usually succeeds. If it times out repeatedly, try shortening your résumé or work history input.');
-      err.partialText = full;
-      throw err;
+      throw new Error('Generation timed out. Click Generate again — a second attempt usually succeeds. If it times out repeatedly, try shortening your résumé or work history input.');
     }
-    if (!e.partialText) e.partialText = full;
     throw e;
   } finally {
     clearTimeout(timer);
@@ -2011,8 +1973,7 @@ Complete all paths fully before stopping.`;
     showToast('Phase 1 complete — generating recommendation...');
   } catch(e) {
     out1.classList.remove('streaming-cursor');
-    const partial = e.partialText ? '<br><br><strong>What was received before the interruption:</strong><div class="output-box" style="margin-top:8px">' + esc(e.partialText) + '</div>' : '';
-    out1.innerHTML = '<div class="error-box"><strong>Phase 1 was interrupted.</strong> ' + esc(e.message) + partial + '</div>';
+    out1.innerHTML = '<div class="error-box"><strong>Phase 1 failed.</strong> ' + esc(e.message) + '<br><br>Click Generate again to retry.</div>';
     setBtn('ready');
     return;
   }
@@ -2059,64 +2020,7 @@ Three concrete actions to take this week, specific to the recommended path. Not 
     showToast('✓ Options Analysis complete');
   } catch(e) {
     out2.classList.remove('streaming-cursor');
-    const partial = e.partialText ? '<br><br><strong>What was received before the interruption:</strong><div class="output-box" style="margin-top:8px">' + esc(e.partialText) + '</div>' : '';
-    out2.innerHTML = '<div class="error-box"><strong>Phase 2 was interrupted.</strong> ' + esc(e.message) + '<br><br>Your Phase 1 path analysis is saved and was not lost.' + partial + '<br><br><button class="btn-action" onclick="runStepAPhase2Only()">↻ Retry Phase 2 Only</button></div>';
-  }
-  setBtn('ready');
-}
-async function runStepAPhase2Only(){
-  const phase1 = getOutput('stepA_phase1');
-  if (!phase1) { showToast('Phase 1 output not found — click Generate to run the full analysis.'); return; }
-  const paths       = document.getElementById('inp_stepA_paths')?.value.trim() || getInput('stepA_paths');
-  const constraints = document.getElementById('inp_stepA_constraints')?.value.trim() || getInput('stepA_constraints');
-  const name = STATE.clientName;
-  const btn  = document.getElementById('btnStepA');
-  const out2 = document.getElementById('out_stepA_options');
-  const setBtn = (label) => {
-    btn.disabled = label === 'ready' ? false : true;
-    btn.innerHTML = label === 'ready' ? '⚡ Generate Options Analysis' : '<span class="spinner"></span> ' + label;
-  };
-  const prompt2 = `You are a Career Options Analyst completing an analysis for ${name}.
-
-The path-by-path analysis has already been completed. Here it is:
-
-${phase1.substring(0,2000)}
-
-PATHS EVALUATED:
-${paths.substring(0,400)}
-
-CONSTRAINTS: ${constraints || 'None specified'}
-
-Now produce the following three sections. Be direct and specific.
-
-RECOMMENDED PATH
-Name the single best path for this candidate. Explain why in 3-4 direct sentences covering market demand, profile fit, realistic timeline, and compensation. Do not hedge — make a clear recommendation.
-
-POSITIONING LANGUAGE FOR THE RECOMMENDED PATH
-(1) Job titles: The specific titles this candidate should use in their search.
-(2) Industries to prioritize: The 2-3 sectors most likely to hire them.
-(3) Verbal summary: 2-3 sentences they can say in recruiter calls and networking conversations to describe what they are seeking and why they are qualified.
-
-IMMEDIATE NEXT STEPS
-Three concrete actions to take this week, specific to the recommended path. Not general advice — specific tasks with clear outcomes.`;
-
-  setBtn('Generating recommendation — Phase 2 of 2...');
-  out2.innerHTML = '<span class="output-placeholder">Generating recommendation, positioning, and next steps...</span>';
-  try {
-    const phase2 = await callClaude(prompt2, 2000, text => {
-      out2.textContent = text;
-      out2.classList.add('streaming-cursor');
-    }, 'stepA');
-    out2.classList.remove('streaming-cursor');
-    out2.textContent = phase2;
-    setOutput('stepA_options', phase2);
-    STATE.completedAgents.add('stepA');
-    buildNav(); updateProgress();
-    showToast('✓ Options Analysis complete');
-  } catch(e) {
-    out2.classList.remove('streaming-cursor');
-    const partial = e.partialText ? '<br><br><strong>What was received before the interruption:</strong><div class="output-box" style="margin-top:8px">' + esc(e.partialText) + '</div>' : '';
-    out2.innerHTML = '<div class="error-box"><strong>Phase 2 was interrupted again.</strong> ' + esc(e.message) + partial + '<br><br><button class="btn-action" onclick="runStepAPhase2Only()">↻ Retry Phase 2 Only</button></div>';
+    out2.innerHTML = '<div class="error-box"><strong>Phase 2 failed.</strong> ' + esc(e.message) + '<br><br>Phase 1 is saved. Click Generate again to retry the full analysis.</div>';
   }
   setBtn('ready');
 }
@@ -2363,8 +2267,6 @@ function renderAgent3(body){
   <div class="ctx-panel">
     <div class="ctx-icon">◆</div>
     <div class="ctx-text"><strong>Agent 3 — Outreach, Network &amp; Informational Interviews.</strong> The hidden job market — roles filled before they are ever posted — accounts for a significant share of professional placements. The primary way into that market is through conversation: recruiter outreach, direct company contacts, and informational interviews with people who work inside your target organizations. This agent gives you the tools to run all three. It is not one agent — it is three distinct capabilities in a single panel, each addressing a different outreach channel.<br><br><strong>Why it matters:</strong> Sending a generic application through a job board puts you in a pool of hundreds. A direct outreach message to a recruiter who covers your function, or a warm informational conversation with someone inside a target company, puts you in a pool of one. Informational interviews in particular are the most underused tool in a professional job search — most people think they are only for students or career changers, but they are the primary way that experienced professionals build the relationships that generate referrals, inside intelligence, and early access to roles before they are posted. At this level, who knows you are looking — and thinks well of you — matters as much as what is on your résumé.<br><br><strong>What you need to do:</strong> Use this agent in three distinct ways. For <strong>recruiter outreach</strong>: fill in the recruiter's name, firm, and specialty, and generate a targeted message to open the relationship — not to ask for a job, but to be known and on their radar. For <strong>direct company outreach</strong>: fill in the company, the contact, and what you know about their business situation, and generate a message that leads with their context rather than your needs. For <strong>informational interviews</strong>: use the request prompt to ask for a 20-minute conversation, the prep prompt to prepare specific questions before the call, and the follow-up prompt immediately after to close the loop and keep the relationship warm. Run all three stages for every informational interview — the follow-up is where most professionals drop the ball and lose the opportunity.</div>
-    <div class="ctx-text"><strong>Agent 3 — Outreach, Network & Informational Interviews.</strong>
-    Two capabilities in one agent. Use the Outreach prompt for recruiter and direct company messages. Use the Informational Interview prompts to access the hidden job market — the primary demand-creation channel at this level.</div>
   </div>
   ${profile?`<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div>
   <div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile is feeding this agent automatically.</span></div></div>`:''}
@@ -2549,8 +2451,6 @@ function renderAgent4(body){
   <div class="ctx-panel">
     <div class="ctx-icon">◆</div>
     <div class="ctx-text"><strong>Agent 4 — Career Toolkit.</strong> This agent has two distinct functions. The Auto-Generate feature produces five professional documents simultaneously from your Career Capital Profile and target company context — a recruiter outreach email, a LinkedIn message, a professional value proposition, a professional bio, and a three-touch follow-up sequence. The On-Demand Documents section produces seven additional specialized documents one at a time when you need them: a cover letter, a professional impact brief, a job fit analysis, post-interview thank-you messages, a 30-60-90 day entry plan, an interview leave-behind, and rejection recovery messages.<br><br><strong>Why it matters:</strong> Most professionals spend hours writing outreach emails, bios, and follow-up sequences one at a time with no consistent positioning thread connecting them. The Auto-Generate feature solves this by producing all five core demand-creation documents in a single pass, all drawn from the same Career Capital Profile and target company context, so every document tells a consistent story. The On-Demand Documents solve a different problem: most professionals either skip documents like the impact brief and the leave-behind entirely because they do not know what they are, or write them poorly because they do not know what goes in them. Each document in this section includes a full explanation of what it is, why it matters, and exactly when to use it — click any card to expand it before generating.<br><br><strong>What you need to do:</strong> For the Auto-Generate feature, fill in the target company and role, paste the job description if you have it, and add any additional context you know about the company. Click Generate All 5 Documents. Review all five before sending anything — these are starting drafts, not finished messages. Personalize each one with one specific detail before sending. For the On-Demand Documents, read the description inside each card before generating — the timing guidance tells you exactly when each document should be used. Do not generate a 30-60-90 plan before a first-round interview or a leave-behind for a phone screen — each document has a specific moment in the process where it has maximum impact.</div>
-    <div class="ctx-text"><strong>Agent 4 — Career Toolkit.</strong>
-    One button generates 5 professional documents simultaneously. Then use the individual prompts for on-demand and situational documents.</div>
   </div>
   ${profile?`<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div><div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile is feeding this agent automatically.</span></div></div>`:''}
   <div class="input-section">
@@ -3155,8 +3055,7 @@ function renderAgent9(body){
   <div class="ctx-panel">
     <div class="ctx-icon">◆</div>
     <div class="ctx-text"><strong>Agent 9 — Interview Intelligence + Live Mock Interview + Post-Interview Follow-Up.</strong> This is the most complex agent in the system and the one that most directly determines whether you get an offer. It has three components that work in sequence. The Intelligence Brief generates a complete company and interview preparation document in two phases: Phase 1 analyzes the business situation, the company's strategic priorities, and each interviewer's likely concerns and evaluation criteria. Phase 2 produces 12 predicted interview questions with full coached answer frameworks, 6 strategic questions to ask, objection handling for likely gaps in your background, and a closing statement. The Live Mock Interview puts you in front of an AI interviewer with your camera and microphone active — questions asked aloud, real-time transcription, per-answer coaching feedback, and a full debrief at the end. The Post-Interview Follow-Up framework produces personalized thank-you messages for each person you interviewed with, calibrated by their role in the process.<br><br><strong>Why it matters:</strong> Most professionals prepare for interviews by reviewing their résumé and rehearsing a few common questions. That level of preparation is immediately visible to an experienced interviewer and produces average results. Preparation at the level this agent produces — company intelligence, interviewer-specific analysis, question-by-question coaching, and live practice with feedback — is what separates the candidates who get offers from those who get compliments and no callback. The thank-you messages matter more than most candidates realize: a message sent within two hours that references a specific moment from the conversation reinforces your candidacy at exactly the right moment. A generic "thank you for your time" sent the next morning does almost nothing.<br><br><strong>What you need to do:</strong> Generate the Intelligence Brief first — fill in the company and role, paste the full job description, and add every interviewer's name and title if you have them. Read the complete brief at least twice: once the evening before the interview and once the morning of. Do not skim it. Use the Live Mock Interview after reading the brief, not before — the brief tells you what to expect, the mock interview builds the muscle memory to deliver it. For the mock interview, use Chrome, allow camera and microphone access, and treat it like a real interview — sit at a desk, dress professionally, and do not pause or restart. Review every answer in the debrief, paying specific attention to filler words, the opening sentence of each answer, and your eye contact rating. Send thank-you messages within two hours of leaving the interview while the specific details of the conversation are still fresh. Include one real, specific detail from the actual conversation in each message before sending.</div>
-    <div class="ctx-text"><strong>Agent 9 — Interview Intelligence + Live Mock Interview + Post-Interview Follow-Up.</strong>
-    Step 1 generates your company intelligence brief and interview preparation. Step 2 is the live camera mock interview. Step 3 handles post-interview follow-up, status management, and rejection recovery.</div>
+    
   </div>
   ${profile?`<div class="carry-box"><div class="carry-title">Career Capital Profile — Loaded</div><div class="carry-item"><span style="color:var(--teal-mid)">▸</span><span>Your Career Capital Profile is feeding this agent automatically.</span></div></div>`:''}
 
@@ -3491,7 +3390,8 @@ Produce:
 // ──────────────────────────────────────────────────═════════════════════════
 // SEARCH DASHBOARD
 // ──────────────────────────────────────────────────═════════════════════════
-const DOC_LIBRARY = [("step0_profile", "Career Capital Profile", "Step 0"), ("stepA_options", "Career Capital Options Analysis", "Step A"), ("stepB_resume", "Master Base Résumé", "Step B"), ("stepC_linkedin", "LinkedIn Profile — All 9 Sections", "Step C"), ("stepD_reputation", "Digital Reputation Plan", "Step D"), ("p1a1_market", "Market & Opportunity Intelligence", "Agent 1"), ("p1a2_positioning", "Positioning & Brand", "Agent 2"), ("p2a3_outreach", "Outreach Messages", "Agent 3"), ("p2a3_info", "Informational Interview Materials", "Agent 3"), ("p2a4_docs", "Career Toolkit — 5 Documents", "Agent 4"), ("p2a5_customresume", "Customized Résumé + Keyword Map", "Agent 5"), ("p2a5_atsscore", "ATS Score & Gap Analysis", "Agent 5"), ("p2a6_references", "Reference Strategy & Prep Briefs", "Agent 6"), ("p2a7_benchmark", "Compensation Benchmark", "Agent 7"), ("p2a8_searchintel", "Job Search Intelligence", "Agent 8"), ("p3a9_brief", "Interview Intelligence Brief", "Agent 9"), ("p3a9_followup", "Post-Interview Follow-Up", "Agent 9"), ("p3a10_offer", "Offer Assessment & Negotiation", "Agent 10"), ("p4a11_core", "Weekly Intelligence Core", "Agent 11"), ("p4a12_onboarding", "Onboarding Intelligence Plan", "Agent 12")];
+const DOC_LIBRARY = [("step0_profile", "Career Capital Profile", "Step 0"), ("stepA_phase1",  "Options Analysis — Path Scoring",       "Step A"),
+    ("stepA_options", "Career Capital Options Analysis — Recommendation", "Step A"), ("stepB_resume", "Master Base Résumé", "Step B"), ("stepC_linkedin", "LinkedIn Profile — All 9 Sections", "Step C"), ("stepD_reputation", "Digital Reputation Plan", "Step D"), ("p1a1_market", "Market & Opportunity Intelligence", "Agent 1"), ("p1a2_positioning", "Positioning & Brand", "Agent 2"), ("p2a3_outreach", "Outreach Messages", "Agent 3"), ("p2a3_info", "Informational Interview Materials", "Agent 3"), ("p2a4_docs", "Career Toolkit — 5 Documents", "Agent 4"), ("p2a5_customresume", "Customized Résumé + Keyword Map", "Agent 5"), ("p2a5_atsscore", "ATS Score & Gap Analysis", "Agent 5"), ("p2a6_references", "Reference Strategy & Prep Briefs", "Agent 6"), ("p2a7_benchmark", "Compensation Benchmark", "Agent 7"), ("p2a8_searchintel", "Job Search Intelligence", "Agent 8"), ("p3a9_brief", "Interview Intelligence Brief", "Agent 9"), ("p3a9_followup", "Post-Interview Follow-Up", "Agent 9"), ("p3a10_offer", "Offer Assessment & Negotiation", "Agent 10"), ("p4a11_core", "Weekly Intelligence Core", "Agent 11"), ("p4a12_onboarding", "Onboarding Intelligence Plan", "Agent 12")];
 
 function renderDashboard(body){
   STATE.searchDashboard = STATE.searchDashboard || { applications:[], recruiters:[], interviews:[], ueLog:[] };
@@ -3702,10 +3602,6 @@ function removeApplication(idx){
   showToast('✓ Removed');
 }
 
-function updateStatus(idx){
-  if(!STATE.searchDashboard?.applications?.[idx]) return;
-  editApplication(idx);
-}
 
 // ── UNEMPLOYMENT LOG ─────────────────────────────────────────────────────
 function getThisWeekUECount(log){
@@ -3993,43 +3889,6 @@ function restoreAgent(id){
   // No window.scrollTo — let the browser keep its position
 }
 
-// ── Auto-update detection ────────────────────────────────────────────────
-// GitHub Pages does not support custom Cache-Control headers, so the only
-// reliable fix for clients getting stuck on an old cached copy is to check,
-// from inside the running app, whether a newer deploy exists — and if so,
-// prompt for a real refresh that bypasses every caching layer.
-async function checkForAppUpdate() {
-  if (window._updateDismissed) return;
-  try {
-    // cache:'no-store' bypasses the browser's disk/memory cache entirely.
-    // The timestamp query param also dodges GitHub Pages' ~10-minute edge
-    // cache, since it makes this a URL the CDN has never seen before.
-    var freshUrl = location.pathname + '?_vcheck=' + Date.now();
-    var res = await fetch(freshUrl, { cache: 'no-store' });
-    if (!res.ok) return;
-    var html = await res.text();
-    var m = html.match(/const APP_VERSION = '([^']+)'/);
-    if (m && m[1] && m[1] !== APP_VERSION) {
-      var banner = document.getElementById('updateBanner');
-      if (banner) { banner.dataset.newVersion = m[1]; banner.classList.add('show'); }
-    }
-  } catch(e) {
-    // Silent failure — offline or a transient network hiccup isn't worth
-    // interrupting the client's work over.
-    console.warn('Update check failed:', e);
-  }
-}
-function applyAppUpdate() {
-  // Navigate to a URL neither the browser nor GitHub's CDN has cached,
-  // guaranteeing a genuinely fresh copy of the app loads.
-  location.href = location.pathname + '?v=' + Date.now();
-}
-function dismissUpdateBanner() {
-  var banner = document.getElementById('updateBanner');
-  if (banner) banner.classList.remove('show');
-  window._updateDismissed = true; // don't nag again for the rest of this session
-}
-
 async function init(){
   // Init Supabase client
   initSupabase();
@@ -4041,8 +3900,6 @@ async function init(){
     hideAuthScreen();
     launchApp();
     showToast('Cloud sign-in unavailable — local mode active', 3000);
-    setTimeout(checkForAppUpdate, 4000);
-    setInterval(checkForAppUpdate, 5 * 60 * 1000);
     return;
   }
   const { data: { session } } = await SB.auth.getSession();
@@ -4057,12 +3914,6 @@ async function init(){
       showAuthScreen('login');
     }
   }
-
-  // Check for a newer deploy shortly after load, then periodically — so a
-  // client who leaves the app open for a long working session still gets
-  // prompted if you push an update mid-session.
-  setTimeout(checkForAppUpdate, 4000);
-  setInterval(checkForAppUpdate, 5 * 60 * 1000);
 }
 
 // startSystem saves plan + name to cloud after onboarding
