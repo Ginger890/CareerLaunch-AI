@@ -1847,7 +1847,7 @@ function renderGenericAgent(body, agentId, contextMsg, inputs, outputKey, output
     </div>`;
   });
   html += `<div style="display:flex;gap:10px;flex-wrap:wrap">
-    <button class="btn btn-primary" id="btnGen_${agentId}" onclick="runGenericAgent('${agentId}','${outputKey}',${JSON.stringify(inputs).replace(/</g,'\\u003c')})">⚡ Generate</button>
+    <button class="btn btn-primary" id="btnGen_${agentId}" onclick="runGenericAgent('${agentId}','${outputKey}')">⚡ Generate</button>
     <button class="btn-action" onclick="saveToCloud()">☁ Save</button>
   </div>
   <div class="output-section" style="margin-top:14px">
@@ -1863,11 +1863,19 @@ function renderGenericAgent(body, agentId, contextMsg, inputs, outputKey, output
   ${savedOut&&nextId?`<button class="btn-proceed" onclick="navigateTo('${nextId}')">Proceed to Next Step →</button>`:''}
   ${buildChecklist(agentId, checklistItems)}`;
   body.innerHTML = html;
-  // Store prompt builder for this agent
+  // Store prompt builder and inputs config for this agent.
+  // (Previously the inputs array was JSON.stringify'd straight into the
+  // onclick="" attribute above. Since both the attribute and the JSON use
+  // double quotes, every quote inside the JSON — e.g. "id":"existingresume" —
+  // closed the attribute early and corrupted the tag, silently breaking the
+  // Generate button. Storing it on window and reading it back by agentId
+  // avoids putting quote-containing JSON inside an HTML attribute.)
   window['promptBuilder_'+agentId] = promptBuilder;
+  window['inputs_'+agentId] = inputs;
 }
 
-async function runGenericAgent(agentId, outputKey, inputs){
+async function runGenericAgent(agentId, outputKey){
+  const inputs = window['inputs_'+agentId] || [];
   const vals = {};
   let missing = false;
   inputs.forEach(inp=>{
@@ -3523,7 +3531,7 @@ Produce:
 // ──────────────────────────────────────────────────═════════════════════════
 // SEARCH DASHBOARD
 // ──────────────────────────────────────────────────═════════════════════════
-const DOC_LIBRARY = [("step0_profile", "Career Capital Profile", "Step 0"), ("stepA_options", "Career Capital Options Analysis", "Step A"), ("stepB_resume", "Master Base Résumé", "Step B"), ("stepC_linkedin", "LinkedIn Profile — All 9 Sections", "Step C"), ("stepD_reputation", "Digital Reputation Plan", "Step D"), ("p1a1_market", "Market & Opportunity Intelligence", "Agent 1"), ("p1a2_positioning", "Positioning & Brand", "Agent 2"), ("p2a3_outreach", "Outreach Messages", "Agent 3"), ("p2a3_info", "Informational Interview Materials", "Agent 3"), ("p2a4_docs", "Career Toolkit — 5 Documents", "Agent 4"), ("p2a5_customresume", "Customized Résumé + Keyword Map", "Agent 5"), ("p2a5_atsscore", "ATS Score & Gap Analysis", "Agent 5"), ("p2a6_references", "Reference Strategy & Prep Briefs", "Agent 6"), ("p2a7_benchmark", "Compensation Benchmark", "Agent 7"), ("p2a8_searchintel", "Job Search Intelligence", "Agent 8"), ("p3a9_brief", "Interview Intelligence Brief", "Agent 9"), ("p3a9_followup", "Post-Interview Follow-Up", "Agent 9"), ("p3a10_offer", "Offer Assessment & Negotiation", "Agent 10"), ("p4a11_core", "Weekly Intelligence Core", "Agent 11"), ("p4a12_onboarding", "Onboarding Intelligence Plan", "Agent 12")];
+const DOC_LIBRARY = [["step0_profile", "Career Capital Profile", "Step 0"], ["stepA_options", "Career Capital Options Analysis", "Step A"], ["stepB_resume", "Master Base Résumé", "Step B"], ["stepC_linkedin", "LinkedIn Profile — All 9 Sections", "Step C"], ["stepD_reputation", "Digital Reputation Plan", "Step D"], ["p1a1_market", "Market & Opportunity Intelligence", "Agent 1"], ["p1a2_positioning", "Positioning & Brand", "Agent 2"], ["p2a3_outreach", "Outreach Messages", "Agent 3"], ["p2a3_info", "Informational Interview Materials", "Agent 3"], ["p2a4_docs", "Career Toolkit — 5 Documents", "Agent 4"], ["p2a5_customresume", "Customized Résumé + Keyword Map", "Agent 5"], ["p2a5_atsscore", "ATS Score & Gap Analysis", "Agent 5"], ["p2a6_references", "Reference Strategy & Prep Briefs", "Agent 6"], ["p2a7_benchmark", "Compensation Benchmark", "Agent 7"], ["p2a8_searchintel", "Job Search Intelligence", "Agent 8"], ["p3a9_brief", "Interview Intelligence Brief", "Agent 9"], ["p3a9_followup", "Post-Interview Follow-Up", "Agent 9"], ["p3a10_offer", "Offer Assessment & Negotiation", "Agent 10"], ["p4a11_core", "Weekly Intelligence Core", "Agent 11"], ["p4a12_onboarding", "Onboarding Intelligence Plan", "Agent 12"]];
 
 function renderDashboard(body){
   STATE.searchDashboard = STATE.searchDashboard || { applications:[], recruiters:[], interviews:[], ueLog:[] };
