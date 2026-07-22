@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CareerLaunch AI™ — Professional Career Operating System</title>
-<meta name="version" content="1.0.0">
+<meta name="version" content="1.0.1">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Reset ── */
@@ -574,7 +574,7 @@ const MODEL  = 'claude-sonnet-4-6';
 // GitHub Pages does not support custom cache-control headers, so this
 // self-check is the mechanism that actually solves the "client stuck on an
 // old cached version" problem — not a _headers file (that's Netlify-only).
-const APP_VERSION = '2026-07-17-01';
+const APP_VERSION = '2026-07-22-01';
 
 // ── Supabase config ──────────────────────────────────────────────────────
 const SB_URL   = 'https://vkrhjirkqziuwboovbgf.supabase.co';
@@ -585,6 +585,8 @@ const APP_URL  = 'https://ginger890.github.io/CareerLaunch-AI';
 // ── Supabase client (with auth) ──────────────────────────────────────────
 // Initialised after DOM ready so supabase global is available
 let SB = null;
+let LAST_SYNCED_VALUES = {};
+let LAST_FAILED_CLOUD_ROWS = [];
 function initSupabase(){
   if (SB) return;
   if (!window.supabase || typeof window.supabase.createClient !== 'function') {
@@ -680,7 +682,12 @@ async function saveToCloud(){
   if (!STATE.clientName) return;
   try {
     const clientKey = await getClientKey();
-    const payload   = buildCloudPayload(clientKey);
+    const allRows = buildCloudPayload(clientKey);
+    // Send only values changed since this tab's last successful load/save.
+    // This prevents unrelated edits in another tab from being overwritten by
+    // a stale full-state snapshot from this tab.
+    const payload = allRows.filter(row => LAST_SYNCED_VALUES[row.data_key] !== row.data_value);
+    if (!payload.length) return;
     const headers   = await sbHeaders();
     // on_conflict=client_key,data_key tells PostgREST which columns define a
     // "duplicate" for the Prefer:resolution=merge-duplicates header above to
@@ -697,10 +704,13 @@ async function saveToCloud(){
       const err = await resp.json().catch(()=>({}));
       throw new Error(err.message || 'HTTP ' + resp.status);
     }
+    payload.forEach(row => { LAST_SYNCED_VALUES[row.data_key] = row.data_value; });
+    LAST_FAILED_CLOUD_ROWS = [];
     showToast('\u2713 Progress saved');
   } catch(e){
     const msg = (e.name === 'AbortError') ? 'Save timed out after 20 seconds. Please try again.' : e.message;
-    showToast('Save failed: ' + msg, 3000);
+    LAST_FAILED_CLOUD_ROWS = buildCloudPayload(await getClientKey()).filter(row => LAST_SYNCED_VALUES[row.data_key] !== row.data_value);
+    showToast('Save failed: ' + msg + ' Use the Save button to retry.', 4500);
     console.error('Cloud save error:', e);
   }
 }
@@ -722,7 +732,10 @@ async function loadCloudData(clientKey){
     if (map['client_name'])         STATE.clientName       = map['client_name'];
     if (map['plan'])                STATE.plan             = map['plan'];
     if (map['current_agent'])       STATE.currentAgent     = map['current_agent'];
-    if (map['completed_agents'])    STATE.completedAgents  = new Set(parse('completed_agents',[]));
+    if (map['completed_agents']) {
+      const completed = parse('completed_agents', []);
+      STATE.completedAgents = new Set(Array.isArray(completed) ? completed : []);
+    }
     if (map['saved_inputs'])        STATE.savedInputs      = parse('saved_inputs',{});
     if (map['saved_outputs'])       STATE.savedOutputs     = parse('saved_outputs',{});
     if (map['assessment_scores'])   STATE.assessmentScores = parse('assessment_scores',{});
@@ -731,8 +744,11 @@ async function loadCloudData(clientKey){
     if (map['search_dashboard'])    STATE.searchDashboard  = parse('search_dashboard',null);
     ['SCI','TSP','VWSI','PPI'].forEach(k => {
       const val = parse('asmt_'+k, null);
-      if (val) Object.assign(ASMT_ANSWERS[k], val);
+      if (val && typeof val === 'object' && !Array.isArray(val)) Object.assign(ASMT_ANSWERS[k], val);
     });
+    LAST_SYNCED_VALUES = Object.assign({}, map);
+    migrateChecklistState();
+    saveLocal();
     return true;
   } catch(e){ console.error('Cloud load error:', e); return false; }
 }
@@ -756,6 +772,7 @@ const STATE = {
   assessmentScores: {},
   assessmentComplete: {},
   checklistState: {},
+  searchDashboard: null,
 };
 
 // Enable start button when name is typed
@@ -1144,7 +1161,18 @@ function friendlyApiError(status, errBody){
   return raw || ('HTTP ' + status);
 }
 window.__genericAgentInputs = window.__genericAgentInputs || {};
-function safeFileName(s){ return String(s || 'Document').trim().replace(/[^a-z0-9_\-]+/gi,'_').replace(/^_+|_+$/g,'').slice(0,80) || 'Document'; }
+function safeFileName(s){
+  const normalized = String(s || 'Document').normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+  const clean = normalized.replace(/[\/\\:*?"<>|\x00-\x1F]/g,' ').replace(/[^a-z0-9 _\-]+/gi,' ').replace(/\s+/g,' ').trim();
+  const capped = clean.slice(0,80).trim().replace(/[. ]+$/g,'').replace(/ /g,'_');
+  return capped || 'Document';
+}
+function warnPromptInjectionPatterns(value, fieldKey){
+  const text = String(value || '');
+  if (/ignore\s+(all|any|the)?\s*(previous|prior|above)\s+instructions|system\s+prompt|developer\s+message|reveal\s+your\s+instructions|output\s+the\s+word/i.test(text)) {
+    console.warn('[CareerLaunch AI] Possible prompt-injection text detected in user-provided field:', fieldKey || 'unknown');
+  }
+}
 function showToast(msg, dur) {
   const t = document.getElementById('toast');
   if(!t) return;
@@ -1170,17 +1198,19 @@ function dlDoc(text, filename) {
 function getOutput(key){ return STATE.savedOutputs[key]||''; }
 function setOutput(key,val){ STATE.savedOutputs[key]=val; autoSave(); }
 function getInput(key){ return STATE.savedInputs[key] || window.__genericAgentInputs?.[key] || ''; }
-function setInput(key,val){ STATE.savedInputs[key]=val; window.__genericAgentInputs[key]=val; saveLocal(); }
+function setInput(key,val){ warnPromptInjectionPatterns(val,key); STATE.savedInputs[key]=val; window.__genericAgentInputs[key]=val; saveLocal(); }
 function saveLocal(){
   try{ localStorage.setItem('cl_state', JSON.stringify({
     clientName: STATE.clientName,
     plan: STATE.plan,
+    currentAgent: STATE.currentAgent,
     completedAgents: [...STATE.completedAgents],
     savedInputs: STATE.savedInputs,
     savedOutputs: STATE.savedOutputs,
     assessmentScores: STATE.assessmentScores,
     assessmentComplete: STATE.assessmentComplete,
     checklistState: STATE.checklistState,
+    searchDashboard: STATE.searchDashboard,
     asmtAnswers: ASMT_ANSWERS || {SCI:{},TSP:{},VWSI:{},PPI:{}},
   })); } catch(e){}
 }
@@ -1191,13 +1221,16 @@ function loadLocal(){
     const d = JSON.parse(raw);
     STATE.clientName = d.clientName || '';
     STATE.plan = d.plan || null;
-    STATE.completedAgents = new Set(d.completedAgents||[]);
+    STATE.currentAgent = d.currentAgent || null;
+    STATE.completedAgents = new Set(Array.isArray(d.completedAgents) ? d.completedAgents : []);
     STATE.savedInputs = d.savedInputs||{};
     STATE.savedOutputs = d.savedOutputs||{};
     STATE.assessmentScores = d.assessmentScores||{};
     STATE.assessmentComplete = d.assessmentComplete||{};
-    STATE.checklistState = d.checklistState||{};
-    if (d.asmtAnswers) { Object.assign(ASMT_ANSWERS, d.asmtAnswers); }
+    STATE.checklistState = (d.checklistState && typeof d.checklistState==='object') ? d.checklistState : {};
+    STATE.searchDashboard = d.searchDashboard || null;
+    migrateChecklistState();
+    if (d.asmtAnswers && typeof d.asmtAnswers==='object') { ['SCI','TSP','VWSI','PPI'].forEach(k=>{ if(d.asmtAnswers[k] && typeof d.asmtAnswers[k]==='object') ASMT_ANSWERS[k]=d.asmtAnswers[k]; }); }
     return !!STATE.clientName;
   } catch(e){ return false; }
 }
@@ -1417,7 +1450,7 @@ function renderInstrument(key){
   const answers = ASMT_ANSWERS[key];
   const answered = Object.keys(answers).length;
   const total = inst.qs.length;
-  const pct = Math.round((answered/total)*100);
+  const pct = total > 0 ? Math.round((answered/total)*100) : 0;
 
   // Group questions by dimension for display
   const dimColors = {};
@@ -1478,12 +1511,14 @@ function answerQ(key, idx, val){
   // Update progress bar
   const inst = INSTRUMENTS[key];
   const answered = Object.keys(ASMT_ANSWERS[key]).length;
-  const pct = Math.round((answered/inst.qs.length)*100);
+  const pct = inst.qs.length > 0 ? Math.round((answered/inst.qs.length)*100) : 0;
   const fill = document.querySelector(`#screen_${key} .prog-fill`);
   const meta = document.querySelector(`#screen_${key} .prog-meta span`);
   if (fill) fill.style.width = pct+'%';
   if (meta) meta.textContent = `${answered} of ${inst.qs.length} answered`;
-  autoSave();
+  saveLocal();
+  clearTimeout(window._autoSaveTimer);
+  window._autoSaveTimer = setTimeout(saveToCloud, 2000);
 }
 
 function submitInstrument(key){
@@ -1504,7 +1539,7 @@ function submitInstrument(key){
   inst.dims.forEach(d=>{ dimTotals[d.id]=0; dimCounts[d.id]=0; });
   inst.qs.forEach((q,i)=>{ dimTotals[q.d]+=(answers[i]||0); dimCounts[q.d]++; });
   const scores = {};
-  inst.dims.forEach(d=>{ scores[d.id] = Math.round((dimTotals[d.id]/(dimCounts[d.id]*5))*100); });
+  inst.dims.forEach(d=>{ scores[d.id] = dimCounts[d.id] > 0 ? Math.round((dimTotals[d.id]/(dimCounts[d.id]*5))*100) : 0; });
   STATE.assessmentScores[key] = scores;
   STATE.assessmentComplete[key] = true;
   saveLocal();
@@ -1753,23 +1788,36 @@ Format as a professional document ready to paste into any subsequent agent promp
 // ──────────────────────────────────────────────────═════════════════════════
 // CHECKLIST HELPER
 // ──────────────────────────────────────────────────═════════════════════════
+function checklistSlug(text){
+  return String(text || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48) || 'item';
+}
+function migrateChecklistState(){
+  if (!STATE.checklistState || typeof STATE.checklistState !== 'object') STATE.checklistState = {};
+  Object.keys(STATE.checklistState).forEach(agentId => {
+    const state = STATE.checklistState[agentId];
+    if (!state || typeof state !== 'object' || Array.isArray(state)) { STATE.checklistState[agentId] = {}; return; }
+    // Old numeric keys cannot be safely matched after checklist edits. Reset
+    // them rather than silently checking the wrong task.
+    if (Object.keys(state).some(k => /^\d+$/.test(k))) STATE.checklistState[agentId] = {};
+  });
+}
 function buildChecklist(agentId, items){
+  migrateChecklistState();
   const state = STATE.checklistState[agentId]||{};
   let html = `<div class="checklist"><div class="checklist-hdr">Completion Checklist</div>`;
-  items.forEach((item,i)=>{
-    const checked = !!state[i];
-    html += `<div class="checklist-item" onclick="toggleCheck('${agentId}',${i},this)">
+  items.forEach((item)=>{
+    const slug = checklistSlug(item);
+    const checked = !!state[slug];
+    html += `<div class="checklist-item" onclick="toggleCheck('${agentId}','${slug}',this)">
       <div class="check-box${checked?' checked':''}"><span class="check-mark">✓</span></div>
       <div class="check-text${checked?' checked':''}">${esc(item)}</div>
     </div>`;
   });
   return html + '</div>';
 }
-
-function toggleCheck(agentId, idx, el){
+function toggleCheck(agentId, slug, el){
   if (!STATE.checklistState[agentId]) STATE.checklistState[agentId]={};
-  const cur = STATE.checklistState[agentId][idx];
-  STATE.checklistState[agentId][idx] = !cur;
+  STATE.checklistState[agentId][slug] = !STATE.checklistState[agentId][slug];
   const box = el && el.querySelector('.check-box');
   const txt = el && el.querySelector('.check-text');
   if(box) box.classList.toggle('checked');
@@ -3583,7 +3631,7 @@ function renderDashboard(body){
       <div style="color:#7EEFD4;font-size:13px;flex-shrink:0">◆</div>
       <div style="font-size:12px;color:rgba(232,248,244,.92);line-height:1.7">
         <strong style="color:#7EEFD4">Texas Workforce Commission (TWC) Job Search Log.</strong>
-        Log every job search contact here. TWC requires documenting at least 3 work search activities per week for most claimants. This log captures all required fields for your weekly certification. Add a new entry each time you apply, contact an employer, or make a networking contact. Use the Print / Export button to generate your weekly summary.
+        This section is specifically for Texas claimants. TWC requires documenting assigned work-search activities; requirements can vary by claimant and can change. Confirm your current requirement with TWC. Log every job search contact here. This log captures all required fields for your weekly certification. Add a new entry each time you apply, contact an employer, or make a networking contact. Use the Print / Export button to generate your weekly summary.
       </div>
     </div>
 
@@ -3601,7 +3649,7 @@ function renderDashboard(body){
     ${(dash.ueLog||[]).length === 0
       ? `<div style="text-align:center;padding:40px;color:var(--text-3);font-size:13px">
           No activities logged yet. Click "Log Activity" to record your first job search contact.<br>
-          <span style="font-size:11px;margin-top:8px;display:block">TWC requires a minimum of 3 work search activities per week for most claimants.</span>
+          <span style="font-size:11px;margin-top:8px;display:block">Texas-specific: confirm your assigned weekly requirement directly with TWC; it may differ from 3 activities.</span>
         </div>`
       : `<table class="dash-table">
         <thead><tr>
@@ -3627,7 +3675,7 @@ function renderDashboard(body){
     }
 
     <div class="ue-print-note">
-      <strong>TWC Weekly Certification reminder:</strong> Log all required activities — applying for jobs, employer contacts, attending job fairs, visiting the Workforce Solutions office, and completing approved reemployment activities. Keep this log as your record. When completing your weekly certification online at <strong>ui.texasworkforce.org</strong>, refer to the entries above to accurately report your work search activities.
+      <strong>Texas-only reminder:</strong> Rules vary by state and by claim. Confirm current requirements with your state agency and, in Texas, with TWC.  Log all required activities — applying for jobs, employer contacts, attending job fairs, visiting the Workforce Solutions office, and completing approved reemployment activities. Keep this log as your record. When completing your weekly certification online at <strong>ui.texasworkforce.org</strong>, refer to the entries above to accurately report your work search activities.
     </div>
   </div>`;
 }
@@ -3770,7 +3818,7 @@ function printUELog(){
   </style></head><body>
   <h1>Texas Workforce Commission — Work Search Record</h1>
   <div class="sub">Claimant: <strong>${esc(STATE.clientName)}</strong> &nbsp;·&nbsp; ${weekLabel} &nbsp;·&nbsp; Printed: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
-  <div class="req"><strong>TWC Requirement:</strong> You must make at least 3 work search contacts per week and keep a record of each contact. This log satisfies that requirement. Keep a copy for your records.</div>
+  <div class="req"><strong>Texas-specific record:</strong> Your assigned work-search requirement may differ and rules may change. Confirm the current requirement directly with TWC. This log is a recordkeeping aid, not a guarantee of eligibility or compliance.</div>
   <table>
     <thead><tr>
       <th>Date</th><th>Employer Name & Address</th><th>Position / Type of Contact</th>
@@ -3780,7 +3828,7 @@ function printUELog(){
   </table>
   <div class="footer">
     Total activities this period: <strong>${displayEntries.length}</strong> &nbsp;·&nbsp;
-    Minimum required: <strong>3 per week</strong> &nbsp;·&nbsp;
+    Assigned requirement: <strong>Confirm with TWC</strong> &nbsp;·&nbsp;
     Complete your weekly certification at <strong>ui.texasworkforce.org</strong>
   </div>
   </body></html>`;
@@ -3869,7 +3917,12 @@ async function doRegister(){
   });
   setBtnLoading('registerBtn', false, 'Create Account');
   if(error){ authError('registerError', error.message); return; }
-  // Show confirmation pending screen
+  if(data?.session){
+    // Projects with confirmation disabled may return a session immediately.
+    // The auth listener will launch the app; do not independently launch here.
+    return;
+  }
+  // Confirmation-required signup: remain gated from the app.
   document.getElementById('confirmEmail').textContent = email;
   showView('confirm');
 }
@@ -3892,17 +3945,28 @@ async function doReset(){
   setBtnLoading('resetBtn', true, 'Updating...');
   const {error} = await SB.auth.updateUser({password: pass});
   setBtnLoading('resetBtn', false, 'Update Password');
-  if(error){ authError('resetError', error.message); return; }
+  if(error){
+    const expired = /expired|invalid.*token|session.*missing|otp/i.test(error.message || '');
+    authError('resetError', expired ? 'This password-reset link has expired or is no longer valid. Return to “Forgot password?” and request a new link.' : error.message);
+    if(expired){
+      const el=document.getElementById('resetError');
+      const b=document.createElement('button'); b.className='auth-link'; b.style.display='block'; b.style.marginTop='8px'; b.textContent='Request a new reset link'; b.onclick=()=>showView('forgot'); el.appendChild(b);
+    }
+    return;
+  }
   authSuccess('resetSuccess', 'Password updated successfully. Signing you in...');
   setTimeout(()=>{ hideAuthScreen(); launchApp(); }, 1500);
 }
 
 async function doSignOut(){
   if(!confirm('Sign out of CareerLaunch AI™?')) return;
+  window._appLaunched = false;
+  clearTimeout(window._autoSaveTimer);
   await SB.auth.signOut();
   STATE.clientName=''; STATE.plan=null; STATE.currentAgent=null;
   STATE.completedAgents=new Set(); STATE.savedInputs={}; STATE.savedOutputs={};
-  STATE.assessmentScores={}; STATE.assessmentComplete={}; STATE.checklistState={};
+  STATE.assessmentScores={}; STATE.assessmentComplete={}; STATE.checklistState={}; STATE.searchDashboard=null;
+  LAST_SYNCED_VALUES={}; LAST_FAILED_CLOUD_ROWS=[];
   ['SCI','TSP','VWSI','PPI'].forEach(k=>{ ASMT_ANSWERS[k]={}; });
   localStorage.removeItem('cl_state');
   document.getElementById('agentArea').style.display='none';
